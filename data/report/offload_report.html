@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- 0 = use dates_index default instead of always jumping to today -->
+  <meta name="activity-report-auto-today" content="" />
+  <!-- Optional overrides; leave empty to auto-detect (http(s) → /data/report/ …). -->
+  <meta name="activity-report-assets-root" content="" />
+  <meta name="activity-report-offload-json" content="" />
+  <!-- Empty = same origin as this page. Set to http://127.0.0.1:5050 if the API runs on another host. -->
+  <meta name="flight-hints-api-base" content="" />
+  <!-- Optional: must match server FLIGHT_HINTS_TOKEN if set -->
+  <meta name="flight-hints-token" content="" />
+  <title>Export Warehouse Activity Report</title>
+  <style>
+    :root{--bg:#f1f5f9;--card:#ffffff;--line:#cbd5e1;--text:#0f172a;--muted:#475569;--blue:#1e3a8a;--blue-soft:#dbeafe;--green-soft:#dcfce7;--amber-soft:#fef3c7;--orange-soft:#ffedd5;--slate-soft:#e2e8f0;--danger:#dc2626;}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);font-family:Arial, Helvetica, sans-serif;color:var(--text);}
+    .page{max-width:1100px;margin:24px auto;background:var(--card);border:1px solid var(--line);}
+    /* Banner blue slightly lighter than --blue so white text reads clearly everywhere */
+    .header{padding:0;border-collapse:collapse;background:#2563eb;color:#ffffff;}
+    .header-brand-table{width:100%;border-collapse:collapse;table-layout:fixed;}
+    .header-accent{width:6px;background:#f97316;}
+    .header-main{padding:20px 20px 18px 18px;background:#2563eb;vertical-align:top;}
+    .header-main-inner{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:16px;}
+    .header-title-block{flex:1;min-width:200px;}
+    .header h1{margin:0 0 10px;font-size:24px;font-weight:700;color:#ffffff;display:flex;align-items:center;gap:10px;}
+    .header-plane{font-size:22px;line-height:1;}
+    .header-company{text-align:right;font-size:13px;line-height:1.45;min-width:140px;color:#ffffff;}
+    .header-company .co-sub{color:#ffffff;font-weight:400;opacity:0.95;}
+    .header-company .co-op{font-weight:700;margin-top:4px;font-size:14px;color:#ffffff;}
+    .meta{margin-top:0;font-size:15px;line-height:1.55;letter-spacing:0.01em;color:#ffffff;}
+    .shift-meta-highlight{color:#ffffff;font-weight:700;}
+    .date-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;user-select:none;}
+    .date-tabs .date-tab{border:1px solid rgba(255,255,255,0.45);background:rgba(255,255,255,0.1);color:#fff;padding:6px 12px;cursor:pointer;font-size:12px;border-radius:4px;}
+    .date-tabs .date-tab:hover{background:rgba(255,255,255,0.2);}
+    .date-tabs .date-tab.active{background:#e0f2fe;color:var(--blue);border-color:#e0f2fe;font-weight:700;}
+    .shift-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;user-select:none;}
+    .shift-tabs .shift-tab{border:1px solid rgba(255,255,255,0.55);background:rgba(255,255,255,0.12);color:#fff;padding:7px 14px;cursor:pointer;font-size:13px;border-radius:4px;}
+    .shift-tabs .shift-tab:hover{background:rgba(255,255,255,0.22);}
+    .shift-tabs .shift-tab.active{background:#fff;color:var(--blue);border-color:#fff;font-weight:700;}
+    .toolbar{padding:14px 18px;border-bottom:1px solid var(--line);background:#f8fafc;}
+    .toolbar-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+    button{border:1px solid #94a3b8;background:#fff;color:#0f172a;padding:9px 14px;cursor:pointer;font-size:14px;transition:background .15s ease,transform .06s ease,box-shadow .15s ease,border-color .15s ease,filter .12s ease;}
+    button:hover{filter:brightness(0.97);box-shadow:0 1px 3px rgba(15,23,42,0.1);}
+    button:active{transform:translateY(1px);filter:brightness(0.9);box-shadow:none;}
+    button.primary{background:#0f172a;color:#fff;border-color:#0f172a;}
+    button.primary:hover{background:#020617;border-color:#020617;filter:none;}
+    button.primary:active{filter:brightness(0.85);}
+    button.blue{background:#2563eb;color:#fff;border-color:#2563eb;}
+    button.blue:hover{background:#1d4ed8;border-color:#1d4ed8;filter:none;}
+    button.blue:active{filter:brightness(0.88);}
+    button.btn-reset{border-color:#f97316;background:#fff7ed;color:#9a3412;}
+    button.btn-reset:hover{background:#ffedd5;border-color:#ea580c;filter:none;}
+    button.btn-reset:active{filter:brightness(0.92);}
+    .content{padding:16px 18px 24px;}
+    .section-title{margin-top:16px;background:var(--blue-soft);padding:7px 10px;font-weight:700;border-left:4px solid var(--blue);}
+    .section-title.green{background:var(--green-soft);border-left-color:#15803d;}
+    .section-title.orange{background:var(--orange-soft);border-left-color:#c2410c;}
+    .section-title.amber{background:var(--amber-soft);border-left-color:#a16207;}
+    .section-title.slate{background:var(--slate-soft);border-left-color:#475569;}
+    .block{padding:12px 4px 0;}
+    .line-group{margin-bottom:14px;}
+    .line-group-title{font-weight:700;color:#1e3a8a;margin-bottom:6px;}
+    .line-item{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+    input[type="text"],input[type="email"],textarea{width:100%;border:1px solid var(--line);padding:8px 10px;font-size:14px;color:var(--text);background:#fff;}
+    textarea{min-height:90px;resize:vertical;}
+    .delete-btn{border:none;background:transparent;color:var(--danger);font-size:16px;padding:4px 6px;min-width:auto;}
+    .manpower-wrap{padding-top:10px;}
+    .manpower-section{margin-bottom:16px;}
+    /* Sub-headings (Supervisor, Load Control, …): larger, distinct from body text */
+    input.manpower-section-title,.manpower-section-title{
+      display:block;width:100%;box-sizing:border-box;
+      font-size:1.125rem;font-weight:700;letter-spacing:0.02em;
+      font-family:Georgia,"Palatino Linotype","Times New Roman",serif;
+      color:#0f172a;margin-bottom:8px;padding:6px 2px 8px 2px;
+      background:transparent;border:none;border-bottom:1px solid var(--line);border-radius:0;
+    }
+    .manpower-item{display:flex;flex-wrap:nowrap;align-items:flex-start;gap:10px;margin-bottom:8px;}
+    .manpower-bullet{
+      flex-shrink:0;width:1.15em;text-align:center;font-weight:700;font-size:1.1em;line-height:1.5;
+      color:#0f172a;padding-top:6px;user-select:none;font-family:Georgia,serif;
+    }
+    /* Override global input{width:100%} so bullet + name stay on one row */
+    .manpower-wrap .manpower-item input.manpower-line{
+      flex:1 1 0%;min-width:0;width:auto!important;max-width:100%;
+      font-size:14px;line-height:1.45;
+    }
+    .manpower-block-heading{font-size:1.2rem!important;letter-spacing:0.03em;font-family:Georgia,"Palatino Linotype","Times New Roman",serif!important;}
+    .manpower-simple{border:1px solid var(--line);margin-bottom:12px;}
+    .manpower-simple .manpower-section-title{margin:0;padding:8px 10px;background:#f8fafc;border-bottom:1px solid var(--line);}
+    .manpower-simple-body{padding:10px;}
+    table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:13px;}
+    th, td{border:1px solid var(--line);padding:6px;vertical-align:top;}
+    th{background:#e0f2fe;font-weight:700;text-align:center;}
+    td input,td textarea{border:none !important;padding:4px 2px !important;background:transparent;}
+    .offload-wrap{max-width:100%;margin-top:10px;}
+    .offload-table{width:100%;max-width:100%;min-width:0;table-layout:fixed;font-size:12px;}
+    .offload-table .offload-item-col{width:22px;min-width:22px;max-width:22px;text-align:center;padding:2px 1px !important;white-space:nowrap;}
+    .offload-table th,.offload-table td{word-wrap:break-word;overflow-wrap:break-word;word-break:normal;min-width:0;padding:4px;}
+    .offload-table textarea.offload-cell{min-height:2em!important;max-height:10em;resize:vertical;width:100%;box-sizing:border-box;font:inherit;line-height:1.25;}
+    .offload-table input.offload-cell-compact{
+      width:100%;box-sizing:border-box;font:inherit;line-height:1.2;height:1.8em;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .offload-table td input,.offload-table td textarea{padding:2px 1px !important;}
+    .remarks-cell-wrap textarea.offload-cell{flex:1;min-width:0;}
+    .remarks-cell-wrap{display:flex;align-items:center;gap:6px;}
+    .remarks-cell-wrap input{flex:1;}
+    .bottom-tools{margin-top:24px;border-top:1px solid var(--line);padding-top:18px;}
+    .recipient-title{font-weight:700;margin-bottom:8px;}
+    .recipient-row{display:flex;gap:8px;margin-bottom:10px;}
+    .recipient-tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+    .recipient-tag{background:#e2e8f0;padding:6px 10px;font-size:12px;border:1px solid #cbd5e1;cursor:pointer;}
+    .modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,0.45);display:flex;align-items:center;justify-content:center;z-index:10000;padding:16px;}
+    .modal-backdrop[hidden]{display:none !important;}
+    .modal-dialog{background:#fff;border-radius:12px;max-width:420px;width:100%;padding:22px 22px 18px;box-shadow:0 20px 50px rgba(0,0,0,0.2);border:1px solid #e2e8f0;}
+    .modal-dialog h2{margin:0 0 10px;font-size:18px;color:#0f172a;}
+    .modal-text{margin:0 0 18px;font-size:14px;line-height:1.55;color:#475569;}
+    .modal-actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;}
+    .btn-muted{padding:9px 16px;border:1px solid #cbd5e1;background:#fff;cursor:pointer;font-size:14px;border-radius:6px;transition:background .15s ease,transform .06s ease,filter .12s ease;}
+    .btn-muted:hover{background:#f8fafc;}
+    .btn-muted:active{transform:translateY(1px);filter:brightness(0.95);}
+    .btn-danger{padding:9px 16px;border:1px solid #dc2626;background:#dc2626;color:#fff;cursor:pointer;font-size:14px;border-radius:6px;transition:background .15s ease,transform .06s ease,filter .12s ease;}
+    .btn-danger:hover{background:#b91c1c;border-color:#b91c1c;}
+    .btn-danger:active{transform:translateY(1px);filter:brightness(0.9);}
+    .dev-server-hint{margin:0 0 12px;padding:12px 14px;background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;font-size:13px;line-height:1.5;color:#78350f;}
+    .dev-server-hint code{font-size:12px;background:rgba(255,255,255,0.7);padding:2px 6px;border-radius:4px;}
+    .dev-server-hint a{color:#1d4ed8;font-weight:600;}
+    .web-signature-block{margin-top:20px;padding-top:8px;border-top:1px solid var(--line);}
+    .web-signature-inner{max-width:100%;}
+    .web-sig-badges-img{max-width:100%;height:auto;display:block;margin:16px 0 0 0;}
+    .web-sig-text-block{font-size:13px;color:#334155;line-height:1.5;}
+    .web-sig-regards{color:#64748b;margin:0 0 8px 0;}
+    .web-sig-name{font-size:15px;font-weight:700;color:#1e3a8a;margin:0 0 6px 0;}
+    .web-sig-name.web-sig-name-empty{color:#94a3b8;font-weight:400;font-style:italic;}
+    .web-sig-role{color:#475569;margin:0 0 14px 0;}
+    .web-sig-company-table{display:flex;gap:0;align-items:flex-start;border-top:1px solid #e2e8f0;padding-top:12px;margin-top:4px;max-width:100%;}
+    .web-sig-co-bar{width:8px;min-height:48px;background:#dc2626;flex-shrink:0;}
+    .web-sig-co-left{padding:0 12px 0 10px;border-left:0;flex-shrink:0;}
+    .web-sig-transom{display:block;font-size:18px;font-weight:700;color:#dc2626;letter-spacing:0.5px;}
+    .web-sig-cargo{display:block;font-size:11px;color:#64748b;letter-spacing:1px;margin-top:2px;}
+    .web-sig-co-right{border-left:2px solid #dc2626;padding-left:14px;font-size:12px;line-height:1.45;flex:1;min-width:0;}
+    .web-sig-co-right a{color:#2563eb;}
+    .hidden-print{display:block;}
+    @media print{body{background:#fff}.page{margin:0;max-width:none;border:none}.toolbar,.bottom-tools,.delete-btn,.hidden-print,.shift-tabs,.date-tabs,.modal-backdrop,.dev-server-hint{display:none !important}input,textarea{border:none !important;padding:0 !important}}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div id="devServerHint" class="dev-server-hint hidden-print" hidden role="alert">
+      <strong>تنبيه:</strong> لم يُعثر على <code>employees.json</code> من مجلد الصفحة ولا من <code>/data/report/</code>.
+      إن كنت تستخدم معاينة المحرّر فقط، شغّل الخادم وافتح الرابط في <strong>Edge أو Chrome</strong>:
+      <a href="http://127.0.0.1:5050/offload_report.html" target="_blank" rel="noopener">http://127.0.0.1:5050/offload_report.html</a>
+      <br /><code>python server/flight_hints_server.py</code>
+    </div>
+    <script>
+      (function () {
+        if (!location.protocol.startsWith("http")) return;
+        var urls = [
+          new URL("employees.json", location.href).href,
+          location.origin + "/data/report/employees.json"
+        ];
+        (async function () {
+          for (var i = 0; i < urls.length; i++) {
+            try {
+              var r = await fetch(urls[i], { cache: "no-store" });
+              if (!r.ok) continue;
+              var t = await r.text();
+              if (!t.trimStart().startsWith("<")) return;
+            } catch (e) {}
+          }
+          var el = document.getElementById("devServerHint");
+          if (el) el.hidden = false;
+        })();
+      })();
+    </script>
+    <div class="header">
+      <table class="header-brand-table" role="presentation" cellpadding="0" cellspacing="0">
+        <tr>
+          <td class="header-accent" aria-hidden="true"></td>
+          <td class="header-main">
+            <div class="header-main-inner">
+              <div class="header-title-block">
+                <h1><span class="header-plane" aria-hidden="true">&#9992;</span> Export Warehouse Activity Report</h1>
+                <div class="date-tabs hidden-print" id="dateTabs" hidden></div>
+                <div class="shift-tabs hidden-print" id="shiftTabs" hidden></div>
+                <div class="meta" id="shiftMetaText">Loading...</div>
+              </div>
+              <div class="header-company">
+                <div class="co-sub">Transom Cargo LLC.</div>
+                <div class="co-op">Export Operations</div>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="content">
+      <div id="reportExportRoot">
+      <div class="section-title">1. Operational Activities</div>
+      <div class="block" id="operationalActivities"></div>
+
+      <div class="section-title">2. Briefings Conducted</div>
+      <div class="block" id="briefings"></div>
+
+      <div class="section-title">3. Flight Performance</div>
+      <div class="block"><textarea id="flightPerformance"></textarea></div>
+
+      <div class="section-title slate">Operational Notes</div>
+      <div class="block" id="operationalNotes"></div>
+
+      <div class="section-title">4. Checks & Compliance</div>
+      <div class="block"><textarea id="checksCompliance"></textarea></div>
+
+      <div class="section-title orange">Offloading Cargo #</div>
+      <div class="offload-wrap">
+        <table class="offload-table">
+          <thead>
+            <tr>
+              <th class="offload-item-col" style="width:2%"></th>
+              <th style="width:8%">DATE</th>
+              <th style="width:7%">FLIGHT</th>
+              <th style="width:7%">STD/ETD</th>
+              <th style="width:6%">DEST</th>
+              <th style="width:8%">Email Received Time</th>
+              <th style="width:10%">Physical Cargo Received from Ramp</th>
+              <th style="width:8%">Trolley / ULD Number</th>
+              <th style="width:10%">Offloading Process Completed in CMS</th>
+              <th style="width:8%">Offloading Pieces Verification</th>
+              <th style="width:8%">Offloading Reason</th>
+              <th style="width:18%">Remarks / Additional Information</th>
+            </tr>
+          </thead>
+          <tbody id="offloadTableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="section-title green">5. Safety</div>
+      <div class="block"><textarea id="safety"></textarea></div>
+
+      <div class="section-title manpower-block-heading">6. Manpower</div>
+      <div class="manpower-wrap" id="manpowerWrap"></div>
+
+      <div class="section-title green">7. Equipment Status</div>
+      <div class="block"><textarea id="equipmentStatus"></textarea></div>
+
+      <div class="section-title">8. Handover Details</div>
+      <div class="block"><textarea id="handoverDetails"></textarea></div>
+
+      <div class="section-title amber">9. Other</div>
+      <div class="block"><textarea id="otherText"></textarea></div>
+
+      <div class="section-title amber">10. Special H/O</div>
+      <div class="block"><textarea id="specialHO"></textarea></div>
+      </div>
+
+      <div class="web-signature-block" id="webSignatureSection">
+        <div class="section-title slate">Email signature (preview)</div>
+        <div class="web-signature-inner">
+          <div class="web-sig-text-block">
+            <p class="web-sig-regards">Best Regards,</p>
+            <p class="web-sig-name web-sig-name-empty" id="webSignatureSupervisorName">(Add name under Manpower → Supervisor)</p>
+            <p class="web-sig-role">Duty Supervisor – Export Operation</p>
+            <div class="web-sig-company-table">
+              <div class="web-sig-co-bar" aria-hidden="true"></div>
+              <div class="web-sig-co-left">
+                <span class="web-sig-transom">TRANSOM</span>
+                <span class="web-sig-cargo">CARGO</span>
+              </div>
+              <div class="web-sig-co-right">
+                <strong>Transom Cargo LLC.</strong><br />
+                P.O. Box: 618, P.C: 111<br />
+                Sultanate of Oman<br />
+                Phone No. 97297474<br />
+                <a href="https://www.transomcargo.com" target="_blank" rel="noopener">www.transomcargo.com</a>
+              </div>
+            </div>
+          </div>
+          <img
+            class="web-sig-badges-img"
+            src="signature-badges.png"
+            width="640"
+            alt="IATA CEIV PHARMA, IATA CEIV FRESH, ISO 9001:2015, ISO 45001:2018, HACCP, GDP, RA3"
+          />
+        </div>
+      </div>
+
+      <div class="bottom-tools hidden-print">
+        <div class="recipient-title">Email Recipients</div>
+        <div class="recipient-row">
+          <input type="email" id="newRecipient" placeholder="Add recipient email" />
+          <button type="button" id="addRecipientBtn">Add</button>
+        </div>
+        <div class="recipient-tags" id="recipientTags"></div>
+
+        <div class="toolbar-row">
+          <button type="button" class="primary" id="copyBtn">Copy</button>
+          <button type="button" class="blue" id="emailBtn">Email</button>
+          <button type="button" id="printBtn">Print</button>
+          <button type="button" id="exportFlightHintsBtn" title="Download current flight hints (same data as on the server after sync)">
+            Export flight hints
+          </button>
+          <button type="button" class="btn-reset" id="resetReportBtn">Reset report</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="resetConfirmBackdrop" class="modal-backdrop hidden-print" hidden>
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="resetModalTitle">
+      <h2 id="resetModalTitle">Reset report?</h2>
+      <p class="modal-text">All unsaved edits will be discarded and the report will revert to the last data loaded from the file (before edits). This cannot be undone.</p>
+      <div class="modal-actions">
+        <button type="button" class="btn-muted" id="resetCancelBtn">Cancel</button>
+        <button type="button" class="btn-danger" id="resetConfirmBtn">Yes, reset</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ?v= bumps browser cache after logic/data changes; increase when deploying -->
+  <script src="../../js/offload-loader.js?v=6"></script>
+  <script src="../../js/flight-hint-cache.js?v=6"></script>
+  <script src="../../js/manpower-role-hint-cache.js?v=2"></script>
+  <script src="../../js/manpower-autocomplete.js?v=7"></script>
+  <script src="../../js/flight-autocomplete.js?v=7"></script>
+  <script src="../../js/csd-route-hint-cache.js?v=1"></script>
+  <script src="../../js/phrase-usage-cache.js?v=3"></script>
+  <script src="../../js/phrase-autocomplete.js?v=15"></script>
+  <script src="../../js/activity-report-app.js?v=19"></script>
+</body>
+</html>

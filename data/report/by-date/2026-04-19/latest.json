@@ -1,0 +1,324 @@
+{
+  "shiftMeta": {
+    "key": "afternoon",
+    "title": "Afternoon Shift",
+    "date": "2026-04-19",
+    "time": "13:00 - 22:00"
+  },
+  "manpowerSections": [
+    {
+      "title": "Supervisor",
+      "items": [
+        "SN81404 Mohamed Al Amri"
+      ]
+    },
+    {
+      "title": "Load Control",
+      "items": [
+        "SN82596 Hamed Al Fulaiti",
+        "SN81258 Jaafar Al Balushi",
+        "SN81402 Mohamed Al Siyabi"
+      ]
+    },
+    {
+      "title": "Export Checker",
+      "items": [
+        "SN82658 Mohamed Al Mazroie",
+        "SN990752 Ali Yousuf Al Balushi",
+        "SN82674 Mohamed Al Mamari",
+        "SN81832 Ahmed Al Bakari",
+        "SN82424 Riyadh Al Sulti"
+      ]
+    },
+    {
+      "title": "Export Operators",
+      "items": [
+        "SN8714 Mohana Al Subhi",
+        "SN81224 Mohamed Al Amri",
+        "SN8647 Issa Al Douyani"
+      ]
+    },
+    {
+      "title": "Flight Dispatch",
+      "items": [
+        "SN82537 KHALIFA AL SAADI",
+        "SN82428 ABDULLAH AL MAHARBI",
+        "SN82571 YAARAB AL RAQADI"
+      ]
+    },
+    {
+      "title": "Support Team",
+      "items": [
+        "SN82653 Ahmed Al Sabii"
+      ]
+    },
+    {
+      "title": "CTU Staff On Duty",
+      "items": []
+    },
+    {
+      "title": "Inventory",
+      "items": []
+    },
+    {
+      "title": "Sick Leave / No Show / Others",
+      "items": []
+    },
+    {
+      "title": "Annual Leave / Course / Off in Lieu",
+      "items": []
+    },
+    {
+      "title": "Trainee",
+      "items": []
+    },
+    {
+      "title": "Overtime Justification",
+      "items": []
+    }
+  ],
+  "shifts": {
+    "morning": {
+      "shiftMeta": {
+        "key": "morning",
+        "title": "Morning Shift",
+        "date": "2026-04-19",
+        "time": "06:00 - 15:00"
+      },
+      "manpowerSections": [
+        {
+          "title": "Supervisor",
+          "items": [
+            "SN81300 Talal Al Balushi"
+          ]
+        },
+        {
+          "title": "Load Control",
+          "items": [
+            "SN82548 Ahmed Al Muqaini",
+            "SN82575 Ahmed Al Kharusi"
+          ]
+        },
+        {
+          "title": "Export Checker",
+          "items": [
+            "SN82659 Ammar Al Hashmi",
+            "SN82587 Yousuf Al Balushi",
+            "SN80270 Marlon Esmilla",
+            "SN82578 Raad Al Farsi",
+            "SN8584 Adil Al Zadjali",
+            "SN82555 Riyadh Al Jabri"
+          ]
+        },
+        {
+          "title": "Export Operators",
+          "items": [
+            "SN82588 Ghassan Al Tarsi",
+            "SN8762 Mohamed Al Falahi",
+            "SN82656 Faisal Al Balushi"
+          ]
+        },
+        {
+          "title": "Flight Dispatch",
+          "items": [
+            "SN82654 AHMED AL HADI",
+            "SN82410 SAID AL SADI",
+            "SN82417 TALAL AL HUSEINI",
+            "SN82423 BADAR AL BURTAMANI"
+          ]
+        },
+        {
+          "title": "Inventory",
+          "items": [
+            "SN990737 Said Al Amri"
+          ]
+        },
+        {
+          "title": "Support Team",
+          "items": [
+            "SN82565 Jamal Al Hadi"
+          ]
+        },
+        {
+          "title": "CTU Staff On Duty",
+          "items": []
+        },
+        {
+          "title": "Sick Leave / No Show / Others",
+          "items": []
+        },
+        {
+          "title": "Annual Leave / Course / Off in Lieu",
+          "items": []
+        },
+        {
+          "title": "Trainee",
+          "items": []
+        },
+        {
+          "title": "Overtime Justification",
+          "items": []
+        }
+      ]
+    },
+    "afternoon": {
+      "shiftMeta": {
+        "key": "afternoon",
+        "title": "Afternoon Shift",
+        "date": "2026-04-19",
+        "time": "13:00 - 22:00"
+      },
+      "manpowerSections": [
+        {
+          "title": "Supervisor",
+          "items": [
+            "SN81404 Mohamed Al Amri"
+          ]
+        },
+        {
+          "title": "Load Control",
+          "items": [
+            "SN82596 Hamed Al Fulaiti",
+            "SN81258 Jaafar Al Balushi",
+            "SN81402 Mohamed Al Siyabi"
+          ]
+        },
+        {
+          "title": "Export Checker",
+          "items": [
+            "SN82658 Mohamed Al Mazroie",
+            "SN990752 Ali Yousuf Al Balushi",
+            "SN82674 Mohamed Al Mamari",
+            "SN81832 Ahmed Al Bakari",
+            "SN82424 Riyadh Al Sulti"
+          ]
+        },
+        {
+          "title": "Export Operators",
+          "items": [
+            "SN8714 Mohana Al Subhi",
+            "SN81224 Mohamed Al Amri",
+            "SN8647 Issa Al Douyani"
+          ]
+        },
+        {
+          "title": "Flight Dispatch",
+          "items": [
+            "SN82537 KHALIFA AL SAADI",
+            "SN82428 ABDULLAH AL MAHARBI",
+            "SN82571 YAARAB AL RAQADI"
+          ]
+        },
+        {
+          "title": "Support Team",
+          "items": [
+            "SN82653 Ahmed Al Sabii"
+          ]
+        },
+        {
+          "title": "CTU Staff On Duty",
+          "items": []
+        },
+        {
+          "title": "Inventory",
+          "items": []
+        },
+        {
+          "title": "Sick Leave / No Show / Others",
+          "items": []
+        },
+        {
+          "title": "Annual Leave / Course / Off in Lieu",
+          "items": []
+        },
+        {
+          "title": "Trainee",
+          "items": []
+        },
+        {
+          "title": "Overtime Justification",
+          "items": []
+        }
+      ]
+    },
+    "night": {
+      "shiftMeta": {
+        "key": "night",
+        "title": "Night Shift",
+        "date": "2026-04-19",
+        "time": "21:00 - 06:00"
+      },
+      "manpowerSections": [
+        {
+          "title": "Supervisor",
+          "items": [
+            "SN82593 Mohamed Al Kalbani"
+          ]
+        },
+        {
+          "title": "Load Control",
+          "items": [
+            "SN82437 Marwan Al Difai",
+            "SN82114 Mubarak Al Nofli",
+            "SN82550 Saleh Al Aufi"
+          ]
+        },
+        {
+          "title": "Export Checker",
+          "items": [
+            "SN82671 Khalil Al Hinai",
+            "SN82615 Rashid Al Farsi",
+            "SN81393 Ali Al Farsi",
+            "SN80482 Waleed Al Hadabi",
+            "SN82666 Mohamed Al Maskari",
+            "SN82439 Ghaith Al Habsi"
+          ]
+        },
+        {
+          "title": "Export Operators",
+          "items": [
+            "SN82467 Khamis Al Hinai",
+            "SN82429 Zakariya Al Balushi"
+          ]
+        },
+        {
+          "title": "Flight Dispatch",
+          "items": [
+            "SN82414 BADAR AL BUSAIDI",
+            "SN82420 MOHAMMED AL SAADI",
+            "SN80479 SAMI AL HADABI"
+          ]
+        },
+        {
+          "title": "CTU Staff On Duty",
+          "items": []
+        },
+        {
+          "title": "Inventory",
+          "items": []
+        },
+        {
+          "title": "Support Team",
+          "items": []
+        },
+        {
+          "title": "Sick Leave / No Show / Others",
+          "items": []
+        },
+        {
+          "title": "Annual Leave / Course / Off in Lieu",
+          "items": []
+        },
+        {
+          "title": "Trainee",
+          "items": []
+        },
+        {
+          "title": "Overtime Justification",
+          "items": []
+        }
+      ]
+    }
+  },
+  "defaultShift": "afternoon"
+}

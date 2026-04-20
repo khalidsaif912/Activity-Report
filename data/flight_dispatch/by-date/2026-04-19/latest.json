@@ -1,0 +1,42 @@
+{
+  "shiftMeta": {
+    "date": "2026-04-19",
+    "shiftCode": "AN13"
+  },
+  "flightDispatch": {
+    "title": "Flight Dispatch",
+    "items": [
+      "SN82537 KHALIFA AL SAADI",
+      "SN82428 ABDULLAH AL MAHARBI",
+      "SN82571 YAARAB AL RAQADI"
+    ]
+  },
+  "byShift": {
+    "morning": {
+      "title": "Flight Dispatch",
+      "items": [
+        "SN82654 AHMED AL HADI",
+        "SN82410 SAID AL SADI",
+        "SN82417 TALAL AL HUSEINI",
+        "SN82423 BADAR AL BURTAMANI"
+      ]
+    },
+    "afternoon": {
+      "title": "Flight Dispatch",
+      "items": [
+        "SN82537 KHALIFA AL SAADI",
+        "SN82428 ABDULLAH AL MAHARBI",
+        "SN82571 YAARAB AL RAQADI"
+      ]
+    },
+    "night": {
+      "title": "Flight Dispatch",
+      "items": [
+        "SN82414 BADAR AL BUSAIDI",
+        "SN82420 MOHAMMED AL SAADI",
+        "SN80479 SAMI AL HADABI"
+      ]
+    }
+  },
+  "defaultShift": "afternoon"
+}
