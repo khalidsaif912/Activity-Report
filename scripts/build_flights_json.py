@@ -79,8 +79,11 @@ def _build_std_etd(std_raw: str, etd_raw: str) -> str:
 
 def fetch_aviationstack(access_key: str, airlines: list[str], dep_iata: str, timeout_sec: int) -> list[dict]:
     out_by_key: dict[str, dict] = {}
-    for airline in airlines:
-        params = {"access_key": access_key, "airline_iata": airline}
+    scopes = airlines[:] if airlines else [""]
+    for airline in scopes:
+        params = {"access_key": access_key}
+        if airline:
+            params["airline_iata"] = airline
         if dep_iata:
             params["dep_iata"] = dep_iata
         try:
@@ -125,13 +128,20 @@ def main() -> None:
         print("AVIATIONSTACK_ACCESS_KEY is not set; keeping existing flights.json.")
         return
 
-    airlines = [
-        x.strip().upper()
-        for x in (os.environ.get("LIVE_FLIGHTS_AIRLINES") or "WY,OV").split(",")
-        if x.strip()
-    ]
-    dep_iata = (os.environ.get("LIVE_FLIGHTS_DEP_IATA") or "MCT").strip().upper()
+    airlines_raw = (os.environ.get("LIVE_FLIGHTS_AIRLINES") or "WY,OV").strip()
+    if airlines_raw.upper() in {"ALL", "ANY", "*"}:
+        airlines = []
+    else:
+        airlines = [x.strip().upper() for x in airlines_raw.split(",") if x.strip()]
+
+    dep_raw = (os.environ.get("LIVE_FLIGHTS_DEP_IATA") or "MCT").strip().upper()
+    dep_iata = "" if dep_raw in {"ALL", "ANY", "*"} else dep_raw
     timeout_sec = int((os.environ.get("LIVE_FLIGHTS_TIMEOUT_SEC") or "20").strip() or "20")
+
+    print(
+        f"Flight source config: airlines={'ALL' if not airlines else ','.join(airlines)} "
+        f"dep_iata={'ALL' if not dep_iata else dep_iata}"
+    )
 
     flights = fetch_aviationstack(access_key, airlines or ["WY", "OV"], dep_iata, timeout_sec)
     if not flights:
