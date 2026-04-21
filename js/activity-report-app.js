@@ -4,7 +4,7 @@
  */
 (function () {
   console.info(
-    "[activity-report] client bundle v19 — Offload DATE/FLIGHT/STD/DEST use single-line inputs (no textarea handles); hard-refresh if needed."
+    "[activity-report] client bundle v33 — Phrase delete + merged flight/phrase suggestions."
   );
   /**
    * Single-folder fallback when meta/window overrides are unset.
@@ -205,11 +205,17 @@
     handoverDetails: "READ AND SIGN. SHELL & AL-MAHA CARD FUEL. DIP MAIL CAGE KEYS.",
     otherText: "",
     specialHO: "",
-    recipients: ["ops@company.com", "supervisor@company.com"],
+    recipients: { to: ["ops@company.com", "supervisor@company.com"], cc: [], bcc: [] },
+    scheduledSendAt: "",
+    scheduledSendEnabled: false,
+    _scheduledSendLastFiredAt: "",
     shiftsFromServer: null,
     activeShift: null,
     datesList: [],
+    availableDates: [],
     activeDate: null,
+    loadErrorMessage: "",
+    noDataMode: false,
     _fetchedReportJson: null,
     _resetBaseline: null,
   };
@@ -233,6 +239,10 @@
     { key: "afternoon", label: "Afternoon" },
     { key: "night", label: "Night" },
   ];
+
+  let _scheduledSendTimer = null;
+  let _gmailStatus = { configured: false, authorized: false };
+  const EMAIL_BUTTON_DEFAULT_TEXT = "Send Report";
 
   /** Bump when draft shape changes; old keys are ignored so stale roster lists are not restored. */
   const DRAFT_STORAGE_PREFIX = "activity-report-draft-v4";
@@ -282,6 +292,9 @@
       otherText: state.otherText,
       specialHO: state.specialHO,
       recipients: deepClone(state.recipients),
+      scheduledSendAt: state.scheduledSendAt,
+      scheduledSendEnabled: state.scheduledSendEnabled,
+      _scheduledSendLastFiredAt: state._scheduledSendLastFiredAt,
       shiftMeta: { ...state.shiftMeta },
       activeShift: state.activeShift,
     };
@@ -303,6 +316,9 @@
     state.otherText = b.otherText;
     state.specialHO = b.specialHO;
     state.recipients = deepClone(b.recipients);
+    state.scheduledSendAt = b.scheduledSendAt || "";
+    state.scheduledSendEnabled = !!b.scheduledSendEnabled;
+    state._scheduledSendLastFiredAt = b._scheduledSendLastFiredAt || "";
     state.shiftMeta = { ...b.shiftMeta };
     if (b.activeShift != null) state.activeShift = b.activeShift;
   }
@@ -444,6 +460,18 @@
 
   async function switchShift(key) {
     if (!state.shiftsFromServer || key === state.activeShift) return;
+    if (state.noDataMode) {
+      state.activeShift = key;
+      applyShiftFromServer(key);
+      if (state.offloads[0]) {
+        state.offloads[0].date = window.offloadLoader
+          ? window.offloadLoader.normalizeOffloadDate(state.shiftMeta.date || "")
+          : state.shiftMeta.date || "";
+      }
+      saveDraft();
+      renderAll();
+      return;
+    }
     saveDraft();
     state.activeShift = key;
     if (state._fetchedReportJson) {
@@ -462,12 +490,19 @@
   async function switchDate(dateStr) {
     if (!dateStr || dateStr === state.activeDate) return;
     if (state.datesList.length && !state.datesList.includes(dateStr)) return;
+    const prevDate = state.activeDate;
     saveDraft();
     state.activeDate = dateStr;
     state.activeShift = null;
     state._fetchedReportJson = null;
-    await loadReportPayload();
-    renderAll();
+    try {
+      await loadReportPayload();
+      renderAll();
+    } catch (err) {
+      const msg = err && err.message ? String(err.message) : "Failed to load selected date";
+      state.activeDate = dateStr || prevDate;
+      applyMissingDateView(msg);
+    }
   }
 
   function renderShiftTabs() {
@@ -502,11 +537,16 @@
     wrap.hidden = false;
     wrap.innerHTML = "";
     state.datesList.forEach((iso) => {
+      const isAvailable =
+        !Array.isArray(state.availableDates) ||
+        state.availableDates.length === 0 ||
+        state.availableDates.includes(iso);
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "date-tab" + (state.activeDate === iso ? " active" : "");
       btn.textContent = dateTabLabel(iso);
-      btn.title = iso;
+      btn.title = isAvailable ? iso : `${iso} (no data yet; will seed from latest available day)`;
+      if (!isAvailable) btn.style.opacity = "0.82";
       btn.addEventListener("click", () => switchDate(iso));
       wrap.appendChild(btn);
     });
@@ -546,6 +586,8 @@
   }
 
   async function finalizeAfterServerData(data) {
+    state.loadErrorMessage = "";
+    state.noDataMode = false;
     syncFetchedContentDates(data);
     state._fetchedReportJson = deepClone(data);
 
@@ -585,11 +627,24 @@
   }
 
   async function loadReportPayload() {
+    const want = state.activeDate && String(state.activeDate).trim();
+    const wantMissingFromIndex =
+      !!want &&
+      Array.isArray(state.availableDates) &&
+      state.availableDates.length > 0 &&
+      !state.availableDates.includes(want);
+
+    if (wantMissingFromIndex) {
+      throw new Error(
+        `No report data exists for ${want} yet. Generate today's report files first (by-date/${want}/latest.json), then reload.`
+      );
+    }
+
     const primaryUrl = reportJsonUrl();
     let url = primaryUrl;
     let r = await fetch(url, { cache: "no-store" });
     let usedRootLatestFallback = false;
-    if (!r.ok && state.activeDate) {
+    if (!r.ok) {
       usedRootLatestFallback = true;
       url = "latest.json";
       r = await fetch(url, { cache: "no-store" });
@@ -597,7 +652,6 @@
     if (!r.ok) throw new Error(`Report data not found (${url})`);
     const data = await r.json();
 
-    const want = state.activeDate && String(state.activeDate).trim();
     const got = getPayloadCalendarDate(data);
     if (want && /^\d{4}-\d{2}-\d{2}$/.test(want) && got && got !== want) {
       const hint = usedRootLatestFallback
@@ -619,7 +673,12 @@
         await window.employeeAutocomplete.load(assetBase + "employees.json");
       }
 
-      if (window.flightAutocomplete) await window.flightAutocomplete.load(assetBase + "flights.json");
+      if (window.flightAutocomplete) {
+        await window.flightAutocomplete.load("/api/live-flights");
+        if (!Array.isArray(window.flightAutocomplete.flights) || !window.flightAutocomplete.flights.length) {
+          await window.flightAutocomplete.load(assetBase + "flights.json");
+        }
+      }
       if (window.phraseAutocomplete) {
         await window.phraseAutocomplete.load(assetBase + "phrases.json");
         await window.phraseAutocomplete.loadCsdDestinationHints(assetBase + "csd-wy-ov-destinations.json");
@@ -646,11 +705,18 @@
         });
         await window.manpowerRoleHintCache.loadRoleOptions(assetBase + "manpower-role-options.json");
       }
+      if (window.recipientsCache) {
+        await window.recipientsCache.hydrate({
+          fallbackUrl: assetBase + "recipients.json"
+        });
+        state.recipients = normalizeRecipientsShape(window.recipientsCache.getAll());
+      }
 
       const idx = await loadDatesIndex();
       const todayIso = getTodayIsoLocal();
+      state.availableDates = idx && Array.isArray(idx.dates) ? idx.dates.slice().sort() : [];
       if (getUseAutoToday()) {
-        const base = idx && Array.isArray(idx.dates) ? idx.dates.slice() : [];
+        const base = state.availableDates.slice();
         if (!base.includes(todayIso)) base.push(todayIso);
         base.sort();
         state.datesList = base;
@@ -670,8 +736,55 @@
     } catch (err) {
       console.error(err);
       const msg = err && err.message ? String(err.message) : "Failed to load data";
-      el("shiftMetaText").textContent = msg.length > 220 ? msg.slice(0, 217) + "…" : msg;
+      applyMissingDateView(msg.length > 220 ? msg.slice(0, 217) + "…" : msg);
     }
+  }
+
+  function blankOffloadRow(item, dateText) {
+    return {
+      item,
+      date: window.offloadLoader ? window.offloadLoader.normalizeOffloadDate(dateText || "") : dateText || "",
+      flight: "",
+      std: "",
+      destination: "",
+      emailTime: "",
+      rampReceived: "",
+      trolley: "",
+      cmsCompleted: "",
+      piecesVerification: "",
+      reason: "",
+      remarks: "",
+    };
+  }
+
+  function buildEmptyShiftsForDate(dateText) {
+    const date = String(dateText || "").trim();
+    return {
+      morning: {
+        shiftMeta: { key: "morning", title: "Morning Shift", date, time: "06:00 - 15:00" },
+        manpowerSections: []
+      },
+      afternoon: {
+        shiftMeta: { key: "afternoon", title: "Afternoon Shift", date, time: "13:00 - 22:00" },
+        manpowerSections: []
+      },
+      night: {
+        shiftMeta: { key: "night", title: "Night Shift", date, time: "21:00 - 06:00" },
+        manpowerSections: []
+      }
+    };
+  }
+
+  function applyMissingDateView(message) {
+    const dateText = state.activeDate || getTodayIsoLocal();
+    state.loadErrorMessage = String(message || "No report data found for selected date.");
+    state.noDataMode = true;
+    state.shiftsFromServer = buildEmptyShiftsForDate(dateText);
+    state.activeShift = state.shiftsFromServer[getCurrentShiftKey()] ? getCurrentShiftKey() : "morning";
+    applyShiftFromServer(state.activeShift);
+    state.manpowerSections = [];
+    state.offloads = [blankOffloadRow(1, dateText)];
+    renderAll();
   }
 
   function renderWebSignaturePreview() {
@@ -695,6 +808,7 @@
     renderOffloads();
     renderManpower();
     renderRecipients();
+    renderScheduledSendStatus();
 
     el("flightPerformance").value = state.flightPerformance;
     el("checksCompliance").value = state.checksCompliance;
@@ -705,9 +819,34 @@
     el("specialHO").value = state.specialHO;
 
     bindAutocompleteWiring();
+    scheduleSendTimerFromState();
+    refreshGmailStatus().catch(() => {});
+  }
+
+  function syncFlightSuggestIsoDate() {
+    try {
+      const iso = (state.activeDate || state.shiftMeta.date || "").trim();
+      if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
+        window.__flightSuggestIsoDate = iso;
+        return;
+      }
+      const d = new Date();
+      window.__flightSuggestIsoDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+        d.getDate()
+      ).padStart(2, "0")}`;
+    } catch {
+      window.__flightSuggestIsoDate = "";
+    }
   }
 
   function renderMeta() {
+    syncFlightSuggestIsoDate();
+    if (state.loadErrorMessage) {
+      el("shiftMetaText").textContent = state.loadErrorMessage;
+      renderDateTabs();
+      renderShiftTabs();
+      return;
+    }
     const d = formatDisplayDate(state.shiftMeta.date || "");
     const t = state.shiftMeta.time || "";
     const title = state.shiftMeta.title || "";
@@ -1349,20 +1488,250 @@
     }, 0);
   }
 
+  function normalizeRecipientsShape(payload) {
+    const src = Array.isArray(payload) ? { to: payload, cc: [], bcc: [] } : payload && typeof payload === "object" ? payload : {};
+    const uniq = (arr) => {
+      const seen = new Set();
+      const out = [];
+      (Array.isArray(arr) ? arr : []).forEach((x) => {
+        const v = String(x || "").trim().toLowerCase();
+        if (!v || seen.has(v)) return;
+        seen.add(v);
+        out.push(v);
+      });
+      return out;
+    };
+    return {
+      to: uniq(src.to),
+      cc: uniq(src.cc),
+      bcc: uniq(src.bcc),
+    };
+  }
+
+  function recipientsAnyCount() {
+    const r = normalizeRecipientsShape(state.recipients);
+    return r.to.length + r.cc.length + r.bcc.length;
+  }
+
+  function persistRecipientsToServer() {
+    if (window.recipientsCache && typeof window.recipientsCache.replaceAll === "function") {
+      window.recipientsCache.replaceAll(state.recipients).catch((e) => {
+        console.warn("Recipients sync failed", e);
+      });
+    }
+  }
+
   function renderRecipients() {
-    const wrap = el("recipientTags");
-    wrap.innerHTML = "";
-    state.recipients.forEach((emailAddr) => {
-      const tag = document.createElement("div");
-      tag.className = "recipient-tag";
-      tag.textContent = `${emailAddr} ×`;
-      tag.onclick = () => {
-        state.recipients = state.recipients.filter((x) => x !== emailAddr);
-        saveDraft();
-        renderRecipients();
-      };
-      wrap.appendChild(tag);
+    const map = [
+      ["to", "recipientTagsTo"],
+      ["cc", "recipientTagsCc"],
+      ["bcc", "recipientTagsBcc"],
+    ];
+    const recipients = normalizeRecipientsShape(state.recipients);
+    state.recipients = recipients;
+    map.forEach(([kind, wrapId]) => {
+      const wrap = el(wrapId);
+      if (!wrap) return;
+      wrap.innerHTML = "";
+      recipients[kind].forEach((emailAddr) => {
+        const tag = document.createElement("div");
+        tag.className = "recipient-tag";
+        tag.textContent = `${emailAddr} ×`;
+        tag.onclick = () => {
+          state.recipients[kind] = state.recipients[kind].filter((x) => x !== emailAddr);
+          saveDraft();
+          renderRecipients();
+          scheduleSendTimerFromState();
+          persistRecipientsToServer();
+        };
+        wrap.appendChild(tag);
+      });
     });
+  }
+
+  function parseRecipientInput(raw) {
+    return String(raw || "")
+      .split(/[,\n;]+/)
+      .map((x) => x.trim())
+      .filter((x) => x);
+  }
+
+  function isValidEmailBasic(v) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v || "").trim());
+  }
+
+  function recipientsMailtoValue(kind) {
+    const r = normalizeRecipientsShape(state.recipients);
+    return r[kind].join(",");
+  }
+
+  function openEmailComposer() {
+    const to = recipientsMailtoValue("to");
+    const cc = recipientsMailtoValue("cc");
+    const bcc = recipientsMailtoValue("bcc");
+    if (!to && !cc && !bcc) return false;
+    const subject = "Export Warehouse Activity Report";
+    const body = encodeURIComponent(buildReportPlainBody());
+    const parts = [`subject=${encodeURIComponent(subject)}`, `body=${body}`];
+    if (cc) parts.push(`cc=${encodeURIComponent(cc)}`);
+    if (bcc) parts.push(`bcc=${encodeURIComponent(bcc)}`);
+    window.location.href = `mailto:${to}?${parts.join("&")}`;
+    return true;
+  }
+
+  async function refreshGmailStatus() {
+    const statusEl = el("gmailStatus");
+    try {
+      const r = await fetch("/api/gmail/status", { cache: "no-store" });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const st = await r.json();
+      _gmailStatus = {
+        configured: !!st.configured,
+        authorized: !!st.authorized,
+      };
+    } catch {
+      _gmailStatus = { configured: false, authorized: false };
+    }
+    if (statusEl) {
+      if (_gmailStatus.configured && _gmailStatus.authorized) {
+        statusEl.textContent = "Gmail API: connected.";
+      } else if (_gmailStatus.configured && !_gmailStatus.authorized) {
+        statusEl.textContent = "Gmail API: configured but not authorized (click Connect Gmail).";
+      } else {
+        statusEl.textContent = "Gmail API: not configured on server (will use mailto fallback).";
+      }
+    }
+  }
+
+  async function connectGmailFlow() {
+    const statusEl = el("gmailStatus");
+    try {
+      const r = await fetch("/api/gmail/auth-url", { cache: "no-store" });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const out = await r.json();
+      if (!out.url) throw new Error("Missing auth URL");
+      window.open(out.url, "_blank", "noopener");
+      if (statusEl) statusEl.textContent = "Gmail auth tab opened. Complete login, then come back here.";
+      setTimeout(() => refreshGmailStatus(), 2000);
+    } catch (e) {
+      if (statusEl) statusEl.textContent = `Gmail connect failed: ${e && e.message ? e.message : "unknown error"}`;
+    }
+  }
+
+  async function sendEmailNow() {
+    const recipients = normalizeRecipientsShape(state.recipients);
+    if (!recipients.to.length && !recipients.cc.length && !recipients.bcc.length) return false;
+
+    const subject = "Export Warehouse Activity Report";
+    const plain = buildReportPlainBody();
+    const html = await buildReportHtmlForClipboard();
+
+    try {
+      const r = await fetch("/api/gmail/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: recipients.to,
+          cc: recipients.cc,
+          bcc: recipients.bcc,
+          subject,
+          plain,
+          html,
+        }),
+      });
+      if (r.ok) {
+        await refreshGmailStatus();
+        return true;
+      }
+    } catch (_) {
+      /* fallback below */
+    }
+    return openEmailComposer();
+  }
+
+  function setEmailButtonState(mode) {
+    const btn = el("emailBtn");
+    if (!btn) return;
+    if (mode === "sending") {
+      btn.disabled = true;
+      btn.classList.remove("send-success");
+      btn.textContent = "Sending...";
+      return;
+    }
+    btn.disabled = false;
+    if (mode === "success") {
+      btn.classList.add("send-success");
+      btn.textContent = "Sent via Gmail";
+      return;
+    }
+    btn.classList.remove("send-success");
+    btn.textContent = EMAIL_BUTTON_DEFAULT_TEXT;
+  }
+
+  function clearScheduledSendTimer() {
+    if (_scheduledSendTimer) {
+      clearTimeout(_scheduledSendTimer);
+      _scheduledSendTimer = null;
+    }
+  }
+
+  function parseScheduleDate(value) {
+    const v = String(value || "").trim();
+    if (!v) return null;
+    const d = new Date(v);
+    if (Number.isNaN(d.getTime())) return null;
+    return d;
+  }
+
+  function renderScheduledSendStatus() {
+    const statusEl = el("scheduleStatus");
+    const inputEl = el("autoSendAt");
+    if (!statusEl || !inputEl) return;
+    inputEl.value = state.scheduledSendAt || "";
+    if (!state.scheduledSendEnabled || !state.scheduledSendAt) {
+      statusEl.textContent = "No scheduled send.";
+      return;
+    }
+    const d = parseScheduleDate(state.scheduledSendAt);
+    if (!d) {
+      statusEl.textContent = "Scheduled time is invalid.";
+      return;
+    }
+    statusEl.textContent = `Scheduled for ${d.toLocaleString()} (page must stay open).`;
+  }
+
+  async function runScheduledSendIfDue() {
+    if (!state.scheduledSendEnabled || !state.scheduledSendAt) return;
+    const due = parseScheduleDate(state.scheduledSendAt);
+    if (!due) return;
+    if (Date.now() < due.getTime()) return;
+    if (state._scheduledSendLastFiredAt === state.scheduledSendAt) return;
+    const ok = await sendEmailNow();
+    state._scheduledSendLastFiredAt = state.scheduledSendAt;
+    state.scheduledSendEnabled = false;
+    renderScheduledSendStatus();
+    saveDraft();
+    if (!ok) {
+      const statusEl = el("scheduleStatus");
+      if (statusEl) statusEl.textContent = "Scheduled time reached, but recipients list is empty.";
+    }
+  }
+
+  function scheduleSendTimerFromState() {
+    clearScheduledSendTimer();
+    renderScheduledSendStatus();
+    if (!state.scheduledSendEnabled || !state.scheduledSendAt) return;
+    const due = parseScheduleDate(state.scheduledSendAt);
+    if (!due) return;
+    const delay = due.getTime() - Date.now();
+    if (delay <= 0) {
+      runScheduledSendIfDue().catch(console.error);
+      return;
+    }
+    _scheduledSendTimer = setTimeout(() => {
+      _scheduledSendTimer = null;
+      runScheduledSendIfDue().catch(console.error);
+    }, delay);
   }
 
   /** Pixel column widths + wide min-width force the table past the report; % + wrap keeps it inside (browser + Outlook paste). */
@@ -1425,28 +1794,28 @@
 
   const WORD_CLIPBOARD = {
     body:
-      "mso-ansi-font-size:11.0pt;mso-bidi-font-size:11.0pt;font-size:11.0pt;font-family:'Arial',sans-serif;color:#0F172A;line-height:115%;mso-line-height-rule:exactly;",
+      "mso-ansi-font-size:11.0pt;mso-bidi-font-size:11.0pt;font-size:11.0pt;font-family:'Arial',sans-serif;color:#000000;line-height:115%;mso-line-height-rule:exactly;",
     bullet:
-      "mso-ansi-font-size:11.0pt;font-size:11.0pt;font-family:'Georgia',serif;mso-ascii-font-family:Georgia;mso-hansi-font-family:Georgia;font-weight:bold;color:#0F172A;",
+      "mso-ansi-font-size:11.0pt;font-size:11.0pt;font-family:'Georgia',serif;mso-ascii-font-family:Georgia;mso-hansi-font-family:Georgia;font-weight:bold;color:#000000;",
     sectionTitle:
-      "mso-ansi-font-size:12.0pt;mso-bidi-font-size:12.0pt;font-size:12.0pt;font-family:'Georgia',serif;mso-ascii-font-family:Georgia;mso-hansi-font-family:Georgia;font-weight:bold;letter-spacing:0.02em;color:#0F172A;",
+      "mso-ansi-font-size:12.0pt;mso-bidi-font-size:12.0pt;font-size:12.0pt;font-family:'Georgia',serif;mso-ascii-font-family:Georgia;mso-hansi-font-family:Georgia;font-weight:bold;letter-spacing:0.02em;color:#000000;",
     bannerMajor:
-      "mso-ansi-font-size:14.0pt;mso-bidi-font-size:14.0pt;font-size:14.0pt;font-family:'Georgia',serif;mso-ascii-font-family:Georgia;mso-hansi-font-family:Georgia;font-weight:bold;letter-spacing:0.02em;color:#0F172A;line-height:1.35;",
+      "mso-ansi-font-size:14.0pt;mso-bidi-font-size:14.0pt;font-size:14.0pt;font-family:'Georgia',serif;mso-ascii-font-family:Georgia;mso-hansi-font-family:Georgia;font-weight:bold;letter-spacing:0.02em;color:#000000;line-height:1.35;",
     bannerDefault:
-      "mso-ansi-font-size:12.0pt;mso-bidi-font-size:12.0pt;font-size:12.0pt;font-family:'Arial',sans-serif;font-weight:bold;color:#0F172A;line-height:1.45;",
+      "mso-ansi-font-size:12.0pt;mso-bidi-font-size:12.0pt;font-size:12.0pt;font-family:'Arial',sans-serif;font-weight:bold;color:#000000;line-height:1.45;",
   };
 
   /** Outlook/Word often drops CSS background on divs; table &lt;td bgcolor&gt; keeps section shading on paste. */
   function convertSectionTitlesToOutlookShadeTables(root) {
     root.querySelectorAll(".section-title").forEach((el) => {
-      let bg = "#dbeafe";
+      let bg = "#bfdbfe";
       let borderLeft = "#1e3a8a";
       if (el.classList.contains("green")) {
         bg = "#dcfce7";
         borderLeft = "#15803d";
       } else if (el.classList.contains("orange")) {
-        bg = "#ffedd5";
-        borderLeft = "#c2410c";
+        bg = "#bfdbfe";
+        borderLeft = "#1e3a8a";
       } else if (el.classList.contains("amber")) {
         bg = "#fef3c7";
         borderLeft = "#a16207";
@@ -1524,7 +1893,7 @@
   /** Outlook uses Word HTML; it often strips &lt;style&gt; — inline CSS + bgcolor where needed. */
   function applyOutlookInlineClipboardStyles(root) {
     const baseFont =
-      "font-family:'Arial',sans-serif;font-size:11.0pt;mso-ansi-font-size:11.0pt;color:#0F172A;line-height:115%;";
+      "font-family:'Arial',sans-serif;font-size:11.0pt;mso-ansi-font-size:11.0pt;color:#000000;line-height:115%;";
     root.setAttribute("style", baseFont + (root.getAttribute("style") || ""));
 
     root.querySelectorAll(".block").forEach((el) => {
@@ -1536,7 +1905,7 @@
     root.querySelectorAll(".line-group-title").forEach((el) => {
       el.setAttribute(
         "style",
-        "font-weight:700;color:#1e3a8a;margin-bottom:6px;mso-ansi-font-size:11.0pt;font-size:11.0pt;font-family:'Arial',sans-serif;" +
+        "font-weight:700;color:#000000;margin-bottom:6px;mso-ansi-font-size:11.0pt;font-size:11.0pt;font-family:'Arial',sans-serif;" +
           (el.getAttribute("style") || "")
       );
     });
@@ -1565,7 +1934,7 @@
     root.querySelectorAll(".manpower-bullet").forEach((el) => {
       el.setAttribute(
         "style",
-        "display:inline-block;min-width:1em;font-weight:700;font-size:15px;line-height:1.5;color:#0f172a;padding-top:2px;font-family:Georgia,'Times New Roman',serif;" +
+        "display:inline-block;min-width:1em;font-weight:700;font-size:15px;line-height:1.5;color:#000000;padding-top:2px;font-family:Georgia,'Times New Roman',serif;" +
           (el.getAttribute("style") || "")
       );
     });
@@ -1578,7 +1947,7 @@
     root.querySelectorAll(".manpower-item .export-val.manpower-line").forEach((el) => {
       el.setAttribute(
         "style",
-        "flex:1;min-width:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.45;color:#0f172a;" +
+        "flex:1;min-width:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.45;color:#000000;" +
           (el.getAttribute("style") || "")
       );
     });
@@ -1587,7 +1956,7 @@
       if (el.classList.contains("manpower-line")) return;
       const prev = el.getAttribute("style") || "";
       const wordBody =
-        "font-size:11.0pt;mso-ansi-font-size:11.0pt;font-family:'Arial',sans-serif;color:#0F172A;";
+        "font-size:11.0pt;mso-ansi-font-size:11.0pt;font-family:'Arial',sans-serif;color:#000000;";
       if (!/min-height/i.test(prev)) {
         el.setAttribute("style", "display:block;min-height:1.2em;" + wordBody + prev);
       } else {
@@ -1648,6 +2017,48 @@
       .replace(/"/g, "&quot;");
   }
 
+  function buildWordClipboardHeadHtml() {
+    return [
+      '<meta charset="utf-8">',
+      '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">',
+      '<meta name="ProgId" content="Word.Document">',
+      '<meta name="Generator" content="Microsoft Word 15">',
+      '<meta name="Originator" content="Microsoft Word 15">',
+      "<style>",
+      "body,table,td,th,div,p,span,li{font-family:Arial,sans-serif;mso-ansi-font-family:Arial;mso-hansi-font-family:Arial;font-size:11.0pt;mso-ansi-font-size:11.0pt;color:#000000;line-height:115%;mso-line-height-rule:exactly;}",
+      "table{border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;}",
+      "p{margin:0 0 8px 0;}",
+      "</style>",
+    ].join("");
+  }
+
+  function wrapWordClipboardDocument(innerHtml) {
+    const head = buildWordClipboardHeadHtml();
+    const bodyStyle =
+      "margin:0;padding:0;font-family:Arial,sans-serif;mso-ansi-font-family:Arial;mso-hansi-font-family:Arial;font-size:11.0pt;mso-ansi-font-size:11.0pt;color:#000000;line-height:115%;mso-line-height-rule:exactly;";
+    return `<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head>${head}</head><body style="${bodyStyle}">${innerHtml}</body></html>`;
+  }
+
+  /** Outlook can ignore head-level CSS; force font family/size inline on every node. */
+  function hardInlineWordFonts(root) {
+    const ensureStyleToken = (style, token, re) => (re.test(style) ? style : token + style);
+    root.querySelectorAll("*").forEach((el) => {
+      let s = el.getAttribute("style") || "";
+      s = ensureStyleToken(s, "font-family:'Arial',sans-serif;", /\bfont-family\s*:/i);
+      s = ensureStyleToken(s, "mso-ansi-font-family:Arial;", /\bmso-ansi-font-family\s*:/i);
+      s = ensureStyleToken(s, "mso-hansi-font-family:Arial;", /\bmso-hansi-font-family\s*:/i);
+      s = ensureStyleToken(s, "mso-bidi-font-family:Arial;", /\bmso-bidi-font-family\s*:/i);
+      s = ensureStyleToken(s, "font-size:11.0pt;", /\bfont-size\s*:/i);
+      s = ensureStyleToken(s, "mso-ansi-font-size:11.0pt;", /\bmso-ansi-font-size\s*:/i);
+      s = ensureStyleToken(s, "mso-bidi-font-size:11.0pt;", /\bmso-bidi-font-size\s*:/i);
+      s = ensureStyleToken(s, "line-height:115%;", /\bline-height\s*:/i);
+      s = ensureStyleToken(s, "mso-line-height-rule:exactly;", /\bmso-line-height-rule\s*:/i);
+      s = s.replace(/\bcolor\s*:[^;]*;?/i, "");
+      s = `color:#000000;${s}`;
+      el.setAttribute("style", s);
+    });
+  }
+
   /** Same folder as offload_report.html — served with the page for Copy → Outlook. */
   function reportSignatureBadgesImageUrl() {
     try {
@@ -1692,23 +2103,23 @@
     const dE = escapeHtml(d);
     const tE = escapeHtml(t);
     const titleE = escapeHtml(title);
-    const bannerBg = "#f1f5f9";
+    const bannerBg = "#93c5fd";
     const ink = "#000000";
-    return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;margin-bottom:14px;max-width:100%;border:1px solid #cbd5e1;"><tr><td bgcolor="#f97316" style="width:6px;background-color:#f97316;font-size:0;line-height:0;">&nbsp;</td><td bgcolor="${bannerBg}" style="background-color:${bannerBg};padding:18px 20px;vertical-align:top;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;"><tr><td style="vertical-align:top;font-family:'Arial',sans-serif;color:${ink};"><div style="mso-ansi-font-size:16.5pt;mso-bidi-font-size:16.5pt;font-size:16.5pt;font-weight:bold;line-height:115%;margin:0 0 10px 0;color:${ink};mso-line-height-rule:exactly;"><span style="mso-ansi-font-size:15.0pt;font-size:15.0pt;margin-right:6px;">&#9992;</span> Export Warehouse Activity Report</div><div style="mso-ansi-font-size:11.0pt;mso-bidi-font-size:11.0pt;font-size:11.0pt;line-height:115%;color:${ink};mso-line-height-rule:exactly;">Shift Date: <span style="color:${ink};font-weight:bold;">${dE}</span> &nbsp;|&nbsp; Time: <span style="color:${ink};font-weight:bold;">${tE}</span> &nbsp;|&nbsp; <span style="color:${ink};font-weight:bold;">${titleE}</span></div></td><td style="vertical-align:top;text-align:right;font-family:'Arial',sans-serif;mso-ansi-font-size:10.0pt;font-size:10.0pt;color:${ink};width:170px;"><div style="color:${ink};">Transom Cargo LLC.</div><div style="font-weight:bold;margin-top:4px;color:${ink};">Export Operations</div></td></tr></table></td></tr></table>`;
+    return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;margin-bottom:14px;max-width:100%;border:1px solid #cbd5e1;"><tr><td bgcolor="#1e3a8a" style="width:6px;background-color:#1e3a8a;font-size:0;line-height:0;">&nbsp;</td><td bgcolor="${bannerBg}" style="background-color:${bannerBg};padding:18px 20px;vertical-align:top;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;"><tr><td style="vertical-align:top;font-family:'Arial',sans-serif;color:${ink};"><div style="mso-ansi-font-size:16.5pt;mso-bidi-font-size:16.5pt;font-size:16.5pt;font-weight:bold;line-height:115%;margin:0 0 10px 0;color:${ink};mso-line-height-rule:exactly;"><span style="mso-ansi-font-size:15.0pt;font-size:15.0pt;margin-right:6px;">&#9992;</span> Export Warehouse Activity Report</div><div style="mso-ansi-font-size:11.0pt;mso-bidi-font-size:11.0pt;font-size:11.0pt;line-height:115%;color:${ink};mso-line-height-rule:exactly;">Shift Date: <span style="color:${ink};font-weight:bold;">${dE}</span> &nbsp;|&nbsp; Time: <span style="color:${ink};font-weight:bold;">${tE}</span> &nbsp;|&nbsp; <span style="color:${ink};font-weight:bold;">${titleE}</span></div></td><td style="vertical-align:top;text-align:right;font-family:'Arial',sans-serif;mso-ansi-font-size:10.0pt;font-size:10.0pt;color:${ink};width:170px;"><div style="color:${ink};">Transom Cargo LLC.</div><div style="font-weight:bold;margin-top:4px;color:${ink};">Export Operations</div></td></tr></table></td></tr></table>`;
   }
 
   function buildOutlookClipboardSignatureHtml(badgeSrcResolved) {
     const nameRaw = getDutySupervisorDisplayName();
     const nameE = escapeHtml(nameRaw);
     const nameBlock = nameRaw
-      ? `<div style="font-family:'Arial',sans-serif;mso-ansi-font-size:11.0pt;font-size:11.0pt;font-weight:bold;color:#1e3a8a;margin:4px 0 2px 0;">${nameE}</div>`
-      : `<div style="font-family:'Arial',sans-serif;mso-ansi-font-size:9.0pt;font-size:9.0pt;color:#64748b;margin:4px 0;">(Add name under Manpower → Supervisor)</div>`;
+      ? `<div style="font-family:'Arial',sans-serif;mso-ansi-font-size:11.0pt;font-size:11.0pt;font-weight:bold;color:#000000;margin:4px 0 2px 0;">${nameE}</div>`
+      : `<div style="font-family:'Arial',sans-serif;mso-ansi-font-size:9.0pt;font-size:9.0pt;color:#000000;margin:4px 0;">(Add name under Manpower → Supervisor)</div>`;
     const rawSrc = badgeSrcResolved || reportSignatureBadgesImageUrl();
     const badgeSrc =
       typeof rawSrc === "string" && rawSrc.startsWith("data:") ? rawSrc : escapeHtml(rawSrc);
     const badgesImg = `<div style="margin:16px 0 0 0;max-width:100%;"><img src="${badgeSrc}" alt="IATA CEIV PHARMA, IATA CEIV FRESH, ISO 9001:2015, ISO 45001:2018, HACCP, GDP, RA3" width="640" style="max-width:100%;height:auto;border:0;display:block;-ms-interpolation-mode:bicubic;" /></div>`;
-    const signatureText = `<div style="margin-bottom:10px;color:#64748b;mso-ansi-font-size:10.0pt;font-size:10.0pt;font-family:'Arial',sans-serif;">Best Regards,</div>${nameBlock}<div style="mso-ansi-font-size:10.0pt;font-size:10.0pt;color:#475569;margin-bottom:14px;font-family:'Arial',sans-serif;">Duty Supervisor – Export Operation</div><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;border-top:1px solid #e2e8f0;padding-top:12px;"><tr><td style="width:8px;background-color:#dc2626;font-size:0;line-height:0;" bgcolor="#dc2626">&nbsp;</td><td style="padding:0 12px 0 10px;vertical-align:top;width:130px;"><div style="mso-ansi-font-size:13.5pt;font-size:13.5pt;font-weight:bold;color:#dc2626;letter-spacing:0.5px;font-family:'Arial',sans-serif;">TRANSOM</div><div style="mso-ansi-font-size:8.5pt;font-size:8.5pt;color:#64748b;letter-spacing:1px;font-family:'Arial',sans-serif;">CARGO</div></td><td style="border-left:2px solid #dc2626;padding-left:14px;vertical-align:top;mso-ansi-font-size:9.0pt;font-size:9.0pt;color:#334155;line-height:115%;font-family:'Arial',sans-serif;mso-line-height-rule:exactly;"><strong style="color:#1e3a8a;">Transom Cargo LLC.</strong><br/>P.O. Box: 618, P.C: 111<br/>Sultanate of Oman<br/>Phone No. 97297474<br/><span style="color:#2563eb;">www.transomcargo.com</span></td></tr></table>`;
-    return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;margin-top:22px;max-width:100%;"><tr><td style="font-family:'Arial',sans-serif;mso-ansi-font-size:10.0pt;font-size:10.0pt;color:#334155;line-height:115%;padding-top:14px;border-top:1px solid #cbd5e1;mso-line-height-rule:exactly;">${signatureText}${badgesImg}</td></tr></table>`;
+    const signatureText = `<div style="margin-bottom:10px;color:#000000;mso-ansi-font-size:10.0pt;font-size:10.0pt;font-family:'Arial',sans-serif;">Best Regards,</div>${nameBlock}<div style="mso-ansi-font-size:10.0pt;font-size:10.0pt;color:#000000;margin-bottom:14px;font-family:'Arial',sans-serif;">Duty Supervisor – Export Operation</div><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;border-top:1px solid #cbd5e1;padding-top:12px;"><tr><td style="width:8px;background-color:#dc2626;font-size:0;line-height:0;" bgcolor="#dc2626">&nbsp;</td><td style="padding:0 12px 0 10px;vertical-align:top;width:130px;"><div style="mso-ansi-font-size:13.5pt;font-size:13.5pt;font-weight:bold;color:#000000;letter-spacing:0.5px;font-family:'Arial',sans-serif;">TRANSOM</div><div style="mso-ansi-font-size:8.5pt;font-size:8.5pt;color:#000000;letter-spacing:1px;font-family:'Arial',sans-serif;">CARGO</div></td><td style="border-left:2px solid #dc2626;padding-left:14px;vertical-align:top;mso-ansi-font-size:9.0pt;font-size:9.0pt;color:#000000;line-height:115%;font-family:'Arial',sans-serif;mso-line-height-rule:exactly;"><strong style="color:#000000;">Transom Cargo LLC.</strong><br/>P.O. Box: 618, P.C: 111<br/>Sultanate of Oman<br/>Phone No. 97297474<br/><span style="color:#000000;">www.transomcargo.com</span></td></tr></table>`;
+    return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;margin-top:22px;max-width:100%;"><tr><td style="font-family:'Arial',sans-serif;mso-ansi-font-size:10.0pt;font-size:10.0pt;color:#000000;line-height:115%;padding-top:14px;border-top:1px solid #cbd5e1;mso-line-height-rule:exactly;">${signatureText}${badgesImg}</td></tr></table>`;
   }
 
   /** Plain text for mailto / fallback: sections 1–10 only (no page title, no header meta, no toolbar). */
@@ -1822,9 +2233,11 @@
     const headerHtml = buildOutlookClipboardHeaderHtml();
     const sigHtml = buildOutlookClipboardSignatureHtml(badgeDataUri);
     if (!inner.trim()) {
-      return `<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body>${headerHtml}<p style="font-family:Arial,sans-serif;font-size:14px;color:#64748b;">${escapeHtml(
-        "(Report body is empty.)"
-      )}</p>${sigHtml}</body></html>`;
+      return wrapWordClipboardDocument(
+        `${headerHtml}<p style="font-family:Arial,sans-serif;font-size:14px;color:#64748b;">${escapeHtml(
+          "(Report body is empty.)"
+        )}</p>${sigHtml}`
+      );
     }
     const wrap = document.createElement("div");
     wrap.className = "report-fragment";
@@ -1833,8 +2246,9 @@
     normalizeOffloadTableForClipboard(wrap);
     applyOutlookInlineClipboardStyles(wrap);
     restructureManpowerItemsForWordPaste(wrap);
+    hardInlineWordFonts(wrap);
     const fragmentHtml = wrap.outerHTML;
-    return `<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body>${headerHtml}${fragmentHtml}${sigHtml}</body></html>`;
+    return wrapWordClipboardDocument(`${headerHtml}${fragmentHtml}${sigHtml}`);
   }
 
   async function copyReportToClipboard() {
@@ -1858,11 +2272,33 @@
     }
 
     try {
+      let copiedViaHtmlEvent = false;
+      const onCopy = (ev) => {
+        try {
+          if (!ev.clipboardData) return;
+          ev.clipboardData.setData("text/html", html);
+          ev.clipboardData.setData("text/plain", plain);
+          ev.preventDefault();
+          copiedViaHtmlEvent = true;
+        } catch (_) {}
+      };
+      document.addEventListener("copy", onCopy);
+      const ok = document.execCommand("copy");
+      document.removeEventListener("copy", onCopy);
+      if (ok && copiedViaHtmlEvent) return;
+    } catch (fallbackErr2) {
+      console.warn("copy-event HTML fallback failed", fallbackErr2);
+    }
+
+    try {
       const holder = document.createElement("div");
       holder.setAttribute("contenteditable", "true");
       holder.style.position = "fixed";
       holder.style.left = "-10000px";
       holder.style.top = "0";
+      holder.style.fontFamily = "Arial, sans-serif";
+      holder.style.fontSize = "11pt";
+      holder.style.lineHeight = "1.15";
       holder.innerHTML = html.includes("</body>") ? html.replace(/^[\s\S]*<body[^>]*>/i, "").replace(/<\/body>[\s\S]*$/i, "") : html;
       document.body.appendChild(holder);
       const sel = window.getSelection();
@@ -1899,6 +2335,9 @@
       otherText: state.otherText,
       specialHO: state.specialHO,
       recipients: state.recipients,
+      scheduledSendAt: state.scheduledSendAt || "",
+      scheduledSendEnabled: !!state.scheduledSendEnabled,
+      _scheduledSendLastFiredAt: state._scheduledSendLastFiredAt || "",
     };
     localStorage.setItem(draftStorageKey(), JSON.stringify(draft));
     persistOffloadFlightHints();
@@ -1966,7 +2405,10 @@
       state.handoverDetails = draft.handoverDetails || state.handoverDetails;
       state.otherText = draft.otherText || "";
       state.specialHO = draft.specialHO || "";
-      state.recipients = draft.recipients || state.recipients;
+      state.recipients = normalizeRecipientsShape(draft.recipients || state.recipients);
+      state.scheduledSendAt = draft.scheduledSendAt || "";
+      state.scheduledSendEnabled = !!draft.scheduledSendEnabled;
+      state._scheduledSendLastFiredAt = draft._scheduledSendLastFiredAt || "";
       stripExcludedEmployeesFromManpower();
       return appliedManpower;
     } catch (err) {
@@ -1976,23 +2418,7 @@
   }
 
   function attachFlightExpansionHelpers() {
-    if (!window.flightAutocomplete) return;
-
-    document.querySelectorAll(".opact-input").forEach((input) => {
-      window.flightAutocomplete.attachInlineInput(input, (value) => {
-        const groupIndex = +input.dataset.group;
-        const itemIndex = +input.dataset.index;
-        state.operationalActivities[groupIndex].items[itemIndex] = value;
-        saveDraft();
-      });
-    });
-
-    window.flightAutocomplete.attachInlineTextarea(el("handoverDetails"), (value) => {
-      state.handoverDetails = value;
-      saveDraft();
-    });
-
-    /* otherText / specialHO: phrase autocomplete only (flight inline conflicts with phrase suggestions). */
+    /* Flight segments (CODE/DATE/DEST) come from phrase autocomplete + /api/live-flights; no second inline layer. */
   }
 
   function attachPhraseHelpers() {
@@ -2052,21 +2478,80 @@
     });
     /* handoverDetails, otherText, specialHO: uppercase + save via phrase attachTextarea (see attachPhraseHelpers). */
 
-    el("addRecipientBtn").addEventListener("click", addRecipient);
-    el("newRecipient").addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        addRecipient();
+    const recipientInputs = [
+      ["to", "newRecipientTo", "addRecipientToBtn"],
+      ["cc", "newRecipientCc", "addRecipientCcBtn"],
+      ["bcc", "newRecipientBcc", "addRecipientBccBtn"],
+    ];
+    recipientInputs.forEach(([kind, inputId, btnId]) => {
+      const input = el(inputId);
+      const btn = el(btnId);
+      if (btn) btn.addEventListener("click", () => addRecipientTo(kind));
+      if (input) {
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            addRecipientTo(kind);
+          }
+        });
       }
     });
     el("copyBtn").addEventListener("click", async () => {
       await copyReportToClipboard();
     });
-    el("emailBtn").addEventListener("click", () => {
-      const subject = "Export Warehouse Activity Report";
-      const body = encodeURIComponent(buildReportPlainBody());
-      window.location.href = `mailto:${state.recipients.join(",")}?subject=${encodeURIComponent(subject)}&body=${body}`;
+    el("emailBtn").addEventListener("click", async () => {
+      setEmailButtonState("sending");
+      const ok = await sendEmailNow();
+      const statusEl = el("gmailStatus");
+      if (ok) {
+        setEmailButtonState("success");
+        if (statusEl) statusEl.textContent = "Email sent successfully via Gmail.";
+      } else {
+        setEmailButtonState("idle");
+        if (statusEl) statusEl.textContent = "Send failed. Please connect Gmail or check recipients.";
+      }
     });
+    const connectGmailBtn = el("connectGmailBtn");
+    if (connectGmailBtn) {
+      connectGmailBtn.addEventListener("click", () => {
+        connectGmailFlow().catch(console.error);
+      });
+    }
+    const autoSendAtEl = el("autoSendAt");
+    if (autoSendAtEl) {
+      autoSendAtEl.addEventListener("change", (e) => {
+        state.scheduledSendAt = String(e.target.value || "");
+        saveDraft();
+        scheduleSendTimerFromState();
+      });
+    }
+    const scheduleBtn = el("scheduleSendBtn");
+    if (scheduleBtn) {
+      scheduleBtn.addEventListener("click", () => {
+        const when = autoSendAtEl ? String(autoSendAtEl.value || "") : "";
+        if (!when) {
+          const statusEl = el("scheduleStatus");
+          if (statusEl) statusEl.textContent = "Please select a date/time first.";
+          return;
+        }
+        state.scheduledSendAt = when;
+        state.scheduledSendEnabled = true;
+        state._scheduledSendLastFiredAt = "";
+        saveDraft();
+        scheduleSendTimerFromState();
+      });
+    }
+    const clearScheduleBtn = el("clearScheduleBtn");
+    if (clearScheduleBtn) {
+      clearScheduleBtn.addEventListener("click", () => {
+        state.scheduledSendEnabled = false;
+        state.scheduledSendAt = "";
+        state._scheduledSendLastFiredAt = "";
+        if (autoSendAtEl) autoSendAtEl.value = "";
+        saveDraft();
+        scheduleSendTimerFromState();
+      });
+    }
     el("printBtn").addEventListener("click", () => window.print());
 
     const exportHintsBtn = el("exportFlightHintsBtn");
@@ -2123,18 +2608,39 @@
         } catch (e) {
           /* ignore */
         }
+      } else {
+        runScheduledSendIfDue().catch(console.error);
+        scheduleSendTimerFromState();
+        refreshGmailStatus().catch(() => {});
       }
     });
   }
 
-  function addRecipient() {
-    const input = el("newRecipient");
-    const value = input.value.trim();
-    if (!value) return;
-    if (!state.recipients.includes(value)) state.recipients.push(value);
+  function addRecipientTo(kind) {
+    const map = {
+      to: "newRecipientTo",
+      cc: "newRecipientCc",
+      bcc: "newRecipientBcc",
+    };
+    if (!Object.prototype.hasOwnProperty.call(map, kind)) return;
+    const input = el(map[kind]);
+    if (!input) return;
+    const values = parseRecipientInput(input.value);
+    if (!values.length) return;
+    const current = normalizeRecipientsShape(state.recipients);
+    if (!Array.isArray(current[kind])) current[kind] = [];
+    values.forEach((valueRaw) => {
+      const value = valueRaw.trim();
+      if (!isValidEmailBasic(value)) return;
+      const v = value.toLowerCase();
+      if (!current[kind].includes(v)) current[kind].push(v);
+    });
+    state.recipients = current;
     input.value = "";
     saveDraft();
     renderRecipients();
+    scheduleSendTimerFromState();
+    persistRecipientsToServer();
   }
 
   bindStaticEvents();

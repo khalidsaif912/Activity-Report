@@ -11,6 +11,7 @@ Hints are stored in data/report/flight-hints.json (single JSON object, keys like
 CSD route usage counts: data/report/csd-route-hints.json (keys like "FRA-MNL", integer values).
 Phrase usage counts: data/report/phrase-usage.json (nested by key, e.g. loadPlan/advanceLoading).
 Manpower role usage: data/report/manpower-role-hints.json (per-name role counts).
+Recipients (To/Cc/Bcc): data/report/recipients.json.
 
 Optional env FLIGHT_HINTS_TOKEN: if set, clients must send header:
   X-Flight-Hints-Token: <token>
@@ -19,12 +20,21 @@ for GET and POST.
 
 from __future__ import annotations
 
+import base64
 import json
 import mimetypes
 import os
+import re
+import secrets
 from pathlib import Path
+from urllib.parse import urlencode
+from datetime import datetime
+
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 from flask import Flask, abort, jsonify, request, send_file, send_from_directory
+import requests
 
 ROOT = Path(__file__).resolve().parent.parent
 REPORT_DIR = ROOT / "data" / "report"
@@ -32,6 +42,25 @@ HINTS_FILE = REPORT_DIR / "flight-hints.json"
 CSD_ROUTES_FILE = REPORT_DIR / "csd-route-hints.json"
 PHRASE_USAGE_FILE = REPORT_DIR / "phrase-usage.json"
 MANPOWER_ROLE_HINTS_FILE = REPORT_DIR / "manpower-role-hints.json"
+RECIPIENTS_FILE = REPORT_DIR / "recipients.json"
+GMAIL_TOKEN_FILE = REPORT_DIR / "gmail-token.json"
+
+GMAIL_CLIENT_ID = (os.environ.get("GMAIL_CLIENT_ID") or "").strip()
+GMAIL_CLIENT_SECRET = (os.environ.get("GMAIL_CLIENT_SECRET") or "").strip()
+GMAIL_REDIRECT_URI = (os.environ.get("GMAIL_REDIRECT_URI") or "http://127.0.0.1:5050/api/gmail/oauth/callback").strip()
+GMAIL_SCOPE = "https://www.googleapis.com/auth/gmail.send"
+
+LIVE_FLIGHTS_PROVIDER = (os.environ.get("LIVE_FLIGHTS_PROVIDER") or "aviationstack").strip().lower()
+AVIATIONSTACK_ACCESS_KEY = (os.environ.get("AVIATIONSTACK_ACCESS_KEY") or "").strip()
+LIVE_FLIGHTS_AIRLINES = [
+    x.strip().upper()
+    for x in (os.environ.get("LIVE_FLIGHTS_AIRLINES") or "WY,OV").split(",")
+    if x.strip()
+]
+LIVE_FLIGHTS_DEP_IATA = (os.environ.get("LIVE_FLIGHTS_DEP_IATA") or "MCT").strip().upper()
+LIVE_FLIGHTS_TIMEOUT_SEC = int((os.environ.get("LIVE_FLIGHTS_TIMEOUT_SEC") or "20").strip() or "20")
+
+_gmail_oauth_state: str | None = None
 
 app = Flask(__name__)
 
@@ -97,13 +126,37 @@ def _atomic_write_csd(data: dict) -> None:
 
 def _read_phrase_usage() -> dict:
     if not PHRASE_USAGE_FILE.is_file():
-        return {"loadPlan": {}, "advanceLoading": {}, "offloadReason": {}, "offloadRemarks": {}, "other": {}, "specialHO": {}}
+        return {
+            "loadPlan": {},
+            "advanceLoading": {},
+            "handoverDetails": {},
+            "offloadReason": {},
+            "offloadRemarks": {},
+            "other": {},
+            "specialHO": {},
+        }
     try:
         raw = json.loads(PHRASE_USAGE_FILE.read_text(encoding="utf-8"))
         if not isinstance(raw, dict):
-            return {"loadPlan": {}, "advanceLoading": {}, "offloadReason": {}, "offloadRemarks": {}, "other": {}, "specialHO": {}}
-        out = {"loadPlan": {}, "advanceLoading": {}, "offloadReason": {}, "offloadRemarks": {}, "other": {}, "specialHO": {}}
-        for key in ("loadPlan", "advanceLoading", "offloadReason", "offloadRemarks", "other", "specialHO"):
+            return {
+                "loadPlan": {},
+                "advanceLoading": {},
+                "handoverDetails": {},
+                "offloadReason": {},
+                "offloadRemarks": {},
+                "other": {},
+                "specialHO": {},
+            }
+        out = {
+            "loadPlan": {},
+            "advanceLoading": {},
+            "handoverDetails": {},
+            "offloadReason": {},
+            "offloadRemarks": {},
+            "other": {},
+            "specialHO": {},
+        }
+        for key in ("loadPlan", "advanceLoading", "handoverDetails", "offloadReason", "offloadRemarks", "other", "specialHO"):
             bucket = raw.get(key)
             if not isinstance(bucket, dict):
                 continue
@@ -117,7 +170,15 @@ def _read_phrase_usage() -> dict:
                     out[key][p] = c
         return out
     except (json.JSONDecodeError, OSError):
-        return {"loadPlan": {}, "advanceLoading": {}, "offloadReason": {}, "offloadRemarks": {}, "other": {}, "specialHO": {}}
+        return {
+            "loadPlan": {},
+            "advanceLoading": {},
+            "handoverDetails": {},
+            "offloadReason": {},
+            "offloadRemarks": {},
+            "other": {},
+            "specialHO": {},
+        }
 
 
 def _atomic_write_phrase_usage(data: dict) -> None:
@@ -170,6 +231,237 @@ def _atomic_write_manpower_role_hints(data: dict) -> None:
     tmp.replace(MANPOWER_ROLE_HINTS_FILE)
 
 
+def _norm_email_list(arr) -> list[str]:
+    if not isinstance(arr, list):
+        return []
+    out = []
+    seen = set()
+    for x in arr:
+        e = str(x or "").strip().lower()
+        if not e or e in seen:
+            continue
+        seen.add(e)
+        out.append(e)
+    return out
+
+
+def _read_recipients() -> dict:
+    if not RECIPIENTS_FILE.is_file():
+        return {"to": [], "cc": [], "bcc": []}
+    try:
+        raw = json.loads(RECIPIENTS_FILE.read_text(encoding="utf-8"))
+        if not isinstance(raw, dict):
+            return {"to": [], "cc": [], "bcc": []}
+        return {
+            "to": _norm_email_list(raw.get("to")),
+            "cc": _norm_email_list(raw.get("cc")),
+            "bcc": _norm_email_list(raw.get("bcc")),
+        }
+    except (json.JSONDecodeError, OSError):
+        return {"to": [], "cc": [], "bcc": []}
+
+
+def _atomic_write_recipients(data: dict) -> None:
+    REPORT_DIR.mkdir(parents=True, exist_ok=True)
+    tmp = RECIPIENTS_FILE.with_suffix(".json.tmp")
+    clean = {
+        "to": _norm_email_list(data.get("to") if isinstance(data, dict) else []),
+        "cc": _norm_email_list(data.get("cc") if isinstance(data, dict) else []),
+        "bcc": _norm_email_list(data.get("bcc") if isinstance(data, dict) else []),
+    }
+    text = json.dumps(clean, ensure_ascii=False, indent=2)
+    tmp.write_text(text, encoding="utf-8")
+    tmp.replace(RECIPIENTS_FILE)
+
+
+def _read_gmail_token() -> dict:
+    if not GMAIL_TOKEN_FILE.is_file():
+        return {}
+    try:
+        raw = json.loads(GMAIL_TOKEN_FILE.read_text(encoding="utf-8"))
+        return raw if isinstance(raw, dict) else {}
+    except (json.JSONDecodeError, OSError):
+        return {}
+
+
+def _atomic_write_gmail_token(data: dict) -> None:
+    REPORT_DIR.mkdir(parents=True, exist_ok=True)
+    tmp = GMAIL_TOKEN_FILE.with_suffix(".json.tmp")
+    text = json.dumps(data if isinstance(data, dict) else {}, ensure_ascii=False, indent=2)
+    tmp.write_text(text, encoding="utf-8")
+    tmp.replace(GMAIL_TOKEN_FILE)
+
+
+def _gmail_configured() -> bool:
+    return bool(GMAIL_CLIENT_ID and GMAIL_CLIENT_SECRET and GMAIL_REDIRECT_URI)
+
+
+def _gmail_access_token() -> str:
+    token = _read_gmail_token()
+    access_token = str(token.get("access_token") or "").strip()
+    if access_token:
+        return access_token
+    refresh_token = str(token.get("refresh_token") or "").strip()
+    if not refresh_token or not _gmail_configured():
+        return ""
+
+    payload = {
+        "client_id": GMAIL_CLIENT_ID,
+        "client_secret": GMAIL_CLIENT_SECRET,
+        "refresh_token": refresh_token,
+        "grant_type": "refresh_token",
+    }
+    try:
+        r = requests.post("https://oauth2.googleapis.com/token", data=payload, timeout=20)
+        if not r.ok:
+            return ""
+        out = r.json()
+        new_access = str(out.get("access_token") or "").strip()
+        if not new_access:
+            return ""
+        token["access_token"] = new_access
+        _atomic_write_gmail_token(token)
+        return new_access
+    except requests.RequestException:
+        return ""
+
+
+def _norm_email(value: str) -> str:
+    return str(value or "").strip()
+
+
+def _norm_email_list_relaxed(arr) -> list[str]:
+    if not isinstance(arr, list):
+        return []
+    out = []
+    seen = set()
+    for x in arr:
+        e = _norm_email(x)
+        if not e:
+            continue
+        k = e.lower()
+        if k in seen:
+            continue
+        seen.add(k)
+        out.append(e)
+    return out
+
+
+def _fmt_ddmon(dt_like: str) -> str:
+    s = str(dt_like or "").strip()
+    if not s:
+        return ""
+    try:
+        s_norm = s.replace("Z", "+00:00")
+        dt = datetime.fromisoformat(s_norm)
+        return dt.strftime("%d%b").upper()
+    except ValueError:
+        pass
+    m = re.search(r"(\d{4})-(\d{2})-(\d{2})", s)
+    if m:
+        try:
+            dt = datetime(int(m.group(1)), int(m.group(2)), int(m.group(3)))
+            return dt.strftime("%d%b").upper()
+        except ValueError:
+            return ""
+    return ""
+
+
+def _fmt_hhmm(dt_like: str) -> str:
+    s = str(dt_like or "").strip()
+    if not s:
+        return ""
+    try:
+        s_norm = s.replace("Z", "+00:00")
+        dt = datetime.fromisoformat(s_norm)
+        return dt.strftime("%H%M")
+    except ValueError:
+        pass
+    m = re.search(r"\b(\d{2}):(\d{2})", s)
+    if m:
+        return f"{m.group(1)}{m.group(2)}"
+    return ""
+
+
+def _norm_iata3(value: str) -> str:
+    s = str(value or "").strip().upper()
+    m = re.match(r"^([A-Z]{3})$", s)
+    return m.group(1) if m else ""
+
+
+def _norm_flight_code(value: str) -> str:
+    s = str(value or "").strip().upper().replace(" ", "")
+    m = re.match(r"^([A-Z]{2}\d{1,4})$", s)
+    return m.group(1) if m else ""
+
+
+def _build_std_etd(std_raw: str, etd_raw: str) -> str:
+    std = _fmt_hhmm(std_raw)
+    etd = _fmt_hhmm(etd_raw)
+    if std and etd and std != etd:
+        return f"{std}/{etd}"
+    return std or etd
+
+
+def _fetch_live_flights_aviationstack() -> list[dict]:
+    if not AVIATIONSTACK_ACCESS_KEY:
+        return []
+
+    out_by_key: dict[str, dict] = {}
+    for airline in LIVE_FLIGHTS_AIRLINES or ["WY", "OV"]:
+        params = {
+            "access_key": AVIATIONSTACK_ACCESS_KEY,
+            "airline_iata": airline,
+        }
+        if LIVE_FLIGHTS_DEP_IATA:
+            params["dep_iata"] = LIVE_FLIGHTS_DEP_IATA
+        try:
+            r = requests.get(
+                "http://api.aviationstack.com/v1/flights",
+                params=params,
+                timeout=LIVE_FLIGHTS_TIMEOUT_SEC,
+            )
+            if not r.ok:
+                continue
+            payload = r.json() if r.text else {}
+            rows = payload.get("data")
+            if not isinstance(rows, list):
+                continue
+        except (requests.RequestException, ValueError):
+            continue
+
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            flight = row.get("flight") if isinstance(row.get("flight"), dict) else {}
+            dep = row.get("departure") if isinstance(row.get("departure"), dict) else {}
+            arr = row.get("arrival") if isinstance(row.get("arrival"), dict) else {}
+
+            code = _norm_flight_code(flight.get("iata"))
+            date = _fmt_ddmon(dep.get("scheduled") or dep.get("estimated") or dep.get("actual"))
+            dest = _norm_iata3(arr.get("iata"))
+            std_etd = _build_std_etd(dep.get("scheduled"), dep.get("estimated") or dep.get("actual"))
+            if not code or not date or not dest:
+                continue
+            key = f"{code}|{date}"
+            out_by_key[key] = {
+                "code": code,
+                "date": date,
+                "destination": dest,
+                "stdEtd": std_etd,
+            }
+
+    out = list(out_by_key.values())
+    out.sort(key=lambda x: (x.get("code", ""), x.get("date", "")))
+    return out
+
+
+def _fetch_live_flights() -> list[dict]:
+    if LIVE_FLIGHTS_PROVIDER == "aviationstack":
+        return _fetch_live_flights_aviationstack()
+    return []
+
+
 @app.route("/api/server-info")
 def server_info():
     """Use this URL to confirm the browser hits THIS Flask app (not another process on :5050)."""
@@ -180,8 +472,22 @@ def server_info():
             "report_dir": str(REPORT_DIR),
             "employees_json_exists": emp.is_file(),
             "employees_url_should_work": emp.is_file(),
+            "live_flights_provider": LIVE_FLIGHTS_PROVIDER,
+            "live_flights_configured": bool(AVIATIONSTACK_ACCESS_KEY) if LIVE_FLIGHTS_PROVIDER == "aviationstack" else False,
         }
     )
+
+
+@app.route("/api/live-flights", methods=["GET"])
+def live_flights_get():
+    """
+    Return live flight list in the same shape as data/report/flights.json:
+    [{ code, date, destination, stdEtd }]
+    """
+    flights = _fetch_live_flights()
+    if flights:
+        return jsonify(flights)
+    return jsonify({"error": "live_flights_unavailable", "provider": LIVE_FLIGHTS_PROVIDER}), 503
 
 
 @app.route("/api/flight-hints", methods=["OPTIONS"])
@@ -263,30 +569,57 @@ def phrase_usage_post():
     body = request.get_json(force=True, silent=True)
     if not isinstance(body, dict):
         return jsonify({"error": "expected JSON object"}), 400
-    merge = body.get("merge")
-    if merge is None and body:
-        merge = body
-    if not isinstance(merge, dict):
-        return jsonify({"error": "missing merge"}), 400
 
+    allowed_keys = ("loadPlan", "advanceLoading", "handoverDetails", "offloadReason", "offloadRemarks", "other", "specialHO")
     current = _read_phrase_usage()
     n = 0
-    allowed_keys = ("loadPlan", "advanceLoading", "offloadReason", "offloadRemarks", "other", "specialHO")
-    for key, bucket in merge.items():
-        if key not in allowed_keys or not isinstance(bucket, dict):
-            continue
-        for phrase, inc in bucket.items():
-            p = str(phrase or "").strip().upper()
-            if not p:
+
+    remove = body.get("remove")
+    if isinstance(remove, dict):
+        for key, phrases in remove.items():
+            if key not in allowed_keys:
                 continue
-            try:
-                delta = int(inc)
-            except (TypeError, ValueError):
+            if not isinstance(phrases, list):
                 continue
-            if delta <= 0:
+            for raw in phrases:
+                p = str(raw or "").strip().upper()
+                if not p or key not in current:
+                    continue
+                if p in current[key]:
+                    current[key].pop(p, None)
+                    n += 1
+
+    merge = body.get("merge")
+    if merge is None and body and "remove" not in body:
+        merge = body
+    if isinstance(merge, dict):
+        for key, bucket in merge.items():
+            if key in ("merge", "remove"):
                 continue
-            current[key][p] = int(current[key].get(p, 0)) + delta
-            n += 1
+            if key not in allowed_keys or not isinstance(bucket, dict):
+                continue
+            for phrase, inc in bucket.items():
+                p = str(phrase or "").strip().upper()
+                if not p:
+                    continue
+                try:
+                    delta = int(inc)
+                except (TypeError, ValueError):
+                    continue
+                if delta == 0:
+                    continue
+                if delta < 0:
+                    cur = int(current[key].get(p, 0))
+                    newv = cur + delta
+                    if newv <= 0:
+                        current[key].pop(p, None)
+                    else:
+                        current[key][p] = newv
+                    n += 1
+                else:
+                    current[key][p] = int(current[key].get(p, 0)) + delta
+                    n += 1
+
     _atomic_write_phrase_usage(current)
     return jsonify({"ok": True, "updated": n})
 
@@ -357,6 +690,159 @@ def manpower_role_hints_post():
             n += 1
     _atomic_write_manpower_role_hints(current)
     return jsonify({"ok": True, "updated": n})
+
+
+@app.route("/api/recipients", methods=["OPTIONS"])
+def recipients_options():
+    return ("", 204)
+
+
+@app.route("/api/recipients", methods=["GET"])
+def recipients_get():
+    if not _check_token():
+        return jsonify({"error": "unauthorized"}), 401
+    return jsonify(_read_recipients())
+
+
+@app.route("/api/recipients", methods=["POST"])
+def recipients_post():
+    if not _check_token():
+        return jsonify({"error": "unauthorized"}), 401
+    body = request.get_json(force=True, silent=True)
+    if not isinstance(body, dict):
+        return jsonify({"error": "expected JSON object"}), 400
+    clean = {
+        "to": _norm_email_list(body.get("to")),
+        "cc": _norm_email_list(body.get("cc")),
+        "bcc": _norm_email_list(body.get("bcc")),
+    }
+    _atomic_write_recipients(clean)
+    return jsonify({"ok": True, "counts": {k: len(v) for k, v in clean.items()}})
+
+
+@app.route("/api/gmail/status", methods=["GET"])
+def gmail_status():
+    token = _read_gmail_token()
+    return jsonify(
+        {
+            "configured": _gmail_configured(),
+            "authorized": bool(str(token.get("refresh_token") or "").strip()),
+            "redirect_uri": GMAIL_REDIRECT_URI,
+        }
+    )
+
+
+@app.route("/api/gmail/auth-url", methods=["GET"])
+def gmail_auth_url():
+    global _gmail_oauth_state
+    if not _gmail_configured():
+        return jsonify({"error": "gmail_not_configured"}), 400
+    _gmail_oauth_state = secrets.token_urlsafe(24)
+    params = {
+        "client_id": GMAIL_CLIENT_ID,
+        "redirect_uri": GMAIL_REDIRECT_URI,
+        "response_type": "code",
+        "scope": GMAIL_SCOPE,
+        "access_type": "offline",
+        "prompt": "consent",
+        "state": _gmail_oauth_state,
+    }
+    return jsonify({"url": f"https://accounts.google.com/o/oauth2/v2/auth?{urlencode(params)}"})
+
+
+@app.route("/api/gmail/oauth/callback", methods=["GET"])
+def gmail_oauth_callback():
+    global _gmail_oauth_state
+    if not _gmail_configured():
+        return jsonify({"error": "gmail_not_configured"}), 400
+    code = (request.args.get("code") or "").strip()
+    state = (request.args.get("state") or "").strip()
+    if not code:
+        return jsonify({"error": "missing_code"}), 400
+    if _gmail_oauth_state and state != _gmail_oauth_state:
+        return jsonify({"error": "invalid_state"}), 400
+    _gmail_oauth_state = None
+
+    payload = {
+        "client_id": GMAIL_CLIENT_ID,
+        "client_secret": GMAIL_CLIENT_SECRET,
+        "code": code,
+        "grant_type": "authorization_code",
+        "redirect_uri": GMAIL_REDIRECT_URI,
+    }
+    try:
+        r = requests.post("https://oauth2.googleapis.com/token", data=payload, timeout=20)
+        if not r.ok:
+            return jsonify({"error": "token_exchange_failed", "status": r.status_code, "body": r.text[:500]}), 400
+        out = r.json()
+    except requests.RequestException as e:
+        return jsonify({"error": "token_exchange_network_error", "detail": str(e)}), 502
+
+    keep = _read_gmail_token()
+    token = {
+        "access_token": out.get("access_token", ""),
+        "refresh_token": out.get("refresh_token") or keep.get("refresh_token", ""),
+        "scope": out.get("scope", ""),
+        "token_type": out.get("token_type", ""),
+    }
+    _atomic_write_gmail_token(token)
+    return (
+        "<html><body style='font-family:Arial,sans-serif;padding:24px;'>"
+        "<h2>Gmail authorization complete.</h2>"
+        "<p>You can close this tab and return to the report page.</p>"
+        "</body></html>"
+    )
+
+
+@app.route("/api/gmail/send", methods=["POST"])
+def gmail_send():
+    if not _check_token():
+        return jsonify({"error": "unauthorized"}), 401
+    body = request.get_json(force=True, silent=True)
+    if not isinstance(body, dict):
+        return jsonify({"error": "expected JSON object"}), 400
+
+    to_list = _norm_email_list_relaxed(body.get("to"))
+    cc_list = _norm_email_list_relaxed(body.get("cc"))
+    bcc_list = _norm_email_list_relaxed(body.get("bcc"))
+    if not to_list and not cc_list and not bcc_list:
+        return jsonify({"error": "missing_recipients"}), 400
+
+    subject = str(body.get("subject") or "Export Warehouse Activity Report").strip()
+    plain = str(body.get("plain") or "").strip()
+    html = str(body.get("html") or "").strip()
+
+    access_token = _gmail_access_token()
+    if not access_token:
+        return jsonify({"error": "gmail_not_authorized"}), 401
+
+    msg = MIMEMultipart("alternative")
+    if to_list:
+        msg["To"] = ", ".join(to_list)
+    if cc_list:
+        msg["Cc"] = ", ".join(cc_list)
+    if bcc_list:
+        msg["Bcc"] = ", ".join(bcc_list)
+    msg["Subject"] = subject
+    msg.attach(MIMEText(plain or "(No text body)", "plain", "utf-8"))
+    if html:
+        msg.attach(MIMEText(html, "html", "utf-8"))
+
+    raw = base64.urlsafe_b64encode(msg.as_bytes()).decode("utf-8")
+    payload = {"raw": raw}
+    try:
+        r = requests.post(
+            "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
+            headers={"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"},
+            data=json.dumps(payload),
+            timeout=25,
+        )
+        if not r.ok:
+            return jsonify({"error": "gmail_send_failed", "status": r.status_code, "body": r.text[:500]}), 502
+        out = r.json() if r.text else {}
+        return jsonify({"ok": True, "id": out.get("id")})
+    except requests.RequestException as e:
+        return jsonify({"error": "gmail_send_network_error", "detail": str(e)}), 502
 
 
 @app.route("/api/flight-hints", methods=["POST"])

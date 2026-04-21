@@ -1,66 +1,64 @@
 {
   "shiftMeta": {
-    "key": "morning",
-    "title": "Morning Shift",
+    "key": "afternoon",
+    "title": "Afternoon Shift",
     "date": "2026-04-20",
-    "time": "06:00 - 15:00"
+    "time": "13:00 - 22:00"
   },
   "manpowerSections": [
     {
       "title": "Supervisor",
       "items": [
-        "SN80250 Jay Macalino"
+        "SN81300 Talal Al Balushi"
       ]
     },
     {
       "title": "Load Control",
       "items": [
-        "SN82445 Al Muthana Al Shamfari",
-        "SN82548 Ahmed Al Muqaini",
-        "SN81409 Qasim Al Maqbali"
+        "SN82596 Hamed Al Fulaiti",
+        "SN82575 Ahmed Al Kharusi"
       ]
     },
     {
       "title": "Export Checker",
       "items": [
-        "SN82649 Saif Al Mahrizi",
-        "SN82283 Ahmed Al Mawali",
-        "SN82587 Yousuf Al Balushi",
-        "SN82574 Ali Al Mamari",
-        "SN8584 Adil Al Zadjali"
+        "SN82659 Ammar Al Hashmi",
+        "SN80270 Marlon Esmilla",
+        "SN990752 Ali Yousuf Al Balushi",
+        "SN82578 Raad Al Farsi",
+        "SN82555 Riyadh Al Jabri",
+        "SN82424 Riyadh Al Sulti"
       ]
     },
     {
       "title": "Export Operators",
       "items": [
-        "SN81307 Badar Al Hamadani",
-        "SN82534 Muadh Al Qasimi",
-        "SN82656 Faisal Al Balushi"
+        "SN8714 Mohana Al Subhi",
+        "SN82588 Ghassan Al Tarsi",
+        "SN8762 Mohamed Al Falahi",
+        "SN8744 Said Al Fahkri"
       ]
     },
     {
       "title": "Flight Dispatch",
       "items": [
         "SN82654 AHMED AL HADI",
-        "SN82410 SAID AL SADI",
         "SN82417 TALAL AL HUSEINI",
         "SN82423 BADAR AL BURTAMANI"
       ]
     },
     {
-      "title": "Inventory",
-      "items": [
-        "SN990737 Said Al Amri"
-      ]
-    },
-    {
       "title": "Support Team",
       "items": [
-        "SN82565 Jamal Al Hadi"
+        "SN82653 Ahmed Al Sabii"
       ]
     },
     {
       "title": "CTU Staff On Duty",
+      "items": []
+    },
+    {
+      "title": "Inventory",
       "items": []
     },
     {
@@ -124,10 +122,10 @@
         {
           "title": "Flight Dispatch",
           "items": [
-            "SN82654 AHMED AL HADI",
+            "SN82431 MAHMOOD AL BALUSHI",
+            "SN82331 ISMAIL AL MAHARBI",
             "SN82410 SAID AL SADI",
-            "SN82417 TALAL AL HUSEINI",
-            "SN82423 BADAR AL BURTAMANI"
+            "SN82416 NASSER AL OMAIRI"
           ]
         },
         {
@@ -208,9 +206,9 @@
         {
           "title": "Flight Dispatch",
           "items": [
-            "SN82537 KHALIFA AL SAADI",
-            "SN82428 ABDULLAH AL MAHARBI",
-            "SN82571 YAARAB AL RAQADI"
+            "SN82654 AHMED AL HADI",
+            "SN82417 TALAL AL HUSEINI",
+            "SN82423 BADAR AL BURTAMANI"
           ]
         },
         {
@@ -289,9 +287,9 @@
         {
           "title": "Flight Dispatch",
           "items": [
-            "SN82414 BADAR AL BUSAIDI",
-            "SN82420 MOHAMMED AL SAADI",
-            "SN80479 SAMI AL HADABI"
+            "SN82537 KHALIFA AL SAADI",
+            "SN82428 ABDULLAH AL MAHARBI",
+            "SN82571 YAARAB AL RAQADI"
           ]
         },
         {
@@ -325,5 +323,5 @@
       ]
     }
   },
-  "defaultShift": "morning"
+  "defaultShift": "afternoon"
 }

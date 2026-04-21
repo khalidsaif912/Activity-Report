@@ -7,7 +7,7 @@ window.phraseUsageCache = {
   _memory: {},
   _apiBase: "",
   LS_KEY: "activityReport_phraseUsage_v1",
-  KEYS: ["loadPlan", "advanceLoading", "offloadReason", "offloadRemarks", "other", "specialHO"],
+  KEYS: ["loadPlan", "advanceLoading", "handoverDetails", "offloadReason", "offloadRemarks", "other", "specialHO"],
 
   _hintsUrl() {
     const b = (this._apiBase || "").replace(/\/$/, "");
@@ -133,6 +133,58 @@ window.phraseUsageCache = {
       .sort((a, b) => Number(b[1]) - Number(a[1]))
       .map(([phrase]) => phrase)
       .slice(0, limitN);
+  },
+
+  /**
+   * Prefix matches first (priority), then substring contains — both sorted by usage desc.
+   */
+  getSortedMatches(key, query, limit) {
+    const k = String(key || "").trim();
+    const q = String(query || "").trim().toUpperCase();
+    const bucket = this._memory[k] && typeof this._memory[k] === "object" ? this._memory[k] : {};
+    const limitN = Math.min(Number(limit) || 14, 50);
+    const entries = Object.entries(bucket).filter(([, c]) => Number(c) > 0);
+    const byCount = (a, b) => Number(b[1]) - Number(a[1]);
+    const pref = entries.filter(([phrase]) => !q || phrase.startsWith(q)).sort(byCount).map(([p]) => p);
+    const sub = q
+      ? entries
+          .filter(([phrase]) => phrase.includes(q) && !phrase.startsWith(q))
+          .sort(byCount)
+          .map(([p]) => p)
+      : [];
+    const out = [];
+    const seen = new Set();
+    for (const p of [...pref, ...sub]) {
+      if (seen.has(p)) continue;
+      seen.add(p);
+      out.push(p);
+      if (out.length >= limitN) break;
+    }
+    return out;
+  },
+
+  removePhrase(key, phrase) {
+    const k = String(key || "").trim();
+    const p = String(phrase || "").trim().toUpperCase();
+    if (!this.KEYS.includes(k) || !p) return;
+    if (!this._memory[k] || typeof this._memory[k] !== "object") return;
+    if (!this._memory[k][p]) return;
+    delete this._memory[k][p];
+    this._persistLocal();
+    try {
+      fetch(this._hintsUrl(), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...this._authHeaders()
+        },
+        body: JSON.stringify({ remove: { [k]: [p] } })
+      }).then((r) => {
+        if (!r.ok) console.warn("phrase remove push failed", r.status);
+      });
+    } catch (e) {
+      console.warn("phrase remove network error", e);
+    }
   },
 
   recordPhrase(key, text) {

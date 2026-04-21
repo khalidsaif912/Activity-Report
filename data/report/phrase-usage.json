@@ -1,8 +1,28 @@
 {
-  "loadPlan": {},
-  "advanceLoading": {},
+  "loadPlan": {
+    "WY103": 3,
+    "WY101": 1,
+    "WY101/20APR/LHR": 5,
+    "WY225/20APR/COK ALL ULD ALLOCATIONS CONFIRMED.": 1,
+    "WY101/20APR/LHR WY103": 1,
+    "WY": 1,
+    "WY843": 1,
+    "WY823": 2
+  },
+  "advanceLoading": {
+    "WY211/20APR/TRV": 1,
+    "WY843": 1
+  },
+  "handoverDetails": {},
   "offloadReason": {},
   "offloadRemarks": {},
-  "other": {},
-  "specialHO": {}
+  "other": {
+    "ALL ACTIVITIES COMPLETED NORMALLY.": 3,
+    "OV105/20APR/SLL": 1,
+    "WY103/20APR/LHR ALL ACTIVITIES COMPLETED NORMALLY.": 1,
+    "WY123/20APR/MUC ALL ACTIVITIES COMPLETED": 1
+  },
+  "specialHO": {
+    "WY903/20APR/SLL": 6
+  }
 }

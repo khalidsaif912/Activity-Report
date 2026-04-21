@@ -120,6 +120,7 @@ window.phraseAutocomplete = {
     return (
       key === "loadPlan" ||
       key === "advanceLoading" ||
+      key === "handoverDetails" ||
       key === "offloadReason" ||
       key === "offloadRemarks" ||
       key === "other" ||
@@ -128,11 +129,51 @@ window.phraseAutocomplete = {
   },
 
   _isFlightAwarePhraseKey(key) {
-    return key === "other" || key === "specialHO";
+    return (
+      key === "loadPlan" ||
+      key === "advanceLoading" ||
+      key === "handoverDetails" ||
+      key === "other" ||
+      key === "specialHO"
+    );
   },
 
   _isLineScopedTextareaKey(key) {
-    return key === "other" || key === "specialHO" || key === "offloadReason" || key === "offloadRemarks";
+    return (
+      key === "handoverDetails" ||
+      key === "other" ||
+      key === "specialHO" ||
+      key === "offloadReason" ||
+      key === "offloadRemarks"
+    );
+  },
+
+  /** Last token as flight code prefix (e.g. WY, WY1, WY101). */
+  _flightPrefixQuery(value) {
+    const parts = String(value || "")
+      .trim()
+      .toUpperCase()
+      .split(/\s+/);
+    const tok = parts.length ? parts[parts.length - 1] : "";
+    if (!/^[A-Z]{2}\d{0,4}$/.test(tok)) return "";
+    return tok;
+  },
+
+  _normPick(picked) {
+    if (picked == null) return "";
+    if (typeof picked === "string") return picked;
+    if (typeof picked === "object" && picked.text != null) return String(picked.text);
+    return String(picked);
+  },
+
+  _mergeFlightPickIntoValue(value, pickedPhrase) {
+    const v = String(value || "").toUpperCase();
+    const p = String(pickedPhrase || "").toUpperCase();
+    const fq = this._flightPrefixQuery(v);
+    if (!fq || !p) return null;
+    const i = v.lastIndexOf(fq);
+    if (i < 0) return null;
+    return v.slice(0, i) + p + v.slice(i + fq.length);
   },
 
   _getTextareaActiveLine(textarea) {
@@ -179,23 +220,61 @@ window.phraseAutocomplete = {
     return src.replace(/\S+$/, p);
   },
 
-  _flightSuggestionStrings(query) {
-    const q = (query || "").trim().toUpperCase();
-    if (!window.flightAutocomplete || typeof window.flightAutocomplete.findMatches !== "function") return [];
-    let matches = [];
-    if (!q) {
-      matches = Array.isArray(window.flightAutocomplete.flights) ? window.flightAutocomplete.flights.slice(0, 8) : [];
-    } else if (/^[A-Z]{1,2}\d{0,4}$/.test(q)) {
-      matches = window.flightAutocomplete.findMatches(q);
-    } else {
-      matches = [];
+  /**
+   * @param {string} flightQuery — prefix of flight code (e.g. WY1), or "".
+   * @param {boolean} [listAllWhenNoFlightToken] — if true and flightQuery is "", return all of today’s flights (after space / new segment).
+   */
+  _flightSuggestionStrings(flightQuery, listAllWhenNoFlightToken) {
+    const q = (flightQuery || "").trim().toUpperCase();
+    const fa = window.flightAutocomplete;
+    if (!fa || !Array.isArray(fa.flights) || !fa.flights.length) return [];
+
+    let iso = "";
+    try {
+      const w = window.__flightSuggestIsoDate;
+      if (w && /^\d{4}-\d{2}-\d{2}$/.test(String(w))) iso = String(w).trim();
+    } catch (_) {}
+    if (!iso) {
+      const d = new Date();
+      iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
     }
-    if (!Array.isArray(matches) || !matches.length) return [];
-    return matches.map((f) =>
-      window.flightAutocomplete && typeof window.flightAutocomplete.formatFlight === "function"
-        ? window.flightAutocomplete.formatFlight(f)
-        : [f.code, f.date, f.destination].filter(Boolean).join("/")
-    );
+
+    let dateKey = "";
+    if (window.offloadLoader && typeof window.offloadLoader.isoToFlightDateKey === "function") {
+      dateKey = String(window.offloadLoader.isoToFlightDateKey(iso) || "")
+        .toUpperCase()
+        .replace(/\s/g, "");
+    }
+
+    const poolAll = fa.flights.slice();
+    let pool = poolAll;
+    if (dateKey) {
+      const sameDay = poolAll.filter((f) => String(f.date || "").toUpperCase().replace(/\s/g, "") === dateKey);
+      /*
+       * Keep flight suggestions always available:
+       * if selected date has no entries in flights.json/live feed, fall back to all flights.
+       */
+      pool = sameDay.length ? sameDay : poolAll;
+    }
+
+    const fmt = (f) =>
+      typeof fa.formatFlight === "function"
+        ? fa.formatFlight(f)
+        : [f.code, f.date, f.destination].filter(Boolean).join("/");
+
+    if (!q) {
+      if (listAllWhenNoFlightToken) {
+        return pool.slice(0, 14).map(fmt);
+      }
+      return [];
+    }
+
+    pool = pool.filter((f) => {
+      const code = fa.normalizeCode(f.code);
+      return code.startsWith(q);
+    });
+
+    return pool.slice(0, 14).map(fmt);
   },
 
   /**
@@ -225,31 +304,59 @@ window.phraseAutocomplete = {
     return `${prefix} ${p}`;
   },
 
-  findMatches(key, query) {
-    const q = (query || "").trim().toUpperCase();
+  findMatches(key, phraseQuery, flightQuery) {
+    const q = (phraseQuery || "").trim().toUpperCase();
+    const fq =
+      arguments.length >= 3 ? String(flightQuery ?? "").trim().toUpperCase() : this._isFlightAwarePhraseKey(key) ? "" : q;
     const list = this.getList(key);
 
     if (key !== "csdRescreening") {
-      const learned =
+      const learnedRaw =
         this._isLearnedPhraseKey(key) &&
         window.phraseUsageCache &&
-        typeof window.phraseUsageCache.getSortedPrefixMatches === "function"
-          ? window.phraseUsageCache.getSortedPrefixMatches(key, q, 12)
+        typeof window.phraseUsageCache.getSortedMatches === "function"
+          ? window.phraseUsageCache.getSortedMatches(key, q, 14)
           : [];
-      const fixed = (list || [])
+      const fixedRaw = (list || [])
         .map((item) => String(item || "").toUpperCase().trim())
-        .filter((item) => item && (!q || item.startsWith(q)));
-      const flights = this._isFlightAwarePhraseKey(key) ? this._flightSuggestionStrings(q) : [];
+        .filter((item) => item && (!q || item.startsWith(q) || (q.length >= 2 && item.includes(q))));
 
+      const flightsRaw = this._isFlightAwarePhraseKey(key)
+        ? fq
+          ? this._flightSuggestionStrings(fq, false)
+          : this._flightSuggestionStrings("", true)
+        : [];
+
+      /* Priority: learned → fixed → flights, with guaranteed flight slots for flight-aware keys. */
       const merged = [];
       const seen = new Set();
-      for (const x of [...flights, ...learned, ...fixed]) {
-        const norm = x.toUpperCase();
-        if (seen.has(norm)) continue;
+      const cap = this._isFlightAwarePhraseKey(key) ? 32 : 12;
+      const flightAware = this._isFlightAwarePhraseKey(key);
+      const minFlightSlots = flightAware ? 10 : 0;
+      const phraseCap = flightAware ? Math.max(0, cap - minFlightSlots) : cap;
+
+      const pushKind = (text, kind) => {
+        const t = String(text || "").trim();
+        if (!t) return;
+        const norm = t.toUpperCase();
+        if (seen.has(norm)) return;
         seen.add(norm);
-        merged.push(x);
-        if (merged.length >= 12) break;
+        merged.push({ text: t, kind });
+        return merged.length >= cap;
+      };
+
+      for (const x of learnedRaw) {
+        if (merged.length >= phraseCap) break;
+        pushKind(x, "learned");
       }
+      for (const x of fixedRaw) {
+        if (merged.length >= phraseCap) break;
+        pushKind(x, "fixed");
+      }
+      for (const x of flightsRaw) {
+        if (pushKind(x, "flight")) break;
+      }
+
       return merged;
     }
 
@@ -382,29 +489,70 @@ window.phraseAutocomplete = {
     });
   },
 
-  renderBox(input, items, onPick) {
+  /**
+   * @param {Array<string|{text:string,kind?:string}>} items
+   * @param {string} [phraseKey] — for deleting learned rows
+   * @param {() => void} [afterDelete] — refresh suggestions
+   */
+  renderBox(input, items, onPick, phraseKey, afterDelete) {
     const box = this.ensureBox();
 
-    if (!items.length) {
+    const rows = (items || []).map((x) =>
+      typeof x === "string" ? { text: x, kind: "fixed" } : { text: String(x.text || ""), kind: x.kind || "fixed" }
+    );
+
+    if (!rows.length) {
       this.hideBox();
       return;
     }
 
     this.activeInput = input;
-    this.activeItems = items;
+    this.activeItems = rows;
     this.activeIndex = 0;
     this.activeOnPick = onPick;
+    this._activePhraseKey = phraseKey || "";
 
     this.positionBox(input);
     box.innerHTML = "";
 
-    items.forEach((text, index) => {
+    rows.forEach((row, index) => {
       const item = document.createElement("div");
-      item.style.padding = "8px 10px";
+      item.style.padding = "6px 8px";
       item.style.cursor = "pointer";
       item.style.borderBottom = "1px solid #e2e8f0";
       item.style.background = index === 0 ? "#eff6ff" : "#fff";
-      item.textContent = text;
+      item.style.display = "flex";
+      item.style.alignItems = "center";
+      item.style.gap = "6px";
+
+      const label = document.createElement("span");
+      label.style.flex = "1";
+      label.style.minWidth = "0";
+      label.style.wordBreak = "break-word";
+      label.textContent = row.text;
+      item.appendChild(label);
+
+      if (row.kind === "learned" && phraseKey && window.phraseUsageCache && typeof window.phraseUsageCache.removePhrase === "function") {
+        const del = document.createElement("button");
+        del.type = "button";
+        del.setAttribute("aria-label", "Remove phrase");
+        del.title = "Remove from learned list";
+        del.textContent = "❌";
+        del.style.flex = "0 0 auto";
+        del.style.cursor = "pointer";
+        del.style.border = "none";
+        del.style.background = "transparent";
+        del.style.padding = "2px 4px";
+        del.style.fontSize = "12px";
+        del.style.lineHeight = "1";
+        del.addEventListener("mousedown", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          window.phraseUsageCache.removePhrase(phraseKey, row.text);
+          if (typeof afterDelete === "function") afterDelete();
+        });
+        item.appendChild(del);
+      }
 
       item.addEventListener("mouseenter", () => {
         this.activeIndex = index;
@@ -412,8 +560,9 @@ window.phraseAutocomplete = {
       });
 
       item.addEventListener("mousedown", (e) => {
+        if (e.target && e.target.closest && e.target.closest("button")) return;
         e.preventDefault();
-        if (this.activeOnPick) this.activeOnPick(text);
+        if (this.activeOnPick) this.activeOnPick(row);
         this.hideBox();
       });
 
@@ -437,32 +586,51 @@ window.phraseAutocomplete = {
     textarea.dataset.phraseAttachMark = mark;
 
     const showSuggest = () => {
-      let tailQuery;
+      let phraseTail = "";
+      let flightQ = "";
       if (this._isLineScopedTextareaKey(key)) {
         const ctx = this._getTextareaActiveLine(textarea);
-        tailQuery = this._isFlightAwarePhraseKey(key) ? this._tailTokenForFlightAwareLine(ctx.line) : ctx.line.trim().toUpperCase();
+        if (this._isFlightAwarePhraseKey(key)) {
+          const rawTail = this.phraseCompositeParts(ctx.line).tailQuery;
+          phraseTail = rawTail.trim().toUpperCase();
+          flightQ = this._flightPrefixQuery(ctx.line);
+        } else {
+          phraseTail = ctx.line.trim().toUpperCase();
+        }
       } else {
         const parts = this.phraseCompositeParts(textarea.value);
-        tailQuery = parts.tailQuery;
-      }
-      const matches = this.findMatches(key, tailQuery);
-      this.renderBox(textarea, matches, (picked) => {
-        let merged;
-        if (this._isLineScopedTextareaKey(key)) {
-          if (this._isFlightAwarePhraseKey(key)) {
-            const ctx = this._getTextareaActiveLine(textarea);
-            const nextLine = this._mergeFlightAwareLine(ctx.line, picked);
-            merged = this._replaceTextareaActiveLine(textarea, nextLine);
-          } else {
-            merged = this._replaceTextareaActiveLine(textarea, picked);
-          }
-        } else {
-          merged = this.mergePhrasePick(textarea.value, picked);
-          textarea.value = merged;
-          textarea.selectionStart = textarea.selectionEnd = merged.length;
+        const rawTail = parts.tailQuery;
+        phraseTail = rawTail.trim().toUpperCase();
+        if (this._isFlightAwarePhraseKey(key)) {
+          flightQ = this._flightPrefixQuery(textarea.value);
         }
-        if (onSave) onSave(merged);
-      });
+      }
+      const matches = this.findMatches(key, phraseTail, flightQ);
+      const useDel = this._isLearnedPhraseKey(key);
+      this.renderBox(
+        textarea,
+        matches,
+        (picked) => {
+          const t = this._normPick(picked);
+          let merged;
+          if (this._isLineScopedTextareaKey(key)) {
+            if (this._isFlightAwarePhraseKey(key)) {
+              const ctx = this._getTextareaActiveLine(textarea);
+              const nextLine = this._mergeFlightAwareLine(ctx.line, t);
+              merged = this._replaceTextareaActiveLine(textarea, nextLine);
+            } else {
+              merged = this._replaceTextareaActiveLine(textarea, t);
+            }
+          } else {
+            merged = this.mergePhrasePick(textarea.value, t);
+            textarea.value = merged;
+            textarea.selectionStart = textarea.selectionEnd = merged.length;
+          }
+          if (onSave) onSave(merged);
+        },
+        useDel ? key : "",
+        useDel ? showSuggest : null
+      );
     };
 
     textarea.addEventListener("input", () => {
@@ -473,6 +641,12 @@ window.phraseAutocomplete = {
     });
 
     textarea.addEventListener("focus", showSuggest);
+
+    textarea.addEventListener("keydown", (e) => {
+      if (e.key === " " || e.code === "Space") {
+        requestAnimationFrame(() => showSuggest());
+      }
+    });
 
     textarea.addEventListener(
       "keydown",
@@ -534,16 +708,39 @@ window.phraseAutocomplete = {
           return;
         }
         tailQuery = tail;
-      } else {
-        tailQuery = this.phraseCompositeParts(input.value).tailQuery;
+        const matches = this.findMatches(key, tailQuery);
+        this.renderBox(input, matches, (picked) => {
+          const t = this._normPick(picked);
+          const merged = this.mergePhrasePickCsd(input.value, t);
+          input.value = merged;
+          if (onSave) onSave(merged);
+        });
+        return;
       }
-      const matches = this.findMatches(key, tailQuery);
-      this.renderBox(input, matches, (picked) => {
-        const merged =
-          key === "csdRescreening" ? this.mergePhrasePickCsd(input.value, picked) : this.mergePhrasePick(input.value, picked);
-        input.value = merged;
-        if (onSave) onSave(merged);
-      });
+      const parts = this.phraseCompositeParts(input.value);
+      const rawTail = parts.tailQuery;
+      tailQuery = rawTail.trim().toUpperCase();
+      const flightQ = this._isFlightAwarePhraseKey(key) ? this._flightPrefixQuery(input.value) : "";
+      const matches = this.findMatches(key, tailQuery, flightQ);
+      const useDel = this._isLearnedPhraseKey(key);
+      this.renderBox(
+        input,
+        matches,
+        (picked) => {
+          const t = this._normPick(picked);
+          let merged;
+          if (this._isFlightAwarePhraseKey(key)) {
+            const via = this._mergeFlightPickIntoValue(input.value, t);
+            merged = via != null ? via : this.mergePhrasePick(input.value, t);
+          } else {
+            merged = this.mergePhrasePick(input.value, t);
+          }
+          input.value = merged;
+          if (onSave) onSave(merged);
+        },
+        useDel ? key : "",
+        useDel ? showSuggest : null
+      );
     };
 
     input.addEventListener("input", () => {
@@ -554,6 +751,12 @@ window.phraseAutocomplete = {
     });
 
     input.addEventListener("focus", showSuggest);
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === " " || e.code === "Space") {
+        requestAnimationFrame(() => showSuggest());
+      }
+    });
 
     input.addEventListener(
       "keydown",
