@@ -155,7 +155,7 @@ window.phraseAutocomplete = {
       .toUpperCase()
       .split(/\s+/);
     const tok = parts.length ? parts[parts.length - 1] : "";
-    if (!/^[A-Z]{2}\d{0,4}$/.test(tok)) return "";
+    if (!/^(?:[A-Z]{2}\d{0,4}|\d{1,4})$/.test(tok)) return "";
     return tok;
   },
 
@@ -269,8 +269,13 @@ window.phraseAutocomplete = {
       return [];
     }
 
+    const digitsOnly = /^\d{1,4}$/.test(q);
     pool = pool.filter((f) => {
       const code = fa.normalizeCode(f.code);
+      if (digitsOnly) {
+        const num = code.replace(/^[A-Z]{2}/, "");
+        return num.startsWith(q) || code.includes(q);
+      }
       return code.startsWith(q);
     });
 

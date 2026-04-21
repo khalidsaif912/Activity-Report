@@ -41,8 +41,16 @@ window.flightAutocomplete = {
   findMatches(query) {
     const q = this.normalizeCode(query);
     if (!q) return [];
+    const digitsOnly = /^\d{1,4}$/.test(q);
     return this.flights
-      .filter(f => this.normalizeCode(f.code).startsWith(q))
+      .filter(f => {
+        const code = this.normalizeCode(f.code);
+        if (digitsOnly) {
+          const num = code.replace(/^[A-Z]{2}/, "");
+          return num.startsWith(q) || code.includes(q);
+        }
+        return code.startsWith(q);
+      })
       .slice(0, 8);
   },
 
@@ -147,8 +155,8 @@ window.flightAutocomplete = {
     this.hideBox();
   },
 
-  /** Flight-ish token at line end; prefix must be start or non-alnum so "HELLO" does not match "LO". */
-  lastFlightChunkRe: /(?:^|[^A-Z0-9])([A-Z]{2}\d{0,4})$/i,
+  /** Flight-ish token at line end; supports code+number (WY223) and number-only (223). */
+  lastFlightChunkRe: /(?:^|[^A-Z0-9])([A-Z]{2}\d{0,4}|\d{1,4})$/i,
 
   replaceLastToken(text, replacement) {
     const t = (text || "").toUpperCase();
