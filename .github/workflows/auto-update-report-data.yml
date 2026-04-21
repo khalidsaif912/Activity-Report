@@ -7,8 +7,8 @@ on:
       - main
       - master
   schedule:
-    # Every 10 minutes
-    - cron: "*/10 * * * *"
+    # Every hour (minute 5)
+    - cron: "5 * * * *"
 
 permissions:
   contents: write
