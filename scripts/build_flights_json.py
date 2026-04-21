@@ -1,12 +1,18 @@
 """
-Build / refresh data/report/flights.json from a live provider (Aviationstack).
+Build / refresh data/report/flights.json from live sources.
+
+Primary source:
+  - Muscat Airport departures page (official MCT departures list)
+
+Fallback source:
+  - Aviationstack API
 
 This keeps GitHub Pages (static) flight suggestions up-to-date without running a backend.
 
 Env:
-  AVIATIONSTACK_ACCESS_KEY   (required)
-  LIVE_FLIGHTS_AIRLINES      default: "WY,OV"
-  LIVE_FLIGHTS_DEP_IATA      default: "MCT"
+  AVIATIONSTACK_ACCESS_KEY   (optional, used as fallback/enrichment)
+  LIVE_FLIGHTS_AIRLINES      default: "WY,OV" (or "ALL")
+  LIVE_FLIGHTS_DEP_IATA      default: "MCT"   (or "ALL")
   LIVE_FLIGHTS_TIMEOUT_SEC   default: "20"
 """
 
@@ -19,6 +25,7 @@ from datetime import datetime
 from pathlib import Path
 
 import requests
+from bs4 import BeautifulSoup
 
 
 def _fmt_ddmon(dt_like: str) -> str:
@@ -77,6 +84,97 @@ def _build_std_etd(std_raw: str, etd_raw: str) -> str:
     return std or etd
 
 
+def _dest_fallback_code(destination_name: str) -> str:
+    src = re.sub(r"[^A-Za-z0-9 ]+", " ", str(destination_name or "")).upper()
+    tokens = [x for x in src.split() if x]
+    if not tokens:
+        return ""
+    first = tokens[0]
+    if re.fullmatch(r"[A-Z]{3}", first):
+        return first
+    return (first[:3] if len(first) >= 3 else first).upper()
+
+
+def _parse_muscat_sched(value: str) -> tuple[str, str]:
+    s = str(value or "").strip()
+    m = re.search(r"(\d{2})/(\d{2})/(\d{4})\s+(\d{2}):(\d{2})", s)
+    if not m:
+        return "", ""
+    dd, mm, yyyy, hh, mi = m.groups()
+    try:
+        dt = datetime(int(yyyy), int(mm), int(dd))
+    except ValueError:
+        return "", ""
+    return dt.strftime("%d%b").upper(), f"{hh}{mi}"
+
+
+def load_existing_dest_maps(report_dir: Path) -> tuple[dict[str, str], dict[str, str]]:
+    by_code_date: dict[str, str] = {}
+    by_code: dict[str, str] = {}
+    src = report_dir / "flights.json"
+    if not src.is_file():
+        return by_code_date, by_code
+    try:
+        rows = json.loads(src.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return by_code_date, by_code
+    if not isinstance(rows, list):
+        return by_code_date, by_code
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        code = _norm_flight_code(row.get("code"))
+        date = str(row.get("date") or "").strip().upper()
+        dest = _norm_iata3(row.get("destination")) or _dest_fallback_code(row.get("destination"))
+        if not code or not dest:
+            continue
+        if date:
+            by_code_date[f"{code}|{date}"] = dest
+        by_code[code] = dest
+    return by_code_date, by_code
+
+
+def fetch_muscat_departures(timeout_sec: int) -> list[dict]:
+    url = (
+        "https://www.muscatairport.co.om/flightstatusframe"
+        "?type=2&airline=&from=&to=&flight_name=&date=&condition=&date_type="
+    )
+    try:
+        r = requests.get(url, timeout=timeout_sec)
+        if not r.ok:
+            return []
+        html = r.text
+    except requests.RequestException:
+        return []
+
+    soup = BeautifulSoup(html, "html.parser")
+    rows = soup.select("table tbody tr")
+    out_by_key: dict[str, dict] = {}
+    for tr in rows:
+        cells = tr.find_all("td")
+        if len(cells) < 4:
+            continue
+        destination_name = cells[1].get_text(" ", strip=True)
+        flight_text = cells[2].get_text(" ", strip=True).replace(" ", "")
+        sched_text = cells[3].get_text(" ", strip=True)
+
+        code = _norm_flight_code(flight_text)
+        date, std = _parse_muscat_sched(sched_text)
+        if not code or not date:
+            continue
+        key = f"{code}|{date}"
+        out_by_key[key] = {
+            "code": code,
+            "date": date,
+            "destination_name": destination_name,
+            "stdEtd": std,
+        }
+
+    out = list(out_by_key.values())
+    out.sort(key=lambda x: (x.get("code", ""), x.get("date", "")))
+    return out
+
+
 def fetch_aviationstack(access_key: str, airlines: list[str], dep_iata: str, timeout_sec: int) -> list[dict]:
     out_by_key: dict[str, dict] = {}
     scopes = airlines[:] if airlines else [""]
@@ -125,9 +223,6 @@ def fetch_aviationstack(access_key: str, airlines: list[str], dep_iata: str, tim
 
 def main() -> None:
     access_key = (os.environ.get("AVIATIONSTACK_ACCESS_KEY") or "").strip()
-    if not access_key:
-        print("AVIATIONSTACK_ACCESS_KEY is not set; keeping existing flights.json.")
-        return
 
     airlines_raw = (os.environ.get("LIVE_FLIGHTS_AIRLINES") or "WY,OV").strip()
     if airlines_raw.upper() in {"ALL", "ANY", "*"}:
@@ -144,17 +239,56 @@ def main() -> None:
         f"dep_iata={'ALL' if not dep_iata else dep_iata}"
     )
 
-    flights = fetch_aviationstack(access_key, airlines or ["WY", "OV"], dep_iata, timeout_sec)
-    if not flights:
-        print("No live flights returned; keeping existing flights.json.")
-        return
-
     base_dir = Path(__file__).resolve().parent.parent
     report_dir = base_dir / "data" / "report"
     report_dir.mkdir(parents=True, exist_ok=True)
     out_path = report_dir / "flights.json"
+    by_code_date, by_code = load_existing_dest_maps(report_dir)
+    if access_key:
+        enrich = fetch_aviationstack(access_key, airlines or ["WY", "OV"], dep_iata, timeout_sec)
+        for row in enrich:
+            code = _norm_flight_code(row.get("code"))
+            date = str(row.get("date") or "").strip().upper()
+            dest = _norm_iata3(row.get("destination"))
+            if not code or not dest:
+                continue
+            if date:
+                by_code_date[f"{code}|{date}"] = dest
+            by_code[code] = dest
+
+    muscat_rows = fetch_muscat_departures(timeout_sec)
+    if muscat_rows:
+        flights = []
+        for row in muscat_rows:
+            code = row.get("code", "")
+            date = row.get("date", "")
+            key = f"{code}|{date}"
+            dest = by_code_date.get(key) or by_code.get(code) or _dest_fallback_code(row.get("destination_name", ""))
+            if not dest:
+                continue
+            flights.append(
+                {
+                    "code": code,
+                    "date": date,
+                    "destination": dest,
+                    "stdEtd": row.get("stdEtd", ""),
+                }
+            )
+        if flights:
+            out_path.write_text(json.dumps(flights, ensure_ascii=False, indent=2), encoding="utf-8")
+            print(f"Done [OK] {out_path} ({len(flights)} flights) source=MUSCAT")
+            return
+
+    if not access_key:
+        print("Muscat source empty and AVIATIONSTACK_ACCESS_KEY is not set; keeping existing flights.json.")
+        return
+
+    flights = fetch_aviationstack(access_key, airlines or ["WY", "OV"], dep_iata, timeout_sec)
+    if not flights:
+        print("No live flights returned from fallback source; keeping existing flights.json.")
+        return
     out_path.write_text(json.dumps(flights, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"Done [OK] {out_path} ({len(flights)} flights)")
+    print(f"Done [OK] {out_path} ({len(flights)} flights) source=AVIATIONSTACK")
 
 
 if __name__ == "__main__":
