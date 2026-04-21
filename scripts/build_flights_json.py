@@ -84,8 +84,6 @@ def fetch_aviationstack(access_key: str, airlines: list[str], dep_iata: str, tim
         params = {"access_key": access_key}
         if airline:
             params["airline_iata"] = airline
-        if dep_iata:
-            params["dep_iata"] = dep_iata
         try:
             r = requests.get(
                 "http://api.aviationstack.com/v1/flights",
@@ -107,6 +105,9 @@ def fetch_aviationstack(access_key: str, airlines: list[str], dep_iata: str, tim
             flight = row.get("flight") if isinstance(row.get("flight"), dict) else {}
             dep = row.get("departure") if isinstance(row.get("departure"), dict) else {}
             arr = row.get("arrival") if isinstance(row.get("arrival"), dict) else {}
+            dep_code = _norm_iata3(dep.get("iata"))
+            if dep_iata and dep_code != dep_iata:
+                continue
 
             code = _norm_flight_code(flight.get("iata"))
             date = _fmt_ddmon(dep.get("scheduled") or dep.get("estimated") or dep.get("actual"))
