@@ -30,6 +30,7 @@ def main():
     scripts = [
         base_dir / "scripts" / "read_roster.py",
         base_dir / "scripts" / "read_flight_dispatch.py",
+        base_dir / "scripts" / "build_flights_json.py",
         base_dir / "scripts" / "build_report_data.py",
         base_dir / "data" / "offload" / "run_pipeline.py",
     ]

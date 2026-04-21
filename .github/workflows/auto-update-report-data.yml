@@ -23,6 +23,11 @@ jobs:
     env:
       TZ: Asia/Muscat
       PYTHONUNBUFFERED: "1"
+      # Set this in GitHub: Settings → Secrets and variables → Actions → New repository secret
+      AVIATIONSTACK_ACCESS_KEY: ${{ secrets.AVIATIONSTACK_ACCESS_KEY }}
+      # Optional overrides
+      LIVE_FLIGHTS_AIRLINES: ${{ vars.LIVE_FLIGHTS_AIRLINES }}
+      LIVE_FLIGHTS_DEP_IATA: ${{ vars.LIVE_FLIGHTS_DEP_IATA }}
 
     steps:
       - name: Checkout repository
