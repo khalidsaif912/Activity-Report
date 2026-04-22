@@ -1834,7 +1834,7 @@
     }, delay);
   }
 
-  /** Pixel column widths + wide min-width force the table past the report; % + wrap keeps it inside (browser + Outlook paste). */
+  /** Keep offload headers readable in clipboard HTML (avoid per-letter wrapping). */
   function normalizeOffloadTableForClipboard(root) {
     const table = root.querySelector("table.offload-table");
     if (!table) return;
@@ -1856,7 +1856,7 @@
       prev = prev.replace(/\bwidth\s*:\s*[^;]+;?/gi, "");
       th.setAttribute(
         "style",
-        `width:${pct};max-width:${pct};min-width:0;word-wrap:break-word;overflow-wrap:break-word;box-sizing:border-box;${prev}`
+        `width:${pct};max-width:${pct};min-width:0;word-wrap:normal;overflow-wrap:normal;word-break:keep-all;hyphens:none;white-space:normal;line-height:1.25;box-sizing:border-box;${prev}`
       );
     });
 
@@ -1869,7 +1869,7 @@
         if (span > 1) {
           td.setAttribute(
             "style",
-            "width:100%;max-width:100%;min-width:0;word-wrap:break-word;overflow-wrap:break-word;box-sizing:border-box;" + prev
+            "width:100%;max-width:100%;min-width:0;word-wrap:break-word;overflow-wrap:anywhere;word-break:normal;box-sizing:border-box;" + prev
           );
           return;
         }
@@ -1877,7 +1877,7 @@
         colIndex += 1;
         td.setAttribute(
           "style",
-          `width:${pct};max-width:${pct};min-width:0;word-wrap:break-word;overflow-wrap:break-word;box-sizing:border-box;${prev}`
+          `width:${pct};max-width:${pct};min-width:0;word-wrap:break-word;overflow-wrap:anywhere;word-break:normal;box-sizing:border-box;${prev}`
         );
       });
     });
@@ -2106,6 +2106,29 @@
         "background-color:#e0f2fe;font-weight:bold;text-align:center;border:1px solid #cbd5e1;padding:6px;vertical-align:top;mso-line-height-rule:exactly;" +
           (cell.getAttribute("style") || "")
       );
+    });
+
+    /* Final pass for offload table: preserve words in headers and stabilize Outlook wrapping. */
+    root.querySelectorAll("table.offload-table").forEach((t) => {
+      t.setAttribute(
+        "style",
+        "width:100%;max-width:100%;min-width:0;border-collapse:collapse;table-layout:fixed;font-size:10.5pt;mso-ansi-font-size:10.5pt;font-family:'Arial',sans-serif;mso-table-lspace:0pt;mso-table-rspace:0pt;box-sizing:border-box;" +
+          (t.getAttribute("style") || "")
+      );
+      t.querySelectorAll("thead th").forEach((th) => {
+        th.setAttribute(
+          "style",
+          "background-color:#e0f2fe;font-weight:bold;text-align:center;border:1px solid #cbd5e1;padding:4px 3px;vertical-align:top;white-space:normal;word-break:keep-all;overflow-wrap:normal;hyphens:none;line-height:1.2;mso-line-height-rule:exactly;" +
+            (th.getAttribute("style") || "")
+        );
+      });
+      t.querySelectorAll("tbody td").forEach((td) => {
+        td.setAttribute(
+          "style",
+          "border:1px solid #cbd5e1;padding:4px;vertical-align:top;word-break:normal;overflow-wrap:anywhere;line-height:1.2;mso-line-height-rule:exactly;" +
+            (td.getAttribute("style") || "")
+        );
+      });
     });
   }
 
