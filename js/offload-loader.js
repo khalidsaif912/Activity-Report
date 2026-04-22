@@ -223,9 +223,15 @@ window.offloadLoader = {
 
     const reportIso = (state.activeDate || state.shiftMeta.date || "").trim();
     /*
-     * Keep source-of-truth loading from ShareFolder, but enforce shift period:
-     * only show offload flight when its STD is within active shift window.
+     * Keep source-of-truth loading from ShareFolder, but enforce:
+     * 1) report date match
+     * 2) active shift period match
      */
+    if (reportIso && !this.offloadDateMatchesReport(data.date || "", reportIso)) {
+      this.resetOffloadsBlank(state);
+      return;
+    }
+
     if (!this.offloadFlightMatchesActiveShift(data, state)) {
       this.resetOffloadsBlank(state);
       return;
