@@ -674,7 +674,7 @@
       }
 
       if (window.flightAutocomplete) {
-        await window.flightAutocomplete.load("/api/live-flights");
+        await window.flightAutocomplete.load("/api/live-flights", { silent: true });
         if (!Array.isArray(window.flightAutocomplete.flights) || !window.flightAutocomplete.flights.length) {
           await window.flightAutocomplete.load(assetBase + "flights.json");
         }

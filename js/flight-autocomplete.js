@@ -7,7 +7,8 @@ window.flightAutocomplete = {
   activeOnPick: null,
   activeMode: "replace",
 
-  async load(url = "../../data/report/flights.json") {
+  async load(url = "../../data/report/flights.json", options = {}) {
+    const { silent = false } = options || {};
     try {
       const res = await fetch(url);
       const text = await res.text();
@@ -28,7 +29,9 @@ window.flightAutocomplete = {
             .filter((flight) => flight.code)
         : [];
     } catch (err) {
-      console.error("Failed to load flights.json", url, err);
+      if (!silent) {
+        console.error("Failed to load flights.json", url, err);
+      }
       this.flights = [];
     }
   },
