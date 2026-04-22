@@ -2140,6 +2140,21 @@
       .replace(/"/g, "&quot;");
   }
 
+  /**
+   * Report-friendly bullets for multiline notes (used in copy/email output).
+   * Each non-empty line becomes "• <text>".
+   */
+  function toBulletedLines(raw) {
+    const lines = String(raw || "")
+      .split(/\r?\n/)
+      .map((line) => String(line || "").trim())
+      .filter((line) => line);
+    if (!lines.length) return "";
+    return lines
+      .map((line) => `\u2022 ${line.replace(/^[\u2022\-*]\s*/, "")}`)
+      .join("\n");
+  }
+
   function buildWordClipboardHeadHtml() {
     return [
       '<meta charset="utf-8">',
@@ -2313,13 +2328,13 @@
       state.equipmentStatus,
       "",
       "8. HANDOVER DETAILS",
-      state.handoverDetails,
+      toBulletedLines(state.handoverDetails),
       "",
       "9. SPECIAL H/O",
-      state.specialHO,
+      toBulletedLines(state.specialHO),
       "",
       "10. OTHER",
-      state.otherText,
+      toBulletedLines(state.otherText),
     ].join("\n");
     return [plainHeader, "", core, plainSig].join("\n");
   }
@@ -2344,7 +2359,9 @@
         .split(/\s+/)
         .filter((c) => c && c !== "offload-cell");
       div.className = ["export-val", "export-multiline", ...keepClasses].join(" ").trim();
-      div.textContent = ta.value;
+      const id = String(ta.id || "").trim();
+      const shouldBullet = id === "handoverDetails" || id === "specialHO" || id === "otherText";
+      div.textContent = shouldBullet ? toBulletedLines(ta.value) : ta.value;
       ta.replaceWith(div);
     });
     return clone.innerHTML;

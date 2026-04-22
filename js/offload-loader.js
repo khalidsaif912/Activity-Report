@@ -222,15 +222,12 @@ window.offloadLoader = {
     if (!cleanItems.length) return;
 
     const reportIso = (state.activeDate || state.shiftMeta.date || "").trim();
-    if (reportIso && !this.offloadDateMatchesReport(data.date || "", reportIso)) {
-      this.resetOffloadsBlank(state);
-      return;
-    }
-
-    if (!this.offloadFlightMatchesActiveShift(data, state)) {
-      this.resetOffloadsBlank(state);
-      return;
-    }
+    /*
+     * Source-of-truth behavior:
+     * Always apply offload rows from ShareFolder JSON when available.
+     * Date/shift mismatches should not blank the table; users expect the
+     * latest offload snapshot from the source link to appear.
+     */
 
     const headerDate = this.normalizeOffloadDate(data.date || state.shiftMeta.date || "");
     const flightRow = this.findFlightForReport(data.flight || "", reportIso);
