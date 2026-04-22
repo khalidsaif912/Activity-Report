@@ -9,6 +9,15 @@ window.manpowerRoleHintCache = {
   _apiBase: "",
   LS_KEY: "activityReport_manpowerRoleHints_v1",
 
+  _canUseApi() {
+    const base = String(this._apiBase || "").trim();
+    if (base) return true;
+    if (location.protocol !== "http:" && location.protocol !== "https:") return false;
+    const host = String(location.hostname || "").trim().toLowerCase();
+    if (!host) return false;
+    return !host.endsWith("github.io");
+  },
+
   _hintsUrl() {
     const b = (this._apiBase || "").replace(/\/$/, "");
     const path = "/api/manpower-role-hints";
@@ -144,18 +153,20 @@ window.manpowerRoleHintCache = {
 
     this._apiBase = apiBase;
 
-    try {
-      const r = await fetch(this._hintsUrl(), {
-        cache: "no-store",
-        headers: { ...this._authHeaders() }
-      });
-      if (r.ok) {
-        this._replaceMemory(await r.json());
-        this._persistLocal();
-        return true;
+    if (this._canUseApi()) {
+      try {
+        const r = await fetch(this._hintsUrl(), {
+          cache: "no-store",
+          headers: { ...this._authHeaders() }
+        });
+        if (r.ok) {
+          this._replaceMemory(await r.json());
+          this._persistLocal();
+          return true;
+        }
+      } catch (e) {
+        console.warn("Manpower role hints API unavailable", e);
       }
-    } catch (e) {
-      console.warn("Manpower role hints API unavailable", e);
     }
 
     if (fallbackUrl) {
@@ -250,19 +261,21 @@ window.manpowerRoleHintCache = {
     this._persistLocal();
 
     if (!Object.keys(outMerge).length) return;
-    try {
-      fetch(this._hintsUrl(), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...this._authHeaders()
-        },
-        body: JSON.stringify({ merge: outMerge })
-      }).then((r) => {
-        if (!r.ok) console.warn("manpower role hints push failed", r.status);
-      });
-    } catch (e) {
-      console.warn("manpower role hints push network error", e);
+    if (this._canUseApi()) {
+      try {
+        fetch(this._hintsUrl(), {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...this._authHeaders()
+          },
+          body: JSON.stringify({ merge: outMerge })
+        }).then((r) => {
+          if (!r.ok) console.warn("manpower role hints push failed", r.status);
+        });
+      } catch (e) {
+        console.warn("manpower role hints push network error", e);
+      }
     }
   }
 };

@@ -120,6 +120,17 @@
     return arr.slice();
   }
 
+  function canUseSameOriginApi() {
+    if (location.protocol !== "http:" && location.protocol !== "https:") return false;
+    const host = String(location.hostname || "").trim().toLowerCase();
+    if (!host) return false;
+    return !host.endsWith("github.io");
+  }
+
+  function canUseServerGmailApi() {
+    return canUseSameOriginApi();
+  }
+
   function stripExcludedEmployeesFromManpower() {
     /* Roster lines come from JSON; SN990737 appears under Inventory when on shift (server rules). */
   }
@@ -674,7 +685,9 @@
       }
 
       if (window.flightAutocomplete) {
-        await window.flightAutocomplete.load("/api/live-flights", { silent: true });
+        if (canUseSameOriginApi()) {
+          await window.flightAutocomplete.load("/api/live-flights", { silent: true });
+        }
         if (!Array.isArray(window.flightAutocomplete.flights) || !window.flightAutocomplete.flights.length) {
           await window.flightAutocomplete.load(assetBase + "flights.json");
         }
@@ -1581,6 +1594,13 @@
 
   async function refreshGmailStatus() {
     const statusEl = el("gmailStatus");
+    if (!canUseServerGmailApi()) {
+      _gmailStatus = { configured: false, authorized: false };
+      if (statusEl) {
+        statusEl.textContent = "Gmail API: unavailable on static host (will use mailto fallback).";
+      }
+      return;
+    }
     try {
       const r = await fetch("/api/gmail/status", { cache: "no-store" });
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
@@ -1605,6 +1625,10 @@
 
   async function connectGmailFlow() {
     const statusEl = el("gmailStatus");
+    if (!canUseServerGmailApi()) {
+      if (statusEl) statusEl.textContent = "Gmail connect is not available on static host. Using mailto fallback.";
+      return;
+    }
     try {
       const r = await fetch("/api/gmail/auth-url", { cache: "no-store" });
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
@@ -1621,6 +1645,10 @@
   async function sendEmailNow() {
     const recipients = normalizeRecipientsShape(state.recipients);
     if (!recipients.to.length && !recipients.cc.length && !recipients.bcc.length) return false;
+
+    if (!canUseServerGmailApi()) {
+      return openEmailComposer();
+    }
 
     const subject = "Export Warehouse Activity Report";
     const plain = buildReportPlainBody();

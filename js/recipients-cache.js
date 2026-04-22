@@ -9,6 +9,15 @@ window.recipientsCache = {
   _apiBase: "",
   LS_KEY: "activityReport_recipients_v1",
 
+  _canUseApi() {
+    const base = String(this._apiBase || "").trim();
+    if (base) return true;
+    if (location.protocol !== "http:" && location.protocol !== "https:") return false;
+    const host = String(location.hostname || "").trim().toLowerCase();
+    if (!host) return false;
+    return !host.endsWith("github.io");
+  },
+
   _hintsUrl() {
     const b = (this._apiBase || "").replace(/\/$/, "");
     const path = "/api/recipients";
@@ -75,15 +84,17 @@ window.recipientsCache = {
     }
     this._apiBase = apiBase;
 
-    try {
-      const r = await fetch(this._hintsUrl(), { cache: "no-store", headers: { ...this._authHeaders() } });
-      if (r.ok) {
-        this._replaceMemory(await r.json());
-        this._persistLocal();
-        return true;
+    if (this._canUseApi()) {
+      try {
+        const r = await fetch(this._hintsUrl(), { cache: "no-store", headers: { ...this._authHeaders() } });
+        if (r.ok) {
+          this._replaceMemory(await r.json());
+          this._persistLocal();
+          return true;
+        }
+      } catch (e) {
+        console.warn("Recipients API unavailable", e);
       }
-    } catch (e) {
-      console.warn("Recipients API unavailable", e);
     }
 
     if (fallbackUrl) {
@@ -109,15 +120,17 @@ window.recipientsCache = {
   async replaceAll(next) {
     this._replaceMemory(next);
     this._persistLocal();
-    try {
-      const r = await fetch(this._hintsUrl(), {
-        method: "POST",
-        headers: { "Content-Type": "application/json", ...this._authHeaders() },
-        body: JSON.stringify(this._memory),
-      });
-      if (!r.ok) console.warn("recipients push failed", r.status);
-    } catch (e) {
-      console.warn("recipients push network error", e);
+    if (this._canUseApi()) {
+      try {
+        const r = await fetch(this._hintsUrl(), {
+          method: "POST",
+          headers: { "Content-Type": "application/json", ...this._authHeaders() },
+          body: JSON.stringify(this._memory),
+        });
+        if (!r.ok) console.warn("recipients push failed", r.status);
+      } catch (e) {
+        console.warn("recipients push network error", e);
+      }
     }
   },
 };

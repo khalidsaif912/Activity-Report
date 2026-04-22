@@ -9,6 +9,15 @@ window.phraseUsageCache = {
   LS_KEY: "activityReport_phraseUsage_v1",
   KEYS: ["loadPlan", "advanceLoading", "handoverDetails", "offloadReason", "offloadRemarks", "other", "specialHO"],
 
+  _canUseApi() {
+    const base = String(this._apiBase || "").trim();
+    if (base) return true;
+    if (location.protocol !== "http:" && location.protocol !== "https:") return false;
+    const host = String(location.hostname || "").trim().toLowerCase();
+    if (!host) return false;
+    return !host.endsWith("github.io");
+  },
+
   _hintsUrl() {
     const b = (this._apiBase || "").replace(/\/$/, "");
     const path = "/api/phrase-usage";
@@ -91,18 +100,20 @@ window.phraseUsageCache = {
 
     this._apiBase = apiBase;
 
-    try {
-      const r = await fetch(this._hintsUrl(), {
-        cache: "no-store",
-        headers: { ...this._authHeaders() }
-      });
-      if (r.ok) {
-        this._replaceMemory(await r.json());
-        this._persistLocal();
-        return true;
+    if (this._canUseApi()) {
+      try {
+        const r = await fetch(this._hintsUrl(), {
+          cache: "no-store",
+          headers: { ...this._authHeaders() }
+        });
+        if (r.ok) {
+          this._replaceMemory(await r.json());
+          this._persistLocal();
+          return true;
+        }
+      } catch (e) {
+        console.warn("Phrase usage API unavailable", e);
       }
-    } catch (e) {
-      console.warn("Phrase usage API unavailable", e);
     }
 
     if (fallbackUrl) {
@@ -171,19 +182,21 @@ window.phraseUsageCache = {
     if (!this._memory[k][p]) return;
     delete this._memory[k][p];
     this._persistLocal();
-    try {
-      fetch(this._hintsUrl(), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...this._authHeaders()
-        },
-        body: JSON.stringify({ remove: { [k]: [p] } })
-      }).then((r) => {
-        if (!r.ok) console.warn("phrase remove push failed", r.status);
-      });
-    } catch (e) {
-      console.warn("phrase remove network error", e);
+    if (this._canUseApi()) {
+      try {
+        fetch(this._hintsUrl(), {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...this._authHeaders()
+          },
+          body: JSON.stringify({ remove: { [k]: [p] } })
+        }).then((r) => {
+          if (!r.ok) console.warn("phrase remove push failed", r.status);
+        });
+      } catch (e) {
+        console.warn("phrase remove network error", e);
+      }
     }
   },
 
@@ -211,19 +224,21 @@ window.phraseUsageCache = {
     });
     this._persistLocal();
 
-    try {
-      fetch(this._hintsUrl(), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...this._authHeaders()
-        },
-        body: JSON.stringify({ merge })
-      }).then((r) => {
-        if (!r.ok) console.warn("phrase usage push failed", r.status);
-      });
-    } catch (e) {
-      console.warn("phrase usage push network error", e);
+    if (this._canUseApi()) {
+      try {
+        fetch(this._hintsUrl(), {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...this._authHeaders()
+          },
+          body: JSON.stringify({ merge })
+        }).then((r) => {
+          if (!r.ok) console.warn("phrase usage push failed", r.status);
+        });
+      } catch (e) {
+        console.warn("phrase usage push network error", e);
+      }
     }
   }
 };

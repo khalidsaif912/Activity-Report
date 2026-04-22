@@ -9,6 +9,15 @@ window.flightHintCache = {
   _memory: {},
   _apiBase: "",
 
+  _canUseApi() {
+    const base = String(this._apiBase || "").trim();
+    if (base) return true;
+    if (location.protocol !== "http:" && location.protocol !== "https:") return false;
+    const host = String(location.hostname || "").trim().toLowerCase();
+    if (!host) return false;
+    return !host.endsWith("github.io");
+  },
+
   cacheKey(iso, code) {
     const c = String(code || "")
       .trim()
@@ -72,18 +81,20 @@ window.flightHintCache = {
 
     this._apiBase = apiBase;
 
-    try {
-      const r = await fetch(this._hintsUrl(), {
-        cache: "no-store",
-        headers: { ...this._authHeaders() }
-      });
-      if (r.ok) {
-        const o = await r.json();
-        this._replaceMemory(o);
-        return true;
+    if (this._canUseApi()) {
+      try {
+        const r = await fetch(this._hintsUrl(), {
+          cache: "no-store",
+          headers: { ...this._authHeaders() }
+        });
+        if (r.ok) {
+          const o = await r.json();
+          this._replaceMemory(o);
+          return true;
+        }
+      } catch (e) {
+        console.warn("Flight hints API unavailable", e);
       }
-    } catch (e) {
-      console.warn("Flight hints API unavailable", e);
     }
 
     if (fallbackUrl) {
@@ -122,6 +133,7 @@ window.flightHintCache = {
         };
       }
     });
+    if (!this._canUseApi()) return;
     try {
       const r = await fetch(this._hintsUrl(), {
         method: "POST",
