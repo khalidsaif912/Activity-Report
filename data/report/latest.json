@@ -1,62 +1,67 @@
 {
   "shiftMeta": {
-    "key": "night",
-    "title": "Night Shift",
+    "key": "morning",
+    "title": "Morning Shift",
     "date": "2026-04-22",
-    "time": "21:00 - 06:00"
+    "time": "06:00 - 15:00"
   },
   "manpowerSections": [
     {
       "title": "Supervisor",
       "items": [
-        "SN81300 Talal Al Balushi"
+        "SN82546 Saleh Al Rashdi"
       ]
     },
     {
       "title": "Load Control",
       "items": [
-        "SN82548 Ahmed Al Muqaini",
-        "SN82575 Ahmed Al Kharusi"
+        "SN82441 Mudathir Al Hajri",
+        "SN82551 Omar Al Obaidi",
+        "SN81348 Assad Al Omairi"
       ]
     },
     {
       "title": "Export Checker",
       "items": [
-        "SN82659 Ammar Al Hashmi",
-        "SN82587 Yousuf Al Balushi",
-        "SN80270 Marlon Esmilla",
-        "SN82578 Raad Al Farsi",
-        "SN8584 Adil Al Zadjali",
-        "SN82555 Riyadh Al Jabri"
+        "SN82673 Khalifa Al Maqbali",
+        "SN82464 Wissam Al Kharusi",
+        "SN82672 Dawood Al Siyabi",
+        "SN82547 Mazin Al Hajri",
+        "SN82661 Mohamed Al Maskari",
+        "SN8715 Khalid Al Raqadi"
       ]
     },
     {
       "title": "Export Operators",
       "items": [
-        "SN8714 Mohana Al Subhi",
-        "SN82588 Ghassan Al Tarsi",
-        "SN8762 Mohamed Al Falahi",
-        "SN8744 Said Al Fahkri"
+        "SN81223 Mazin Al Siyabi",
+        "SN8542 Salim Al Harassi",
+        "SN82468 Badar Al Fulaiti"
       ]
     },
     {
       "title": "Flight Dispatch",
       "items": [
-        "SN82654 AHMED AL HADI",
-        "SN82410 SAID AL SADI",
-        "SN82417 TALAL AL HUSEINI"
+        "SN82419 HAITHAM AL BALUSHI",
+        "SN82425 ALI AL SHAMSI",
+        "SN80480 YOUNIS AL SIYABI",
+        "SN82566 ANWAR AL AMRI"
+      ]
+    },
+    {
+      "title": "Inventory",
+      "items": [
+        "SN990737 Said Al Amri"
+      ]
+    },
+    {
+      "title": "Support Team",
+      "items": [
+        "SN82653 Ahmed Al Sabii"
       ]
     },
     {
       "title": "CTU Staff On Duty",
-      "items": []
-    },
-    {
-      "title": "Inventory",
-      "items": []
-    },
-    {
-      "title": "Support Team",
       "items": []
     },
     {
@@ -322,5 +327,5 @@
       ]
     }
   },
-  "defaultShift": "night"
+  "defaultShift": "morning"
 }
