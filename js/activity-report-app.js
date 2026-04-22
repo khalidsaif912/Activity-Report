@@ -2266,11 +2266,11 @@
       "8. HANDOVER DETAILS",
       state.handoverDetails,
       "",
-      "9. OTHER",
-      state.otherText,
-      "",
-      "10. SPECIAL H/O",
+      "9. SPECIAL H/O",
       state.specialHO,
+      "",
+      "10. OTHER",
+      state.otherText,
     ].join("\n");
     return [plainHeader, "", core, plainSig].join("\n");
   }
