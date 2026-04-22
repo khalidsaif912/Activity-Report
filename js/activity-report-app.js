@@ -1483,7 +1483,11 @@
           renderWebSignaturePreview();
         };
         input.onkeydown = (e) => handleManpowerKeydown(e, sectionIndex, itemIndex);
-        if (window.employeeAutocomplete) window.employeeAutocomplete.attach(input, `${sectionIndex}-${itemIndex}`);
+        if (window.employeeAutocomplete) {
+          window.employeeAutocomplete.attach(input, `${sectionIndex}-${itemIndex}`, {
+            sectionTitle: section.title || ""
+          });
+        }
 
         const del = document.createElement("button");
         del.type = "button";

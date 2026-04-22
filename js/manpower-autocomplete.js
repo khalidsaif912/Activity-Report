@@ -56,10 +56,28 @@ window.employeeAutocomplete = {
     return out.slice(0, max);
   },
 
-  attach(input, key) {
+  _normSectionTitle(value) {
+    return String(value || "")
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, " ");
+  },
+
+  _sectionSuggestMode(sectionTitle) {
+    const t = this._normSectionTitle(sectionTitle);
+    if (!t) return "mixed";
+    if (t === "export checker") return "nameWithRole";
+    if (t === "supervisor" || t === "load control" || t === "export operators" || t === "flight dispatch") {
+      return "nameOnly";
+    }
+    return "mixed";
+  },
+
+  attach(input, key, options = {}) {
     const mark = `emp:${key}`;
     if (input.dataset.empAttachMark === mark) return;
     input.dataset.empAttachMark = mark;
+    const suggestMode = this._sectionSuggestMode(options.sectionTitle);
 
     const listId = `employee-list-${key}`;
     input.setAttribute("list", listId);
@@ -76,7 +94,9 @@ window.employeeAutocomplete = {
       const names = this._employeeMatchesByName(namePart);
       let matches = [];
 
-      if (hasDash) {
+      if (suggestMode === "nameOnly") {
+        matches = names.slice();
+      } else if (hasDash) {
         names.forEach((name) => {
           const roles =
             window.manpowerRoleHintCache && typeof window.manpowerRoleHintCache.getRolesForName === "function"
@@ -93,6 +113,19 @@ window.employeeAutocomplete = {
           if (topRole) matches.push(`${name} - ${topRole}`);
           matches.push(name);
         });
+
+        if (suggestMode === "nameWithRole") {
+          const roleAware = [];
+          names.forEach((name) => {
+            const roles =
+              window.manpowerRoleHintCache && typeof window.manpowerRoleHintCache.getRolesForName === "function"
+                ? window.manpowerRoleHintCache.getRolesForName(name, "", 12)
+                : [];
+            roles.forEach((role) => roleAware.push(`${name} - ${role}`));
+            roleAware.push(name);
+          });
+          matches = roleAware;
+        }
       }
 
       const finalMatches = this._mergeUnique(matches, 20);
