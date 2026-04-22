@@ -252,6 +252,8 @@
   ];
 
   let _scheduledSendTimer = null;
+  let _autoTodayWatcherTimer = null;
+  let _autoTodayLastIso = "";
   let _gmailStatus = { configured: false, authorized: false };
   const EMAIL_BUTTON_DEFAULT_TEXT = "Send Report";
 
@@ -341,6 +343,25 @@
     const mo = String(n.getMonth() + 1).padStart(2, "0");
     const da = String(n.getDate()).padStart(2, "0");
     return `${y}-${mo}-${da}`;
+  }
+
+  function isIsoDate(value) {
+    return /^\d{4}-\d{2}-\d{2}$/.test(String(value || "").trim());
+  }
+
+  /** Keep today's date first, with the rest newest-to-oldest. */
+  function buildDatesListTodayFirst(sourceDates, todayIso) {
+    const today = isIsoDate(todayIso) ? String(todayIso).trim() : getTodayIsoLocal();
+    const rest = [];
+    const seen = new Set([today]);
+    (Array.isArray(sourceDates) ? sourceDates : []).forEach((raw) => {
+      const iso = String(raw || "").trim();
+      if (!isIsoDate(iso) || seen.has(iso)) return;
+      seen.add(iso);
+      rest.push(iso);
+    });
+    rest.sort((a, b) => (a < b ? 1 : a > b ? -1 : 0));
+    return [today, ...rest];
   }
 
   /**
@@ -514,6 +535,32 @@
       state.activeDate = dateStr || prevDate;
       applyMissingDateView(msg);
     }
+  }
+
+  function startAutoTodayWatcher() {
+    if (_autoTodayWatcherTimer) return;
+    _autoTodayLastIso = getTodayIsoLocal();
+    _autoTodayWatcherTimer = window.setInterval(() => {
+      const nowIso = getTodayIsoLocal();
+      if (nowIso === _autoTodayLastIso) return;
+      _autoTodayLastIso = nowIso;
+      state.datesList = buildDatesListTodayFirst(state.availableDates, nowIso);
+      if (!getUseAutoToday()) {
+        renderDateTabs();
+        syncFlightSuggestIsoDate();
+        return;
+      }
+      if (state.activeDate === nowIso) {
+        renderDateTabs();
+        syncFlightSuggestIsoDate();
+        return;
+      }
+      switchDate(nowIso).catch((err) => {
+        const msg = err && err.message ? String(err.message) : "Failed to load selected date";
+        state.activeDate = nowIso;
+        applyMissingDateView(msg);
+      });
+    }, 60000);
   }
 
   function renderShiftTabs() {
@@ -728,19 +775,14 @@
       const idx = await loadDatesIndex();
       const todayIso = getTodayIsoLocal();
       state.availableDates = idx && Array.isArray(idx.dates) ? idx.dates.slice().sort() : [];
+      state.datesList = buildDatesListTodayFirst(state.availableDates, todayIso);
       if (getUseAutoToday()) {
-        const base = state.availableDates.slice();
-        if (!base.includes(todayIso)) base.push(todayIso);
-        base.sort();
-        state.datesList = base;
         state.activeDate = todayIso;
       } else if (idx && Array.isArray(idx.dates) && idx.dates.length) {
-        state.datesList = idx.dates.slice().sort();
         const def = idx.default && state.datesList.includes(idx.default) ? idx.default : state.datesList[0];
         state.activeDate = def;
       } else {
-        state.datesList = [];
-        state.activeDate = null;
+        state.activeDate = state.datesList[0] || null;
       }
 
       await loadReportPayload();
@@ -2672,5 +2714,6 @@
   }
 
   bindStaticEvents();
+  startAutoTodayWatcher();
   loadData();
 })();
