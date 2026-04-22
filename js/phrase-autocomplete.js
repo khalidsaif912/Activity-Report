@@ -250,11 +250,8 @@ window.phraseAutocomplete = {
     let pool = poolAll;
     if (dateKey) {
       const sameDay = poolAll.filter((f) => String(f.date || "").toUpperCase().replace(/\s/g, "") === dateKey);
-      /*
-       * Keep flight suggestions always available:
-       * if selected date has no entries in flights.json/live feed, fall back to all flights.
-       */
-      pool = sameDay.length ? sameDay : poolAll;
+      /* Date-first behavior: never show previous-day flights for a selected day. */
+      pool = sameDay;
     }
 
     const fmt = (f) =>
