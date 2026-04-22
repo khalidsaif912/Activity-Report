@@ -1624,18 +1624,44 @@
     return r[kind].join(",");
   }
 
-  function openEmailComposer() {
+  function openEmailComposer(options = {}) {
+    const { includePlainBody = true } = options || {};
     const to = recipientsMailtoValue("to");
     const cc = recipientsMailtoValue("cc");
     const bcc = recipientsMailtoValue("bcc");
     if (!to && !cc && !bcc) return false;
     const subject = "Export Warehouse Activity Report";
-    const body = encodeURIComponent(buildReportPlainBody());
-    const parts = [`subject=${encodeURIComponent(subject)}`, `body=${body}`];
+    const parts = [`subject=${encodeURIComponent(subject)}`];
+    if (includePlainBody) {
+      const body = encodeURIComponent(buildReportPlainBody());
+      parts.push(`body=${body}`);
+    }
     if (cc) parts.push(`cc=${encodeURIComponent(cc)}`);
     if (bcc) parts.push(`bcc=${encodeURIComponent(bcc)}`);
     window.location.href = `mailto:${to}?${parts.join("&")}`;
     return true;
+  }
+
+  /**
+   * mailto cannot carry full HTML reliably in Outlook desktop.
+   * We pre-copy the rich report so the user can paste it in compose.
+   */
+  async function openEmailComposerWithClipboardHint() {
+    const statusEl = el("gmailStatus");
+    let copied = false;
+    try {
+      await copyReportToClipboard();
+      copied = true;
+    } catch (err) {
+      console.warn("Could not pre-copy rich report before mailto fallback", err);
+    }
+    const opened = openEmailComposer({ includePlainBody: !copied });
+    if (statusEl && opened) {
+      statusEl.textContent = copied
+        ? "Mail draft opened. The formatted report is copied — paste with Ctrl+V in Outlook body."
+        : "Mail draft opened. If the body appears plain in Outlook, use Copy then paste with Ctrl+V.";
+    }
+    return opened;
   }
 
   async function refreshGmailStatus() {
@@ -1693,7 +1719,7 @@
     if (!recipients.to.length && !recipients.cc.length && !recipients.bcc.length) return false;
 
     if (!canUseServerGmailApi()) {
-      return openEmailComposer();
+      return openEmailComposerWithClipboardHint();
     }
 
     const subject = "Export Warehouse Activity Report";
@@ -1720,7 +1746,7 @@
     } catch (_) {
       /* fallback below */
     }
-    return openEmailComposer();
+    return openEmailComposerWithClipboardHint();
   }
 
   function setEmailButtonState(mode) {
