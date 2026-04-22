@@ -27,6 +27,61 @@ from pathlib import Path
 import requests
 from bs4 import BeautifulSoup
 
+DESTINATION_NAME_TO_IATA = {
+    "ABHA": "AHB",
+    "ABU DHABI": "AUH",
+    "ADDIS ABABA": "ADD",
+    "AMMAN": "AMM",
+    "AMSTERDAM": "AMS",
+    "BAHRAIN": "BAH",
+    "BANGKOK": "BKK",
+    "BENGALURU": "BLR",
+    "BOMBAY": "BOM",
+    "CAIRO": "CAI",
+    "CALICUT": "CCJ",
+    "CHENNAI": "MAA",
+    "CHITTAGONG": "CGP",
+    "COCHIN": "COK",
+    "COLOMBO": "CMB",
+    "DAMMAM": "DMM",
+    "DELHI": "DEL",
+    "DHAKA": "DAC",
+    "DOHA": "DOH",
+    "DUQM": "DQM",
+    "DUBAI": "DXB",
+    "FAHUD": "FAU",
+    "FUJAIRAH": "FJR",
+    "HYDERABAD": "HYD",
+    "ISLAMABAD": "ISB",
+    "ISTANBUL": "IST",
+    "JEDDAH": "JED",
+    "KARACHI": "KHI",
+    "KUALA LUMPUR": "KUL",
+    "KUWAIT": "KWI",
+    "LAHORE": "LHE",
+    "LONDON": "LHR",
+    "LUCKNOW": "LKO",
+    "MEDINA": "MED",
+    "MILANO": "MXP",
+    "MOSCOW": "SVO",
+    "MUMBAI": "BOM",
+    "MULTAN": "MUX",
+    "MUSCAT": "MCT",
+    "MUKHAIZNA": "UKH",
+    "MUSCAT (MCT)": "MCT",
+    "MUNICH": "MUC",
+    "PHUKET": "HKT",
+    "PORT SUDAN": "PZU",
+    "RIYADH": "RUH",
+    "SALALAH": "SLL",
+    "SHARJAH": "SHJ",
+    "SIALKOT": "SKT",
+    "THIRUVANANTHAPURAM": "TRV",
+    "TRIVANDRUM": "TRV",
+    "TEHRAN": "IKA",
+    "ZURICH": "ZRH",
+}
+
 
 def _fmt_ddmon(dt_like: str) -> str:
     s = str(dt_like or "").strip()
@@ -86,6 +141,9 @@ def _build_std_etd(std_raw: str, etd_raw: str) -> str:
 
 def _dest_fallback_code(destination_name: str) -> str:
     src = re.sub(r"[^A-Za-z0-9 ]+", " ", str(destination_name or "")).upper()
+    src = re.sub(r"\s+", " ", src).strip()
+    if src in DESTINATION_NAME_TO_IATA:
+        return DESTINATION_NAME_TO_IATA[src]
     tokens = [x for x in src.split() if x]
     if not tokens:
         return ""
@@ -263,7 +321,8 @@ def main() -> None:
             code = row.get("code", "")
             date = row.get("date", "")
             key = f"{code}|{date}"
-            dest = by_code_date.get(key) or by_code.get(code) or _dest_fallback_code(row.get("destination_name", ""))
+            dest_from_name = _dest_fallback_code(row.get("destination_name", ""))
+            dest = dest_from_name or by_code_date.get(key) or by_code.get(code)
             if not dest:
                 continue
             flights.append(

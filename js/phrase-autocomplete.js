@@ -53,15 +53,15 @@ window.phraseAutocomplete = {
     const q = (query || "").trim().toUpperCase();
     try {
       const flights = window.flightAutocomplete && window.flightAutocomplete.flights;
+      const normalizeDest =
+        window.flightAutocomplete && typeof window.flightAutocomplete.normalizeDestination === "function"
+          ? window.flightAutocomplete.normalizeDestination.bind(window.flightAutocomplete)
+          : (v) => String(v || "").trim().toUpperCase();
       if (!Array.isArray(flights)) return [];
       const out = [];
       const seen = new Set();
       for (const f of flights) {
-        const dest = String(f.destination || "")
-          .trim()
-          .toUpperCase()
-          .match(/^([A-Z]{3})/);
-        const code3 = dest ? dest[1] : "";
+        const code3 = normalizeDest(f.destination);
         if (!code3) continue;
         if (q && !code3.includes(q)) continue;
         if (seen.has(code3)) continue;

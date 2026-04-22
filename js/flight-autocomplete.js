@@ -15,7 +15,18 @@ window.flightAutocomplete = {
       if (text.trimStart().startsWith("<")) {
         throw new Error(`Expected JSON but got HTML (wrong URL?). ${url}`);
       }
-      this.flights = JSON.parse(text);
+      const parsed = JSON.parse(text);
+      this.flights = Array.isArray(parsed)
+        ? parsed
+            .map((flight) => ({
+              ...flight,
+              code: this.normalizeCode(flight && flight.code),
+              date: String((flight && flight.date) || "").trim().toUpperCase(),
+              destination: this.normalizeDestination(flight && flight.destination),
+              stdEtd: String((flight && flight.stdEtd) || "").trim().toUpperCase()
+            }))
+            .filter((flight) => flight.code)
+        : [];
     } catch (err) {
       console.error("Failed to load flights.json", url, err);
       this.flights = [];
@@ -26,10 +37,25 @@ window.flightAutocomplete = {
     return (value || "").trim().toUpperCase();
   },
 
+  normalizeDestination(value) {
+    const src = String(value || "").trim().toUpperCase();
+    if (!src) return "";
+    if (/^[A-Z]{3}$/.test(src)) return src;
+
+    const fromParens = [...src.matchAll(/\(([A-Z]{3})\)/g)].map((m) => m[1]);
+    if (fromParens.length) return fromParens[fromParens.length - 1];
+
+    const tokenCodes = [...src.matchAll(/(?:^|[^A-Z])([A-Z]{3})(?=$|[^A-Z])/g)].map((m) => m[1]);
+    if (tokenCodes.length) return tokenCodes[tokenCodes.length - 1];
+
+    const lettersOnly = src.replace(/[^A-Z]/g, "");
+    return lettersOnly.slice(0, 3);
+  },
+
   formatFlight(flight) {
     const code = this.normalizeCode(flight.code);
     const date = (flight.date || "").trim().toUpperCase();
-    const destination = (flight.destination || "").trim().toUpperCase();
+    const destination = this.normalizeDestination(flight.destination);
     return [code, date, destination].filter(Boolean).join("/");
   },
 
