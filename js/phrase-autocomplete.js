@@ -250,8 +250,24 @@ window.phraseAutocomplete = {
     let pool = poolAll;
     if (dateKey) {
       const sameDay = poolAll.filter((f) => String(f.date || "").toUpperCase().replace(/\s/g, "") === dateKey);
-      /* Date-first behavior: never show previous-day flights for a selected day. */
-      pool = sameDay;
+      if (sameDay.length) {
+        pool = sameDay;
+      } else if (window.offloadLoader && typeof window.offloadLoader.isoToFlightDateKey === "function") {
+        /*
+         * If report date has no flights, fall back to browser "today" flights so
+         * Load Plan remains useful during date-index/report-date lag.
+         */
+        const d = new Date();
+        const todayIso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+        const todayKey = String(window.offloadLoader.isoToFlightDateKey(todayIso) || "")
+          .toUpperCase()
+          .replace(/\s/g, "");
+        pool = todayKey
+          ? poolAll.filter((f) => String(f.date || "").toUpperCase().replace(/\s/g, "") === todayKey)
+          : [];
+      } else {
+        pool = [];
+      }
     }
 
     const fmt = (f) =>
