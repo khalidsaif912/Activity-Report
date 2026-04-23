@@ -1943,17 +1943,16 @@
       table.setAttribute("border", "0");
       table.setAttribute(
         "style",
-        "border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;margin-top:16px;width:100%;table-layout:fixed;"
+        "border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;margin-top:16px;width:100%;table-layout:fixed;mso-cellspacing:0pt;"
       );
       const tr = document.createElement("tr");
       const tdAccent = document.createElement("td");
-      tdAccent.setAttribute("width", "3");
-      tdAccent.setAttribute("bgcolor", borderLeft);
+      tdAccent.setAttribute("width", "4");
       tdAccent.setAttribute(
         "style",
-        `width:3px;min-width:3px;max-width:3px;background-color:${borderLeft};font-size:0;line-height:0;mso-line-height-rule:exactly;padding:0;`
+        "width:4px;min-width:4px;max-width:4px;padding:0;margin:0;mso-padding-alt:0;mso-line-height-rule:exactly;vertical-align:top;"
       );
-      tdAccent.innerHTML = "&nbsp;";
+      tdAccent.innerHTML = `<div style="display:block;width:4px;min-width:4px;max-width:4px;height:100%;min-height:26px;background-color:${borderLeft};font-size:0;line-height:0;mso-line-height-rule:exactly;">&nbsp;</div>`;
       const td = document.createElement("td");
       td.setAttribute("bgcolor", bg);
       const isManpowerMajor = el.classList && el.classList.contains("manpower-block-heading");
