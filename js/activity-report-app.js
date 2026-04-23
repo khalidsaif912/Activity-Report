@@ -336,13 +336,25 @@
     if (b.activeShift != null) state.activeShift = b.activeShift;
   }
 
-  /** Local calendar date YYYY-MM-DD (matches scripts/read_roster.py ACTIVITY_REPORT_DATE idea). */
-  function getTodayIsoLocal() {
-    const n = new Date();
+  function toIsoDateLocal(n) {
     const y = n.getFullYear();
     const mo = String(n.getMonth() + 1).padStart(2, "0");
     const da = String(n.getDate()).padStart(2, "0");
     return `${y}-${mo}-${da}`;
+  }
+
+  /**
+   * Operational report date YYYY-MM-DD.
+   * Night shift is 21:00-06:00, so 00:00-05:59 belongs to the previous day.
+   */
+  function getReportDateIsoLocal() {
+    const n = new Date();
+    if (n.getHours() < 6) {
+      const prev = new Date(n);
+      prev.setDate(prev.getDate() - 1);
+      return toIsoDateLocal(prev);
+    }
+    return toIsoDateLocal(n);
   }
 
   function isIsoDate(value) {
@@ -351,7 +363,7 @@
 
   /** Keep today's date first, with the rest newest-to-oldest. */
   function buildDatesListTodayFirst(sourceDates, todayIso) {
-    const today = isIsoDate(todayIso) ? String(todayIso).trim() : getTodayIsoLocal();
+    const today = isIsoDate(todayIso) ? String(todayIso).trim() : getReportDateIsoLocal();
     const rest = [];
     const seen = new Set([today]);
     (Array.isArray(sourceDates) ? sourceDates : []).forEach((raw) => {
@@ -539,9 +551,9 @@
 
   function startAutoTodayWatcher() {
     if (_autoTodayWatcherTimer) return;
-    _autoTodayLastIso = getTodayIsoLocal();
+    _autoTodayLastIso = getReportDateIsoLocal();
     _autoTodayWatcherTimer = window.setInterval(() => {
-      const nowIso = getTodayIsoLocal();
+      const nowIso = getReportDateIsoLocal();
       if (nowIso === _autoTodayLastIso) return;
       _autoTodayLastIso = nowIso;
       state.datesList = buildDatesListTodayFirst(state.availableDates, nowIso);
@@ -653,7 +665,7 @@
       state.shiftsFromServer = data.shifts;
       if (!state.activeShift || !state.shiftsFromServer[state.activeShift]) {
         let def = data.defaultShift || "morning";
-        const todayIso = getTodayIsoLocal();
+        const todayIso = getReportDateIsoLocal();
         const reportDay =
           (state.activeDate && String(state.activeDate).trim()) ||
           String((data.shiftMeta && data.shiftMeta.date) || "").trim();
@@ -773,7 +785,7 @@
       }
 
       const idx = await loadDatesIndex();
-      const todayIso = getTodayIsoLocal();
+      const todayIso = getReportDateIsoLocal();
       state.availableDates = idx && Array.isArray(idx.dates) ? idx.dates.slice().sort() : [];
       state.datesList = buildDatesListTodayFirst(state.availableDates, todayIso);
       if (getUseAutoToday()) {
@@ -831,7 +843,7 @@
   }
 
   function applyMissingDateView(message) {
-    const dateText = state.activeDate || getTodayIsoLocal();
+    const dateText = state.activeDate || getReportDateIsoLocal();
     state.loadErrorMessage = String(message || "No report data found for selected date.");
     state.noDataMode = true;
     state.shiftsFromServer = buildEmptyShiftsForDate(dateText);
