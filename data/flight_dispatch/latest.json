@@ -1,40 +1,41 @@
 {
   "shiftMeta": {
-    "date": "2026-04-22",
+    "date": "2026-04-23",
     "shiftCode": "AN13"
   },
   "flightDispatch": {
     "title": "Flight Dispatch",
     "items": [
-      "SN82431 MAHMOOD AL BALUSHI",
-      "SN82331 ISMAIL AL MAHARBI",
-      "SN82416 NASSER AL OMAIRI"
+      "SN82419 HAITHAM AL BALUSHI",
+      "SN82425 ALI AL SHAMSI",
+      "SN82566 ANWAR AL AMRI"
     ]
   },
   "byShift": {
     "morning": {
       "title": "Flight Dispatch",
       "items": [
-        "SN82419 HAITHAM AL BALUSHI",
-        "SN82425 ALI AL SHAMSI",
+        "SN82414 BADAR AL BUSAIDI",
+        "SN82420 MOHAMMED AL SAADI",
         "SN80480 YOUNIS AL SIYABI",
-        "SN82566 ANWAR AL AMRI"
+        "SN80479 SAMI AL HADABI"
       ]
     },
     "afternoon": {
       "title": "Flight Dispatch",
       "items": [
-        "SN82431 MAHMOOD AL BALUSHI",
-        "SN82331 ISMAIL AL MAHARBI",
-        "SN82416 NASSER AL OMAIRI"
+        "SN82419 HAITHAM AL BALUSHI",
+        "SN82425 ALI AL SHAMSI",
+        "SN82566 ANWAR AL AMRI"
       ]
     },
     "night": {
       "title": "Flight Dispatch",
       "items": [
-        "SN82654 AHMED AL HADI",
+        "SN82431 MAHMOOD AL BALUSHI",
+        "SN82331 ISMAIL AL MAHARBI",
         "SN82410 SAID AL SADI",
-        "SN82417 TALAL AL HUSEINI"
+        "SN82416 NASSER AL OMAIRI"
       ]
     }
   },
