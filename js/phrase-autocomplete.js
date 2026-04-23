@@ -199,14 +199,75 @@ window.phraseAutocomplete = {
     return true;
   },
 
+  _toAsciiDigits(value) {
+    return String(value || "")
+      .replace(/[\u0660-\u0669]/g, (d) => String(d.charCodeAt(0) - 0x0660))
+      .replace(/[\u06F0-\u06F9]/g, (d) => String(d.charCodeAt(0) - 0x06f0));
+  },
+
+  _normalizeFlightDateKey(value) {
+    const raw = String(value || "").toUpperCase().replace(/\s/g, "");
+    const m = raw.match(/^(\d{1,2})([A-Z]{3})$/);
+    if (!m) return raw;
+    return `${parseInt(m[1], 10)}${m[2]}`;
+  },
+
+  _isoToFlightKey(iso) {
+    if (!window.offloadLoader || typeof window.offloadLoader.isoToFlightDateKey !== "function") return "";
+    return this._normalizeFlightDateKey(window.offloadLoader.isoToFlightDateKey(iso || ""));
+  },
+
+  _dateFromFlightKey(key) {
+    const m = this._normalizeFlightDateKey(key).match(/^(\d{1,2})([A-Z]{3})$/);
+    if (!m) return null;
+    const months = {
+      JAN: 0,
+      FEB: 1,
+      MAR: 2,
+      APR: 3,
+      MAY: 4,
+      JUN: 5,
+      JUL: 6,
+      AUG: 7,
+      SEP: 8,
+      OCT: 9,
+      NOV: 10,
+      DEC: 11
+    };
+    const month = months[m[2]];
+    if (month == null) return null;
+    const day = parseInt(m[1], 10);
+    if (!day || day < 1 || day > 31) return null;
+    const now = new Date();
+    let year = now.getFullYear();
+    if (month - now.getMonth() > 6) year -= 1;
+    if (now.getMonth() - month > 6) year += 1;
+    return new Date(year, month, day);
+  },
+
+  _pickLatestFlightDateKey(keys) {
+    const arr = Array.from(keys || []).filter(Boolean);
+    if (!arr.length) return "";
+    const dated = arr
+      .map((key) => ({ key: this._normalizeFlightDateKey(key), dt: this._dateFromFlightKey(key) }))
+      .filter((x) => x.dt instanceof Date && !Number.isNaN(x.dt.getTime()))
+      .sort((a, b) => b.dt.getTime() - a.dt.getTime());
+    if (dated.length) return dated[0].key;
+    return this._normalizeFlightDateKey(arr[arr.length - 1]);
+  },
+
   /** Last token as flight code prefix (e.g. WY, WY1, WY101). */
   _flightPrefixQuery(value) {
     const parts = String(value || "")
       .replace(/^[\s\u2022\-*]+/, "")
+      .replace(/[\/،,;:()]+/g, " ")
+      .replace(/\s+/g, " ")
       .trim()
+      .replace(/[^\w\s]/g, "")
+      .replace(/[^\u0000-\u007F]/g, (ch) => this._toAsciiDigits(ch))
       .toUpperCase()
       .split(/\s+/);
-    const tok = parts.length ? parts[parts.length - 1] : "";
+    const tok = this._toAsciiDigits(parts.length ? parts[parts.length - 1] : "");
     if (!/^(?:[A-Z]{2}\d{0,4}|\d{1,4})$/.test(tok)) return "";
     return tok;
   },
@@ -279,50 +340,40 @@ window.phraseAutocomplete = {
    * @param {boolean} [listAllWhenNoFlightToken] — if true and flightQuery is "", return all of today’s flights (after space / new segment).
    */
   _flightSuggestionStrings(flightQuery, listAllWhenNoFlightToken) {
-    const q = (flightQuery || "").trim().toUpperCase();
+    const q = this._toAsciiDigits((flightQuery || "").trim().toUpperCase());
     const fa = window.flightAutocomplete;
     if (!fa || !Array.isArray(fa.flights) || !fa.flights.length) return [];
 
-    let iso = "";
+    let reportIso = "";
     try {
       const w = window.__flightSuggestIsoDate;
-      if (w && /^\d{4}-\d{2}-\d{2}$/.test(String(w))) iso = String(w).trim();
+      if (w && /^\d{4}-\d{2}-\d{2}$/.test(String(w))) reportIso = String(w).trim();
     } catch (_) {}
-    if (!iso) {
-      const d = new Date();
-      iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-    }
-
-    let dateKey = "";
-    if (window.offloadLoader && typeof window.offloadLoader.isoToFlightDateKey === "function") {
-      dateKey = String(window.offloadLoader.isoToFlightDateKey(iso) || "")
-        .toUpperCase()
-        .replace(/\s/g, "");
-    }
+    const d = new Date();
+    const todayIso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(
+      2,
+      "0"
+    )}`;
+    if (!reportIso) reportIso = todayIso;
+    const reportKey = this._isoToFlightKey(reportIso);
+    const todayKey = this._isoToFlightKey(todayIso);
 
     const poolAll = fa.flights.slice();
-    let pool = poolAll;
-    if (dateKey) {
-      const sameDay = poolAll.filter((f) => String(f.date || "").toUpperCase().replace(/\s/g, "") === dateKey);
-      if (sameDay.length) {
-        pool = sameDay;
-      } else if (window.offloadLoader && typeof window.offloadLoader.isoToFlightDateKey === "function") {
-        /*
-         * If report date has no flights, fall back to browser "today" flights so
-         * Load Plan remains useful during date-index/report-date lag.
-         */
-        const d = new Date();
-        const todayIso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-        const todayKey = String(window.offloadLoader.isoToFlightDateKey(todayIso) || "")
-          .toUpperCase()
-          .replace(/\s/g, "");
-        pool = todayKey
-          ? poolAll.filter((f) => String(f.date || "").toUpperCase().replace(/\s/g, "") === todayKey)
-          : [];
-      } else {
-        pool = [];
-      }
+    const byDate = new Map();
+    poolAll.forEach((f) => {
+      const key = this._normalizeFlightDateKey(f.date || "");
+      if (!key) return;
+      if (!byDate.has(key)) byDate.set(key, []);
+      byDate.get(key).push(f);
+    });
+
+    let pool = reportKey && byDate.has(reportKey) ? byDate.get(reportKey) : null;
+    if (!pool && todayKey && byDate.has(todayKey)) pool = byDate.get(todayKey);
+    if (!pool) {
+      const latestKey = this._pickLatestFlightDateKey(byDate.keys());
+      if (latestKey && byDate.has(latestKey)) pool = byDate.get(latestKey);
     }
+    if (!pool) pool = poolAll;
 
     const fmt = (f) =>
       typeof fa.formatFlight === "function"
