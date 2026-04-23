@@ -2167,6 +2167,12 @@
       .join("\n");
   }
 
+  /** For copy/paste output: keep one visible bullet even when section is empty. */
+  function toBulletedLinesWithFallback(raw) {
+    const bullets = toBulletedLines(raw);
+    return bullets || "\u2022";
+  }
+
   function buildWordClipboardHeadHtml() {
     return [
       '<meta charset="utf-8">',
@@ -2337,16 +2343,16 @@
       manpowerText,
       "",
       "7. EQUIPMENT STATUS",
-      state.equipmentStatus,
+      toBulletedLinesWithFallback(state.equipmentStatus),
       "",
       "8. HANDOVER DETAILS",
       toBulletedLines(state.handoverDetails),
       "",
       "9. SPECIAL H/O",
-      toBulletedLines(state.specialHO),
+      toBulletedLinesWithFallback(state.specialHO),
       "",
       "10. OTHER",
-      toBulletedLines(state.otherText),
+      toBulletedLinesWithFallback(state.otherText),
     ].join("\n");
     return [plainHeader, "", core, plainSig].join("\n");
   }
@@ -2373,7 +2379,14 @@
       div.className = ["export-val", "export-multiline", ...keepClasses].join(" ").trim();
       const id = String(ta.id || "").trim();
       const shouldBullet = id === "handoverDetails" || id === "specialHO" || id === "otherText";
-      div.textContent = shouldBullet ? toBulletedLines(ta.value) : ta.value;
+      const shouldBulletWithFallback = id === "equipmentStatus" || id === "specialHO" || id === "otherText";
+      if (shouldBulletWithFallback) {
+        div.textContent = toBulletedLinesWithFallback(ta.value);
+      } else if (shouldBullet) {
+        div.textContent = toBulletedLines(ta.value);
+      } else {
+        div.textContent = ta.value;
+      }
       ta.replaceWith(div);
     });
     return clone.innerHTML;
