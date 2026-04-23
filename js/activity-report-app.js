@@ -1946,15 +1946,23 @@
         "border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;margin-top:16px;width:100%;"
       );
       const tr = document.createElement("tr");
+      const tdAccent = document.createElement("td");
+      tdAccent.setAttribute("bgcolor", borderLeft);
+      tdAccent.setAttribute(
+        "style",
+        `width:8px;background-color:${borderLeft};font-size:0;line-height:0;mso-line-height-rule:exactly;`
+      );
+      tdAccent.innerHTML = "&nbsp;";
       const td = document.createElement("td");
       td.setAttribute("bgcolor", bg);
       const isManpowerMajor = el.classList && el.classList.contains("manpower-block-heading");
       const titleStyle = isManpowerMajor
-        ? `background-color:${bg};border-left:4px solid ${borderLeft};padding:9px 12px;mso-line-height-rule:exactly;`
-        : `background-color:${bg};border-left:4px solid ${borderLeft};padding:7px 10px;mso-line-height-rule:exactly;`;
+        ? `background-color:${bg};padding:9px 12px;mso-line-height-rule:exactly;`
+        : `background-color:${bg};padding:7px 10px;mso-line-height-rule:exactly;`;
       td.setAttribute("style", titleStyle);
       const runStyle = isManpowerMajor ? WORD_CLIPBOARD.bannerMajor : WORD_CLIPBOARD.bannerDefault;
       td.appendChild(wordStyledSpan(text, runStyle));
+      tr.appendChild(tdAccent);
       tr.appendChild(td);
       table.appendChild(tr);
       el.replaceWith(table);
@@ -2261,7 +2269,7 @@
     const titleE = escapeHtml(title);
     const bannerBg = "#93c5fd";
     const ink = "#000000";
-    return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;margin-bottom:14px;max-width:100%;border:1px solid #cbd5e1;"><tr><td bgcolor="#1e3a8a" style="width:6px;background-color:#1e3a8a;font-size:0;line-height:0;">&nbsp;</td><td bgcolor="${bannerBg}" style="background-color:${bannerBg};padding:18px 20px;vertical-align:top;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;"><tr><td style="vertical-align:top;font-family:'Arial',sans-serif;color:${ink};"><div style="mso-ansi-font-size:16.5pt;mso-bidi-font-size:16.5pt;font-size:16.5pt;font-weight:bold;line-height:115%;margin:0 0 10px 0;color:${ink};mso-line-height-rule:exactly;"><span style="mso-ansi-font-size:15.0pt;font-size:15.0pt;margin-right:6px;">&#9992;</span> Export Warehouse Activity Report</div><div style="mso-ansi-font-size:11.0pt;mso-bidi-font-size:11.0pt;font-size:11.0pt;line-height:115%;color:${ink};mso-line-height-rule:exactly;">Shift Date: <span style="color:${ink};font-weight:bold;">${dE}</span> &nbsp;|&nbsp; Time: <span style="color:${ink};font-weight:bold;">${tE}</span> &nbsp;|&nbsp; <span style="color:${ink};font-weight:bold;">${titleE}</span></div></td><td style="vertical-align:top;text-align:right;font-family:'Arial',sans-serif;mso-ansi-font-size:10.0pt;font-size:10.0pt;color:${ink};width:170px;"><div style="color:${ink};">Transom Cargo LLC.</div><div style="font-weight:bold;margin-top:4px;color:${ink};">Export Operations</div></td></tr></table></td></tr></table>`;
+    return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;margin-bottom:14px;max-width:100%;border:1px solid #cbd5e1;"><tr><td bgcolor="#1e3a8a" style="width:12px;background-color:#1e3a8a;font-size:0;line-height:0;">&nbsp;</td><td bgcolor="${bannerBg}" style="background-color:${bannerBg};padding:18px 20px;vertical-align:top;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;"><tr><td style="vertical-align:top;font-family:'Arial',sans-serif;color:${ink};"><div style="mso-ansi-font-size:16.5pt;mso-bidi-font-size:16.5pt;font-size:16.5pt;font-weight:bold;line-height:115%;margin:0 0 10px 0;color:${ink};mso-line-height-rule:exactly;"><span style="mso-ansi-font-size:15.0pt;font-size:15.0pt;margin-right:6px;">&#9992;</span> Export Warehouse Activity Report</div><div style="mso-ansi-font-size:11.0pt;mso-bidi-font-size:11.0pt;font-size:11.0pt;line-height:115%;color:${ink};mso-line-height-rule:exactly;">Shift Date: <span style="color:${ink};font-weight:bold;">${dE}</span> &nbsp;|&nbsp; Time: <span style="color:${ink};font-weight:bold;">${tE}</span> &nbsp;|&nbsp; <span style="color:${ink};font-weight:bold;">${titleE}</span></div></td><td style="vertical-align:top;text-align:right;font-family:'Arial',sans-serif;mso-ansi-font-size:10.0pt;font-size:10.0pt;color:${ink};width:170px;"><div style="color:${ink};">Transom Cargo LLC.</div><div style="font-weight:bold;margin-top:4px;color:${ink};">Export Operations</div></td></tr></table></td></tr></table>`;
   }
 
   function buildOutlookClipboardSignatureHtml(badgeSrcResolved) {
@@ -2274,7 +2282,7 @@
     const badgeSrc =
       typeof rawSrc === "string" && rawSrc.startsWith("data:") ? rawSrc : escapeHtml(rawSrc);
     const badgesImg = `<div style="margin:16px 0 0 0;max-width:100%;"><img src="${badgeSrc}" alt="IATA CEIV PHARMA, IATA CEIV FRESH, ISO 9001:2015, ISO 45001:2018, HACCP, GDP, RA3" width="640" style="max-width:100%;height:auto;border:0;display:block;-ms-interpolation-mode:bicubic;" /></div>`;
-    const signatureText = `<div style="margin-bottom:10px;color:#000000;mso-ansi-font-size:10.0pt;font-size:10.0pt;font-family:'Arial',sans-serif;">Best Regards,</div>${nameBlock}<div style="mso-ansi-font-size:10.0pt;font-size:10.0pt;color:#000000;margin-bottom:14px;font-family:'Arial',sans-serif;">Duty Supervisor – Export Operation</div><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;border-top:1px solid #cbd5e1;padding-top:12px;"><tr><td style="width:8px;background-color:#dc2626;font-size:0;line-height:0;" bgcolor="#dc2626">&nbsp;</td><td style="padding:0 12px 0 10px;vertical-align:top;width:130px;"><div style="mso-ansi-font-size:13.5pt;font-size:13.5pt;font-weight:bold;color:#000000;letter-spacing:0.5px;font-family:'Arial',sans-serif;">TRANSOM</div><div style="mso-ansi-font-size:8.5pt;font-size:8.5pt;color:#000000;letter-spacing:1px;font-family:'Arial',sans-serif;">CARGO</div></td><td style="border-left:2px solid #dc2626;padding-left:14px;vertical-align:top;mso-ansi-font-size:9.0pt;font-size:9.0pt;color:#000000;line-height:115%;font-family:'Arial',sans-serif;mso-line-height-rule:exactly;"><strong style="color:#000000;">Transom Cargo LLC.</strong><br/>P.O. Box: 618, P.C: 111<br/>Sultanate of Oman<br/>Phone No. 97297474<br/><span style="color:#000000;">www.transomcargo.com</span></td></tr></table>`;
+    const signatureText = `<div style="margin-bottom:10px;color:#000000;mso-ansi-font-size:10.0pt;font-size:10.0pt;font-family:'Arial',sans-serif;">Best Regards,</div>${nameBlock}<div style="mso-ansi-font-size:10.0pt;font-size:10.0pt;color:#000000;margin-bottom:14px;font-family:'Arial',sans-serif;">Duty Supervisor – Export Operation</div><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;border-top:1px solid #cbd5e1;padding-top:12px;"><tr><td style="width:16px;background-color:#dc2626;font-size:0;line-height:0;" bgcolor="#dc2626">&nbsp;</td><td style="padding:0 12px 0 10px;vertical-align:top;width:130px;"><div style="mso-ansi-font-size:13.5pt;font-size:13.5pt;font-weight:bold;color:#000000;letter-spacing:0.5px;font-family:'Arial',sans-serif;">TRANSOM</div><div style="mso-ansi-font-size:8.5pt;font-size:8.5pt;color:#000000;letter-spacing:1px;font-family:'Arial',sans-serif;">CARGO</div></td><td style="border-left:4px solid #dc2626;padding-left:14px;vertical-align:top;mso-ansi-font-size:9.0pt;font-size:9.0pt;color:#000000;line-height:115%;font-family:'Arial',sans-serif;mso-line-height-rule:exactly;"><strong style="color:#000000;">Transom Cargo LLC.</strong><br/>P.O. Box: 618, P.C: 111<br/>Sultanate of Oman<br/>Phone No. 97297474<br/><span style="color:#000000;">www.transomcargo.com</span></td></tr></table>`;
     return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;margin-top:30px;max-width:100%;"><tr><td style="font-family:'Arial',sans-serif;mso-ansi-font-size:10.0pt;font-size:10.0pt;color:#000000;line-height:115%;padding-top:22px;border-top:1px solid #cbd5e1;mso-line-height-rule:exactly;">${signatureText}${badgesImg}</td></tr></table>`;
   }
 
