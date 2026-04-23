@@ -256,6 +256,15 @@ window.phraseAutocomplete = {
     return this._normalizeFlightDateKey(arr[arr.length - 1]);
   },
 
+  _formatFlightSuggestionRow(flight, displayDateKey, formatter) {
+    const code = String((flight && flight.code) || "").trim().toUpperCase();
+    const destination = String((flight && flight.destination) || "").trim().toUpperCase();
+    const dateKey = this._normalizeFlightDateKey(displayDateKey || (flight && flight.date) || "");
+    if (dateKey) return [code, dateKey, destination].filter(Boolean).join("/");
+    if (typeof formatter === "function") return formatter(flight);
+    return [code, destination].filter(Boolean).join("/");
+  },
+
   /** Last token as flight code prefix (e.g. WY, WY1, WY101). */
   _flightPrefixQuery(value) {
     const parts = String(value || "")
@@ -367,18 +376,25 @@ window.phraseAutocomplete = {
       byDate.get(key).push(f);
     });
 
-    let pool = reportKey && byDate.has(reportKey) ? byDate.get(reportKey) : null;
-    if (!pool && todayKey && byDate.has(todayKey)) pool = byDate.get(todayKey);
+    let poolDateKey = reportKey && byDate.has(reportKey) ? reportKey : "";
+    if (!poolDateKey && todayKey && byDate.has(todayKey)) poolDateKey = todayKey;
+
+    let pool = poolDateKey ? byDate.get(poolDateKey) : null;
     if (!pool) {
       const latestKey = this._pickLatestFlightDateKey(byDate.keys());
-      if (latestKey && byDate.has(latestKey)) pool = byDate.get(latestKey);
+      if (latestKey && byDate.has(latestKey)) {
+        pool = byDate.get(latestKey);
+        poolDateKey = latestKey;
+      }
     }
     if (!pool) pool = poolAll;
 
-    const fmt = (f) =>
-      typeof fa.formatFlight === "function"
-        ? fa.formatFlight(f)
-        : [f.code, f.date, f.destination].filter(Boolean).join("/");
+    /*
+     * Always show suggestions with the selected report day (or today's day)
+     * so users don't keep seeing yesterday's date when source data lags.
+     */
+    const displayDateKey = reportKey || todayKey || poolDateKey;
+    const fmt = (f) => this._formatFlightSuggestionRow(f, displayDateKey, fa.formatFlight);
 
     if (!q) {
       if (listAllWhenNoFlightToken) {

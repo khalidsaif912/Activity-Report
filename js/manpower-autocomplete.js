@@ -67,10 +67,25 @@ window.employeeAutocomplete = {
     const t = this._normSectionTitle(sectionTitle);
     if (!t) return "mixed";
     if (t === "export checker") return "nameWithRole";
-    if (t === "supervisor" || t === "load control" || t === "export operators" || t === "flight dispatch") {
+    if (t === "export operators") return "nameWithOperatorRoles";
+    if (t === "supervisor" || t === "load control" || t === "flight dispatch") {
       return "nameOnly";
     }
     return "mixed";
+  },
+
+  _exportOperatorRoles() {
+    const fixed = ["ULD ATT", "MHS"];
+    const out = [];
+    const seen = new Set();
+    fixed.forEach((role) => {
+      const v = String(role || "").trim();
+      const k = v.toUpperCase();
+      if (!v || seen.has(k)) return;
+      seen.add(k);
+      out.push(v);
+    });
+    return out;
   },
 
   attach(input, key, options = {}) {
@@ -96,6 +111,21 @@ window.employeeAutocomplete = {
 
       if (suggestMode === "nameOnly") {
         matches = names.slice();
+      } else if (suggestMode === "nameWithOperatorRoles") {
+        const operatorRoles = this._exportOperatorRoles();
+        if (hasDash) {
+          const roleQ = this._normalize(rolePart);
+          names.forEach((name) => {
+            operatorRoles
+              .filter((role) => !roleQ || this._normalize(role).startsWith(roleQ))
+              .forEach((role) => matches.push(`${name} - ${role}`));
+          });
+        } else {
+          names.forEach((name) => {
+            matches.push(name);
+            operatorRoles.forEach((role) => matches.push(`${name} - ${role}`));
+          });
+        }
       } else if (hasDash) {
         names.forEach((name) => {
           const roles =
