@@ -175,11 +175,12 @@ window.phraseAutocomplete = {
     return String(value || "")
       .split(/\r?\n/)
       .map((line) => {
-        const text = String(line || "").trim();
-        if (!text) return "";
-        const stripped = text.replace(/^[\u2022\-*]\s*/, "").trim();
-        if (!stripped) return "";
-        return `\u2022 ${stripped}`;
+        const raw = String(line || "");
+        if (!raw.trim()) return "";
+        const noIndent = raw.replace(/^\s+/, "");
+        const strippedLeadBullet = noIndent.replace(/^[\u2022\-*]\s*/, "");
+        if (!strippedLeadBullet.trim()) return "";
+        return `\u2022 ${strippedLeadBullet}`;
       })
       .join("\n");
   },
@@ -340,8 +341,10 @@ window.phraseAutocomplete = {
     const src = String(line || "").toUpperCase();
     const p = String(picked || "").toUpperCase();
     if (!src.trim()) return p;
-    if (/\s$/.test(src)) return src + p;
-    return src.replace(/\S+$/, p);
+    const looksLikeFlight = /^[A-Z]{2}\d{2,4}\/[0-9A-Z]+\/[A-Z0-9]{2,4}$/.test(p);
+    if (/\s$/.test(src)) return src + p + (looksLikeFlight ? " " : "");
+    const merged = src.replace(/\S+$/, p);
+    return looksLikeFlight ? `${merged} ` : merged;
   },
 
   /**
