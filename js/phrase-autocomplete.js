@@ -148,6 +148,21 @@ window.phraseAutocomplete = {
     );
   },
 
+  _isBulletedTextareaKey(key) {
+    return key === "handoverDetails" || key === "other" || key === "specialHO";
+  },
+
+  _normalizeBulletedTextareaValue(value) {
+    return String(value || "")
+      .split(/\r?\n/)
+      .map((line) => {
+        const text = String(line || "").trim();
+        if (!text) return "";
+        return `\u2022 ${text.replace(/^[\u2022\-*]\s*/, "")}`;
+      })
+      .join("\n");
+  },
+
   /** Last token as flight code prefix (e.g. WY, WY1, WY101). */
   _flightPrefixQuery(value) {
     const parts = String(value || "")
@@ -652,7 +667,10 @@ window.phraseAutocomplete = {
     };
 
     textarea.addEventListener("input", () => {
-      const value = textarea.value.toUpperCase();
+      let value = textarea.value.toUpperCase();
+      if (this._isBulletedTextareaKey(key)) {
+        value = this._normalizeBulletedTextareaValue(value);
+      }
       textarea.value = value;
       if (onSave) onSave(value);
       showSuggest();
@@ -664,6 +682,26 @@ window.phraseAutocomplete = {
       if (e.key === " " || e.code === "Space") {
         requestAnimationFrame(() => showSuggest());
       }
+    });
+
+    textarea.addEventListener("keydown", (e) => {
+      if (!this._isBulletedTextareaKey(key) || e.key !== "Enter") return;
+      if (this.activeInput === textarea && this.activeItems.length) return;
+      e.preventDefault();
+      const value = String(textarea.value || "");
+      const start = typeof textarea.selectionStart === "number" ? textarea.selectionStart : value.length;
+      const end = typeof textarea.selectionEnd === "number" ? textarea.selectionEnd : start;
+      const left = value.slice(0, start);
+      const right = value.slice(end);
+      const joiner = left.endsWith("\n") || !left.length ? "\u2022 " : "\n\u2022 ";
+      const next = left + joiner + right;
+      textarea.value = next;
+      const pos = (left + joiner).length;
+      try {
+        textarea.selectionStart = textarea.selectionEnd = pos;
+      } catch (_) {}
+      if (onSave) onSave(next);
+      requestAnimationFrame(() => showSuggest());
     });
 
     textarea.addEventListener(
