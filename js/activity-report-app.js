@@ -1936,36 +1936,24 @@
         borderLeft = "#475569";
       }
       const text = el.textContent ?? "";
-      const table = document.createElement("table");
-      table.setAttribute("width", "100%");
-      table.setAttribute("cellpadding", "0");
-      table.setAttribute("cellspacing", "0");
-      table.setAttribute("border", "0");
-      table.setAttribute(
-        "style",
-        "border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;margin-top:16px;width:100%;table-layout:fixed;mso-cellspacing:0pt;"
-      );
-      const tr = document.createElement("tr");
-      const tdAccent = document.createElement("td");
-      tdAccent.setAttribute("width", "4");
-      tdAccent.setAttribute(
-        "style",
-        "width:4px;min-width:4px;max-width:4px;padding:0;margin:0;mso-padding-alt:0;mso-line-height-rule:exactly;vertical-align:top;"
-      );
-      tdAccent.innerHTML = `<div style="display:block;width:4px;min-width:4px;max-width:4px;height:100%;min-height:26px;background-color:${borderLeft};font-size:0;line-height:0;mso-line-height-rule:exactly;">&nbsp;</div>`;
-      const td = document.createElement("td");
-      td.setAttribute("bgcolor", bg);
       const isManpowerMajor = el.classList && el.classList.contains("manpower-block-heading");
-      const titleStyle = isManpowerMajor
-        ? `background-color:${bg};padding:9px 12px 9px 10px;mso-line-height-rule:exactly;`
-        : `background-color:${bg};padding:7px 10px 7px 8px;mso-line-height-rule:exactly;`;
-      td.setAttribute("style", titleStyle);
+      const box = document.createElement("div");
+      box.setAttribute(
+        "style",
+        isManpowerMajor
+          ? `background-color:${bg};padding:9px 12px;margin-top:16px;mso-line-height-rule:exactly;`
+          : `background-color:${bg};padding:7px 10px;margin-top:16px;mso-line-height-rule:exactly;`
+      );
+      const bar = document.createElement("span");
+      bar.setAttribute(
+        "style",
+        `display:inline-block;color:${borderLeft};font-weight:700;font-size:16px;line-height:1;margin-right:7px;vertical-align:middle;`
+      );
+      bar.textContent = "\u258F";
       const runStyle = isManpowerMajor ? WORD_CLIPBOARD.bannerMajor : WORD_CLIPBOARD.bannerDefault;
-      td.appendChild(wordStyledSpan(text, runStyle));
-      tr.appendChild(tdAccent);
-      tr.appendChild(td);
-      table.appendChild(tr);
-      el.replaceWith(table);
+      box.appendChild(bar);
+      box.appendChild(wordStyledSpan(text, runStyle));
+      el.replaceWith(box);
     });
   }
 
