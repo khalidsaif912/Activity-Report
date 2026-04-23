@@ -152,6 +152,25 @@ window.phraseAutocomplete = {
     return key === "handoverDetails" || key === "other" || key === "specialHO";
   },
 
+  _phraseSourceKeysFor(key) {
+    if (key === "handoverDetails") return ["handoverDetails", "specialHO"];
+    return [key];
+  },
+
+  _mergedPhraseListForKey(key) {
+    const out = [];
+    const seen = new Set();
+    this._phraseSourceKeysFor(key).forEach((srcKey) => {
+      this.getList(srcKey).forEach((item) => {
+        const text = String(item || "").toUpperCase().trim();
+        if (!text || seen.has(text)) return;
+        seen.add(text);
+        out.push(text);
+      });
+    });
+    return out;
+  },
+
   _normalizeBulletedTextareaValue(value) {
     return String(value || "")
       .split(/\r?\n/)
@@ -341,17 +360,26 @@ window.phraseAutocomplete = {
     const q = (phraseQuery || "").trim().toUpperCase();
     const fq =
       arguments.length >= 3 ? String(flightQuery ?? "").trim().toUpperCase() : this._isFlightAwarePhraseKey(key) ? "" : q;
-    const list = this.getList(key);
+    const list = this._mergedPhraseListForKey(key);
 
     if (key !== "csdRescreening") {
-      const learnedRaw =
+      const learnedRaw = [];
+      if (
         this._isLearnedPhraseKey(key) &&
         window.phraseUsageCache &&
         typeof window.phraseUsageCache.getSortedMatches === "function"
-          ? window.phraseUsageCache.getSortedMatches(key, q, 14)
-          : [];
+      ) {
+        const seenLearned = new Set();
+        this._phraseSourceKeysFor(key).forEach((srcKey) => {
+          window.phraseUsageCache.getSortedMatches(srcKey, q, 14).forEach((item) => {
+            const text = String(item || "").toUpperCase().trim();
+            if (!text || seenLearned.has(text)) return;
+            seenLearned.add(text);
+            learnedRaw.push(text);
+          });
+        });
+      }
       const fixedRaw = (list || [])
-        .map((item) => String(item || "").toUpperCase().trim())
         .filter((item) => item && (!q || item.startsWith(q) || (q.length >= 2 && item.includes(q))));
 
       const flightsRaw = this._isFlightAwarePhraseKey(key)
