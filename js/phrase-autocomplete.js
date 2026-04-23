@@ -177,9 +177,26 @@ window.phraseAutocomplete = {
       .map((line) => {
         const text = String(line || "").trim();
         if (!text) return "";
-        return `\u2022 ${text.replace(/^[\u2022\-*]\s*/, "")}`;
+        const stripped = text.replace(/^[\u2022\-*]\s*/, "").trim();
+        if (!stripped) return "";
+        return `\u2022 ${stripped}`;
       })
       .join("\n");
+  },
+
+  _isPrimaryBulletTextareaKey(key) {
+    return key === "specialHO" || key === "other";
+  },
+
+  _ensurePrimaryBulletSkeleton(textarea, key) {
+    if (!this._isPrimaryBulletTextareaKey(key)) return false;
+    const raw = String((textarea && textarea.value) || "");
+    if (raw.trim()) return false;
+    textarea.value = "\u2022 ";
+    try {
+      textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
+    } catch (_) {}
+    return true;
   },
 
   /** Last token as flight code prefix (e.g. WY, WY1, WY101). */
@@ -687,6 +704,13 @@ window.phraseAutocomplete = {
             textarea.value = merged;
             textarea.selectionStart = textarea.selectionEnd = merged.length;
           }
+          if (this._isBulletedTextareaKey(key)) {
+            merged = this._normalizeBulletedTextareaValue(merged);
+            textarea.value = merged;
+            try {
+              textarea.selectionStart = textarea.selectionEnd = merged.length;
+            } catch (_) {}
+          }
           if (onSave) onSave(merged);
         },
         useDel ? key : "",
@@ -704,7 +728,10 @@ window.phraseAutocomplete = {
       showSuggest();
     });
 
-    textarea.addEventListener("focus", showSuggest);
+    textarea.addEventListener("focus", () => {
+      this._ensurePrimaryBulletSkeleton(textarea, key);
+      showSuggest();
+    });
 
     textarea.addEventListener("keydown", (e) => {
       if (e.key === " " || e.code === "Space") {
@@ -767,6 +794,13 @@ window.phraseAutocomplete = {
     );
 
     textarea.addEventListener("blur", () => {
+      if (this._isBulletedTextareaKey(key)) {
+        const raw = String(textarea.value || "");
+        if (/^[\s\u2022\-*]*$/.test(raw)) {
+          textarea.value = "";
+          if (onSave) onSave("");
+        }
+      }
       if (this._isLearnedPhraseKey(key) && window.phraseUsageCache && typeof window.phraseUsageCache.recordPhrase === "function") {
         window.phraseUsageCache.recordPhrase(key, textarea.value);
       }
