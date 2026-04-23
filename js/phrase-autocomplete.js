@@ -202,6 +202,7 @@ window.phraseAutocomplete = {
   /** Last token as flight code prefix (e.g. WY, WY1, WY101). */
   _flightPrefixQuery(value) {
     const parts = String(value || "")
+      .replace(/^[\s\u2022\-*]+/, "")
       .trim()
       .toUpperCase()
       .split(/\s+/);
@@ -256,7 +257,9 @@ window.phraseAutocomplete = {
   },
 
   _tailTokenForFlightAwareLine(line) {
-    const u = String(line || "").toUpperCase();
+    const u = String(line || "")
+      .toUpperCase()
+      .replace(/^[\s\u2022\-*]+/, "");
     if (!u.trim()) return "";
     if (/\s$/.test(u)) return "";
     const parts = u.trimEnd().split(/\s+/);
@@ -351,7 +354,9 @@ window.phraseAutocomplete = {
    * Phrase matching uses only tailQuery so suggestions appear after a flight is chosen.
    */
   phraseCompositeParts(value) {
-    const v = (value || "").toUpperCase();
+    const v = String(value || "")
+      .toUpperCase()
+      .replace(/^[\s\u2022\-*]+/, "");
     const flightRe = /[A-Z]{2}\d{2,4}\/[0-9A-Z]+\/[A-Z0-9]{2,4}/g;
     let lastEnd = -1;
     let m;
