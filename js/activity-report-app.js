@@ -1944,26 +1944,28 @@
       table.setAttribute("border", "0");
       table.setAttribute(
         "style",
-        "border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;margin-top:16px;width:100%;"
+        "border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;margin-top:16px;width:100%;table-layout:fixed;"
       );
       const tr = document.createElement("tr");
+      const tdAccent = document.createElement("td");
+      tdAccent.setAttribute("width", "2");
+      tdAccent.setAttribute("bgcolor", borderLeft);
+      tdAccent.setAttribute(
+        "style",
+        `width:2px;min-width:2px;max-width:2px;background-color:${borderLeft};padding:0;margin:0;font-size:0;line-height:0;mso-line-height-rule:exactly;mso-padding-alt:0;`
+      );
+      tdAccent.innerHTML = "&nbsp;";
       const td = document.createElement("td");
       td.setAttribute("bgcolor", bg);
       td.setAttribute(
         "style",
         isManpowerMajor
-          ? `background-color:${bg};padding:9px 12px;mso-line-height-rule:exactly;`
-          : `background-color:${bg};padding:7px 10px;mso-line-height-rule:exactly;`
+          ? `background-color:${bg};padding:9px 12px 9px 10px;mso-line-height-rule:exactly;`
+          : `background-color:${bg};padding:7px 10px 7px 8px;mso-line-height-rule:exactly;`
       );
-      const bar = document.createElement("span");
-      bar.setAttribute(
-        "style",
-        `display:inline-block;color:${borderLeft};font-weight:700;font-size:16px;line-height:1;margin-right:7px;vertical-align:middle;`
-      );
-      bar.textContent = "\u258F";
       const runStyle = isManpowerMajor ? WORD_CLIPBOARD.bannerMajor : WORD_CLIPBOARD.bannerDefault;
-      td.appendChild(bar);
       td.appendChild(wordStyledSpan(text, runStyle));
+      tr.appendChild(tdAccent);
       tr.appendChild(td);
       table.appendChild(tr);
       el.replaceWith(table);
