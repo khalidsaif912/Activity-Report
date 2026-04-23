@@ -1937,12 +1937,23 @@
       }
       const text = el.textContent ?? "";
       const isManpowerMajor = el.classList && el.classList.contains("manpower-block-heading");
-      const box = document.createElement("div");
-      box.setAttribute(
+      const table = document.createElement("table");
+      table.setAttribute("width", "100%");
+      table.setAttribute("cellpadding", "0");
+      table.setAttribute("cellspacing", "0");
+      table.setAttribute("border", "0");
+      table.setAttribute(
+        "style",
+        "border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;margin-top:16px;width:100%;"
+      );
+      const tr = document.createElement("tr");
+      const td = document.createElement("td");
+      td.setAttribute("bgcolor", bg);
+      td.setAttribute(
         "style",
         isManpowerMajor
-          ? `background-color:${bg};padding:9px 12px;margin-top:16px;mso-line-height-rule:exactly;`
-          : `background-color:${bg};padding:7px 10px;margin-top:16px;mso-line-height-rule:exactly;`
+          ? `background-color:${bg};padding:9px 12px;mso-line-height-rule:exactly;`
+          : `background-color:${bg};padding:7px 10px;mso-line-height-rule:exactly;`
       );
       const bar = document.createElement("span");
       bar.setAttribute(
@@ -1951,9 +1962,11 @@
       );
       bar.textContent = "\u258F";
       const runStyle = isManpowerMajor ? WORD_CLIPBOARD.bannerMajor : WORD_CLIPBOARD.bannerDefault;
-      box.appendChild(bar);
-      box.appendChild(wordStyledSpan(text, runStyle));
-      el.replaceWith(box);
+      td.appendChild(bar);
+      td.appendChild(wordStyledSpan(text, runStyle));
+      tr.appendChild(td);
+      table.appendChild(tr);
+      el.replaceWith(table);
     });
   }
 
