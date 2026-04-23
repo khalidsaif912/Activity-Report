@@ -1943,27 +1943,18 @@
       table.setAttribute("border", "0");
       table.setAttribute(
         "style",
-        "border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;margin-top:16px;width:100%;table-layout:fixed;"
+        "border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;margin-top:16px;width:100%;"
       );
       const tr = document.createElement("tr");
-      const tdAccent = document.createElement("td");
-      tdAccent.setAttribute("width", "1");
-      tdAccent.setAttribute("bgcolor", borderLeft);
-      tdAccent.setAttribute(
-        "style",
-        `width:1px;background-color:${borderLeft};font-size:0;line-height:0;mso-line-height-rule:exactly;`
-      );
-      tdAccent.innerHTML = "&nbsp;";
       const td = document.createElement("td");
       td.setAttribute("bgcolor", bg);
       const isManpowerMajor = el.classList && el.classList.contains("manpower-block-heading");
       const titleStyle = isManpowerMajor
-        ? `background-color:${bg};border-left:1px solid ${borderLeft};padding:9px 12px;mso-line-height-rule:exactly;`
-        : `background-color:${bg};border-left:1px solid ${borderLeft};padding:7px 10px;mso-line-height-rule:exactly;`;
+        ? `background-color:${bg};border-left:2px solid ${borderLeft};mso-border-left-alt:solid ${borderLeft} 1.5pt;padding:9px 12px 9px 10px;mso-line-height-rule:exactly;`
+        : `background-color:${bg};border-left:2px solid ${borderLeft};mso-border-left-alt:solid ${borderLeft} 1.5pt;padding:7px 10px 7px 8px;mso-line-height-rule:exactly;`;
       td.setAttribute("style", titleStyle);
       const runStyle = isManpowerMajor ? WORD_CLIPBOARD.bannerMajor : WORD_CLIPBOARD.bannerDefault;
       td.appendChild(wordStyledSpan(text, runStyle));
-      tr.appendChild(tdAccent);
       tr.appendChild(td);
       table.appendChild(tr);
       el.replaceWith(table);
