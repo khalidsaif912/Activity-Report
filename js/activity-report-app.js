@@ -947,6 +947,64 @@
     return { row, input };
   }
 
+  function splitOperationalTwoFieldLine(raw) {
+    const line = String(raw || "").trim();
+    if (!line) return { flight: "", phrase: "" };
+    const slashPattern = /^(\S+\/\d{1,2}[A-Za-z]{3}\/\S+)\s+(.*)$/;
+    const slashMatch = line.match(slashPattern);
+    if (slashMatch) {
+      return { flight: String(slashMatch[1] || "").trim(), phrase: String(slashMatch[2] || "").trim() };
+    }
+    const hardGap = line.match(/^(.+?)\s{2,}(.+)$/);
+    if (hardGap) {
+      return { flight: String(hardGap[1] || "").trim(), phrase: String(hardGap[2] || "").trim() };
+    }
+    return { flight: line, phrase: "" };
+  }
+
+  function composeOperationalTwoFieldLine(flight, phrase) {
+    const f = String(flight || "").trim();
+    const p = String(phrase || "").trim();
+    if (f && p) return `${f} ${p}`;
+    return f || p;
+  }
+
+  function makeDualEditableRow(parts, onInput, onKeyDown, onDelete) {
+    const row = document.createElement("div");
+    row.className = "line-item";
+    row.style.display = "flex";
+    row.style.alignItems = "center";
+    row.style.gap = "8px";
+
+    const flightInput = document.createElement("input");
+    flightInput.type = "text";
+    flightInput.value = parts.flight || "";
+    flightInput.placeholder = "WY101/24APR/LHR";
+    flightInput.style.flex = "0 0 260px";
+    flightInput.oninput = () => onInput(flightInput.value, phraseInput.value);
+    flightInput.onkeydown = onKeyDown;
+
+    const phraseInput = document.createElement("input");
+    phraseInput.type = "text";
+    phraseInput.value = parts.phrase || "";
+    phraseInput.placeholder = "ALL ULD ALLOCATIONS CONFIRMED.";
+    phraseInput.style.flex = "1";
+    phraseInput.oninput = () => onInput(flightInput.value, phraseInput.value);
+    phraseInput.onkeydown = onKeyDown;
+
+    const del = document.createElement("button");
+    del.type = "button";
+    del.className = "delete-btn hidden-print";
+    del.textContent = "✕";
+    del.tabIndex = -1;
+    del.onclick = onDelete;
+
+    row.appendChild(flightInput);
+    row.appendChild(phraseInput);
+    row.appendChild(del);
+    return { row, flightInput, phraseInput };
+  }
+
   function handleEnterBackspace(list, index, onInsert, onDelete) {
     return function (e) {
       if (e.key === "Enter") {
@@ -977,6 +1035,63 @@
       box.appendChild(title);
 
       group.items.forEach((item, itemIndex) => {
+        const useTwoFields = groupIndex === 0 || groupIndex === 1;
+        if (useTwoFields) {
+          const parts = splitOperationalTwoFieldLine(item);
+          const editable = makeDualEditableRow(
+            parts,
+            (flightValue, phraseValue) => {
+              state.operationalActivities[groupIndex].items[itemIndex] = composeOperationalTwoFieldLine(
+                flightValue,
+                phraseValue
+              );
+              saveDraft();
+            },
+            function (e) {
+              if (e.key === "Enter") {
+                if (isAnySuggestOpenFor(e.target)) return;
+                e.preventDefault();
+                state.operationalActivities[groupIndex].items.splice(itemIndex + 1, 0, "");
+                saveDraft();
+                renderOperationalActivities();
+                focusOperational(groupIndex, itemIndex + 1);
+              }
+              if (
+                e.key === "Backspace" &&
+                !editable.flightInput.value.trim() &&
+                !editable.phraseInput.value.trim() &&
+                state.operationalActivities[groupIndex].items.length > 1
+              ) {
+                e.preventDefault();
+                state.operationalActivities[groupIndex].items.splice(itemIndex, 1);
+                saveDraft();
+                renderOperationalActivities();
+                focusOperational(groupIndex, Math.max(0, itemIndex - 1));
+              }
+            },
+            () => {
+              if (state.operationalActivities[groupIndex].items.length > 1) {
+                state.operationalActivities[groupIndex].items.splice(itemIndex, 1);
+                saveDraft();
+                renderOperationalActivities();
+              }
+            }
+          );
+          editable.flightInput.dataset.group = groupIndex;
+          editable.flightInput.dataset.index = itemIndex;
+          editable.flightInput.classList.add("opact-input");
+          editable.flightInput.dataset.phraseKey = "";
+          editable.flightInput.dataset.segment = "flight";
+
+          editable.phraseInput.dataset.group = groupIndex;
+          editable.phraseInput.dataset.index = itemIndex;
+          editable.phraseInput.classList.add("opact-input");
+          editable.phraseInput.dataset.phraseKey = opPhraseKeysStatic[groupIndex] || "";
+          editable.phraseInput.dataset.segment = "phrase";
+          box.appendChild(editable.row);
+          return;
+        }
+
         const editable = makeEditableRow(
           item,
           (value) => {
@@ -1012,6 +1127,7 @@
         editable.input.dataset.index = itemIndex;
         editable.input.classList.add("opact-input");
         editable.input.dataset.phraseKey = opPhraseKeysStatic[groupIndex] || "";
+        editable.input.dataset.segment = "full";
         if (groupIndex === 2) {
           editable.input.title =
             "After the policy number, press Space — then destination suggestions (codes & routes). Advance Loading phrases never appear here.";
@@ -2609,7 +2725,16 @@
         const g = +inp.dataset.group;
         const ii = +inp.dataset.index;
         if (state.operationalActivities[g] && state.operationalActivities[g].items[ii] !== undefined) {
-          state.operationalActivities[g].items[ii] = value;
+          const segment = (inp.dataset.segment || "full").trim();
+          if (segment === "phrase") {
+            const current = splitOperationalTwoFieldLine(state.operationalActivities[g].items[ii]);
+            state.operationalActivities[g].items[ii] = composeOperationalTwoFieldLine(current.flight, value);
+          } else if (segment === "flight") {
+            const current = splitOperationalTwoFieldLine(state.operationalActivities[g].items[ii]);
+            state.operationalActivities[g].items[ii] = composeOperationalTwoFieldLine(value, current.phrase);
+          } else {
+            state.operationalActivities[g].items[ii] = value;
+          }
           saveDraft();
         }
       });
