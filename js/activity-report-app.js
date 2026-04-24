@@ -2500,6 +2500,21 @@
       span.textContent = inp.value;
       inp.replaceWith(span);
     });
+    clone.querySelectorAll(".line-item").forEach((row) => {
+      const flight = row.querySelector("span.opact-flight-input");
+      const phrase = row.querySelector("span.opact-phrase-input");
+      if (!flight && !phrase) return;
+      const joined = [String((flight && flight.textContent) || "").trim(), String((phrase && phrase.textContent) || "").trim()]
+        .filter(Boolean)
+        .join(" ");
+      const one = document.createElement("span");
+      one.className = "export-val";
+      one.textContent = joined;
+      [flight, phrase].forEach((n) => {
+        if (n && n.parentNode === row) n.remove();
+      });
+      row.insertBefore(one, row.firstChild);
+    });
     clone.querySelectorAll("textarea").forEach((ta) => {
       const div = document.createElement("div");
       const keepClasses = String(ta.className || "")
