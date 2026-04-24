@@ -141,6 +141,53 @@
       font-size:13px;
     }
     .day-row:hover{background:#eff6ff}
+    .accordion-item{
+      border:1px solid #dbe5f1;
+      background:#fff;
+      margin-bottom:8px;
+    }
+    .accordion-btn{
+      width:100%;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      border:none;
+      background:#f8fafc;
+      padding:10px 12px;
+      cursor:pointer;
+      font-size:14px;
+      color:#0f172a;
+      text-align:right;
+    }
+    .accordion-btn:hover{background:#eff6ff}
+    .acc-arrow{
+      font-size:12px;
+      color:#334155;
+      transition:transform .16s ease;
+    }
+    .accordion-btn[aria-expanded="true"] .acc-arrow{transform:rotate(90deg)}
+    .accordion-panel{
+      padding:8px 10px 10px;
+      border-top:1px solid #e2e8f0;
+      background:#fff;
+    }
+    .shift-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      border:1px solid #e2e8f0;
+      background:#f8fafc;
+      padding:8px 10px;
+      margin-bottom:6px;
+      text-decoration:none;
+      color:#0f172a;
+      font-size:13px;
+    }
+    .shift-row:hover{background:#eaf2ff}
+    .shift-name{font-weight:700}
+    .shift-meta{color:#475569;font-size:12px}
     .tip{margin-top:8px;color:var(--muted);font-size:12px}
     @media (max-width:760px){
       .cards{grid-template-columns:1fr}
@@ -189,14 +236,103 @@
         </div>
         <div class="timeline">
           <h3>الأيام المتاحة</h3>
-          <a class="day-row" href="./data/report/offload_report.html"><span>‹</span><span>📅 2026-04-24 &nbsp; TODAY &nbsp; 2 flights</span></a>
-          <a class="day-row" href="./data/report/offload_report.html"><span>‹</span><span>📅 2026-04-23 &nbsp; 1 flights</span></a>
-          <a class="day-row" href="./data/report/offload_report.html"><span>‹</span><span>📅 2026-04-22 &nbsp; 3 flights</span></a>
-          <a class="day-row" href="./data/report/offload_report.html"><span>‹</span><span>📅 2026-04-21</span></a>
+          <div id="daysAccordion"></div>
         </div>
         <p class="tip">التصميم هنا مقلّد لنفس روح الواجهة القديمة، وجميع العناصر تنقلك لنفس صفحة التقرير الحالية.</p>
       </div>
     </section>
   </main>
+  <script>
+    const DAY_ITEMS = [
+      { date: "2026-04-24", today: true, total: 2, shifts: [
+        { name: "🌅 صباح / Morning", time: "06:00 – 15:00", flights: 1 },
+        { name: "☀️ ظهر / Afternoon", time: "13:00 – 22:00", flights: 0 },
+        { name: "🌙 ليل / Night", time: "21:00 – 06:00", flights: 1 }
+      ]},
+      { date: "2026-04-23", total: 1, shifts: [
+        { name: "🌅 صباح / Morning", time: "06:00 – 15:00", flights: 0 },
+        { name: "☀️ ظهر / Afternoon", time: "13:00 – 22:00", flights: 0 },
+        { name: "🌙 ليل / Night", time: "21:00 – 06:00", flights: 1 }
+      ]},
+      { date: "2026-04-22", total: 3, shifts: [
+        { name: "🌅 صباح / Morning", time: "06:00 – 15:00", flights: 1 },
+        { name: "☀️ ظهر / Afternoon", time: "13:00 – 22:00", flights: 1 },
+        { name: "🌙 ليل / Night", time: "21:00 – 06:00", flights: 1 }
+      ]},
+      { date: "2026-04-21", total: 0, shifts: [
+        { name: "🌅 صباح / Morning", time: "06:00 – 15:00", flights: 0 },
+        { name: "☀️ ظهر / Afternoon", time: "13:00 – 22:00", flights: 0 },
+        { name: "🌙 ليل / Night", time: "21:00 – 06:00", flights: 0 }
+      ]}
+    ];
+
+    function flightText(n) {
+      return n > 0 ? `${n} flight${n > 1 ? "s" : ""}` : "";
+    }
+
+    function buildAccordion() {
+      const root = document.getElementById("daysAccordion");
+      if (!root) return;
+      const targetUrl = "./data/report/offload_report.html";
+      root.innerHTML = "";
+
+      DAY_ITEMS.forEach((day, idx) => {
+        const item = document.createElement("div");
+        item.className = "accordion-item";
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "accordion-btn";
+        btn.setAttribute("aria-expanded", idx === 0 ? "true" : "false");
+
+        const left = document.createElement("span");
+        const todayTxt = day.today ? " TODAY" : "";
+        const countTxt = day.total ? ` ${day.total} flights` : "";
+        left.textContent = `📅 ${day.date}${todayTxt}${countTxt}`;
+
+        const right = document.createElement("span");
+        right.className = "acc-arrow";
+        right.textContent = "›";
+
+        btn.appendChild(left);
+        btn.appendChild(right);
+
+        const panel = document.createElement("div");
+        panel.className = "accordion-panel";
+        panel.hidden = idx !== 0;
+
+        day.shifts.forEach((shift) => {
+          const row = document.createElement("a");
+          row.className = "shift-row";
+          row.href = targetUrl;
+
+          const n = document.createElement("div");
+          n.className = "shift-name";
+          n.textContent = shift.name;
+
+          const m = document.createElement("div");
+          m.className = "shift-meta";
+          const ft = flightText(shift.flights);
+          m.textContent = ft ? `${shift.time} · ${ft}` : shift.time;
+
+          row.appendChild(n);
+          row.appendChild(m);
+          panel.appendChild(row);
+        });
+
+        btn.addEventListener("click", () => {
+          const open = btn.getAttribute("aria-expanded") === "true";
+          btn.setAttribute("aria-expanded", open ? "false" : "true");
+          panel.hidden = open;
+        });
+
+        item.appendChild(btn);
+        item.appendChild(panel);
+        root.appendChild(item);
+      });
+    }
+
+    buildAccordion();
+  </script>
 </body>
 </html>
