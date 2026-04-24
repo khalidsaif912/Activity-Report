@@ -1,19 +1,122 @@
 <!doctype html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Activity Report</title>
-  <meta http-equiv="refresh" content="0; url=./data/report/offload_report.html" />
-  <script>
-    window.location.replace("./data/report/offload_report.html");
-  </script>
+  <title>Export Warehouse Activity Report</title>
+  <style>
+    :root{
+      --bg:#f3f6fb;
+      --line:#dbe3ef;
+      --text:#0f172a;
+      --muted:#475569;
+      --brand:#93c5fd;
+      --brand-deep:#1e3a8a;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Arial,Helvetica,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+    .page{
+      width:min(1040px,94vw);
+      margin:24px auto;
+      background:#fff;
+      border:1px solid var(--line);
+    }
+    .header{
+      display:flex;
+      gap:16px;
+      align-items:stretch;
+      background:var(--brand);
+      border-bottom:1px solid #60a5fa;
+    }
+    .header-accent{width:12px;background:var(--brand-deep)}
+    .header-main{padding:18px 20px;flex:1}
+    h1{
+      margin:0 0 8px;
+      font-size:28px;
+      line-height:1.2;
+      color:#000;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .meta{margin:0;color:#0b2444;font-size:14px}
+    .body{padding:18px 20px}
+    .section{
+      border:1px solid var(--line);
+      background:#f8fafc;
+      padding:14px;
+      margin-bottom:14px;
+    }
+    .section h2{
+      margin:0 0 10px;
+      font-size:18px;
+      color:#0b2444;
+    }
+    .btn-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+    }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:40px;
+      padding:9px 14px;
+      border:1px solid #94a3b8;
+      background:#fff;
+      color:#0f172a;
+      text-decoration:none;
+      font-size:14px;
+      cursor:pointer;
+      transition:background .15s ease,transform .06s ease,box-shadow .15s ease,border-color .15s ease;
+    }
+    .btn:hover{background:#f1f5f9;box-shadow:0 1px 3px rgba(15,23,42,.1)}
+    .btn:active{transform:translateY(1px)}
+    .btn.primary{background:#0f172a;border-color:#0f172a;color:#fff}
+    .btn.blue{background:#2563eb;border-color:#2563eb;color:#fff}
+    .btn.reset{background:#eef2ff;border-color:#1e3a8a;color:#1e3a8a}
+    .tip{margin-top:10px;color:var(--muted);font-size:13px}
+  </style>
 </head>
 <body>
-  <p>Redirecting to report page...</p>
-  <p>
-    If it does not redirect, open
-    <a href="./data/report/offload_report.html">the report page</a>.
-  </p>
+  <main class="page">
+    <header class="header">
+      <div class="header-accent" aria-hidden="true"></div>
+      <div class="header-main">
+        <h1><span aria-hidden="true">&#9992;</span> Export Warehouse Activity Report</h1>
+        <p class="meta">الصفحة الرئيسية بنفس أسلوب التصميم القديم مع اختصارات الأزرار الأساسية.</p>
+      </div>
+    </header>
+
+    <section class="body">
+      <div class="section">
+        <h2>الصفحة الرئيسية</h2>
+        <div class="btn-row">
+          <a class="btn primary" href="./data/report/offload_report.html">فتح التقرير</a>
+          <a class="btn" href="./data/report/offload_report.html#manpowerWrap">Manpower</a>
+          <a class="btn" href="./data/report/offload_report.html#operationalActivities">Operational Activities</a>
+          <a class="btn" href="./data/report/offload_report.html#offloadTableBody">Offload</a>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>أزرار البنر (بنفس الأسلوب)</h2>
+        <div class="btn-row">
+          <a class="btn primary" href="./data/report/offload_report.html">Copy</a>
+          <a class="btn blue" href="./data/report/offload_report.html">Send Report</a>
+          <a class="btn" href="./data/report/offload_report.html">Print</a>
+          <a class="btn" href="./data/report/offload_report.html">Export Flight Hints</a>
+          <a class="btn reset" href="./data/report/offload_report.html">Reset report</a>
+        </div>
+        <p class="tip">هذه الأزرار اختصارات تنقلك لصفحة التقرير بنفس شكل الأزرار المستخدمة في البنر.</p>
+      </div>
+    </section>
+  </main>
 </body>
 </html>
