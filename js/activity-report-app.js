@@ -1080,12 +1080,14 @@
           editable.flightInput.dataset.group = groupIndex;
           editable.flightInput.dataset.index = itemIndex;
           editable.flightInput.classList.add("opact-input");
+          editable.flightInput.classList.add("opact-flight-input");
           editable.flightInput.dataset.phraseKey = "";
           editable.flightInput.dataset.segment = "flight";
 
           editable.phraseInput.dataset.group = groupIndex;
           editable.phraseInput.dataset.index = itemIndex;
           editable.phraseInput.classList.add("opact-input");
+          editable.phraseInput.classList.add("opact-phrase-input");
           editable.phraseInput.dataset.phraseKey = opPhraseKeysStatic[groupIndex] || "";
           editable.phraseInput.dataset.segment = "phrase";
           box.appendChild(editable.row);
@@ -2710,7 +2712,20 @@
   }
 
   function attachFlightExpansionHelpers() {
-    /* Flight segments (CODE/DATE/DEST) come from phrase autocomplete + /api/live-flights; no second inline layer. */
+    if (!window.flightAutocomplete) return;
+    document.querySelectorAll('.opact-flight-input[data-segment="flight"]').forEach((inp) => {
+      const g = +inp.dataset.group;
+      const ii = +inp.dataset.index;
+      window.flightAutocomplete.attach(inp, `opact-flight-${g}-${ii}`, (picked) => {
+        const pickedText = window.flightAutocomplete.formatFlight(picked);
+        inp.value = pickedText;
+        if (state.operationalActivities[g] && state.operationalActivities[g].items[ii] !== undefined) {
+          const current = splitOperationalTwoFieldLine(state.operationalActivities[g].items[ii]);
+          state.operationalActivities[g].items[ii] = composeOperationalTwoFieldLine(pickedText, current.phrase);
+          saveDraft();
+        }
+      });
+    });
   }
 
   function attachPhraseHelpers() {
@@ -2719,13 +2734,14 @@
     const opPhraseKeys = ["loadPlan", "advanceLoading", "csdRescreening"];
     document.querySelectorAll(".opact-input").forEach((inp) => {
       const gi = +inp.dataset.group;
-      const phraseKey = (inp.dataset.phraseKey || "").trim() || opPhraseKeys[gi];
+      const segment = (inp.dataset.segment || "full").trim();
+      if (segment === "flight") return;
+      const phraseKey = (inp.dataset.phraseKey || "").trim() || (segment === "full" ? opPhraseKeys[gi] : "");
       if (!phraseKey) return;
       window.phraseAutocomplete.attachInput(inp, phraseKey, (value) => {
         const g = +inp.dataset.group;
         const ii = +inp.dataset.index;
         if (state.operationalActivities[g] && state.operationalActivities[g].items[ii] !== undefined) {
-          const segment = (inp.dataset.segment || "full").trim();
           if (segment === "phrase") {
             const current = splitOperationalTwoFieldLine(state.operationalActivities[g].items[ii]);
             state.operationalActivities[g].items[ii] = composeOperationalTwoFieldLine(current.flight, value);

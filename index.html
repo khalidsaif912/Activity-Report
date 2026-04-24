@@ -21,23 +21,38 @@
       color:var(--text);
     }
     .page{
-      width:min(1040px,94vw);
-      margin:24px auto;
+      width:min(1060px,95vw);
+      margin:16px auto;
       background:#fff;
       border:1px solid var(--line);
+      box-shadow:0 8px 30px rgba(15,23,42,.05);
     }
     .header{
       display:flex;
-      gap:16px;
       align-items:stretch;
       background:var(--brand);
       border-bottom:1px solid #60a5fa;
     }
     .header-accent{width:12px;background:var(--brand-deep)}
     .header-main{padding:18px 20px;flex:1}
+    .header-top{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-start;
+      flex-wrap:wrap;
+    }
+    .company{
+      text-align:left;
+      font-size:13px;
+      color:#0b2444;
+      line-height:1.45;
+      min-width:180px;
+    }
+    .company .op{font-weight:700}
     h1{
       margin:0 0 8px;
-      font-size:28px;
+      font-size:25px;
       line-height:1.2;
       color:#000;
       display:flex;
@@ -45,43 +60,92 @@
       gap:10px;
     }
     .meta{margin:0;color:#0b2444;font-size:14px}
-    .body{padding:18px 20px}
+    .quick-actions{
+      margin-top:12px;
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .body{padding:14px 18px 18px}
     .section{
       border:1px solid var(--line);
       background:#f8fafc;
-      padding:14px;
-      margin-bottom:14px;
+      padding:12px;
+      margin-bottom:10px;
     }
     .section h2{
-      margin:0 0 10px;
-      font-size:18px;
-      color:#0b2444;
+      margin:0 0 8px;
+      font-size:16px;
+      color:#0f172a;
     }
     .btn-row{
       display:flex;
       flex-wrap:wrap;
-      gap:10px;
+      gap:8px;
     }
     .btn{
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      min-height:40px;
-      padding:9px 14px;
+      min-height:36px;
+      padding:8px 12px;
       border:1px solid #94a3b8;
       background:#fff;
       color:#0f172a;
       text-decoration:none;
-      font-size:14px;
+      font-size:13px;
       cursor:pointer;
       transition:background .15s ease,transform .06s ease,box-shadow .15s ease,border-color .15s ease;
+      border-radius:4px;
     }
     .btn:hover{background:#f1f5f9;box-shadow:0 1px 3px rgba(15,23,42,.1)}
     .btn:active{transform:translateY(1px)}
     .btn.primary{background:#0f172a;border-color:#0f172a;color:#fff}
     .btn.blue{background:#2563eb;border-color:#2563eb;color:#fff}
     .btn.reset{background:#eef2ff;border-color:#1e3a8a;color:#1e3a8a}
-    .tip{margin-top:10px;color:var(--muted);font-size:13px}
+    .cards{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(220px,1fr));
+      gap:10px;
+      margin-bottom:10px;
+    }
+    .card{
+      border:1px solid var(--line);
+      background:#fff;
+      padding:10px;
+      min-height:72px;
+    }
+    .card-title{font-weight:700;margin-bottom:4px}
+    .card-sub{font-size:13px;color:var(--muted)}
+    .timeline{
+      border:1px solid var(--line);
+      background:#fff;
+      padding:10px;
+    }
+    .timeline h3{
+      margin:0 0 8px;
+      font-size:14px;
+      color:#334155;
+    }
+    .day-row{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:8px;
+      border:1px solid #e2e8f0;
+      background:#f8fafc;
+      padding:8px 10px;
+      margin-bottom:6px;
+      text-decoration:none;
+      color:#0f172a;
+      font-size:13px;
+    }
+    .day-row:hover{background:#eff6ff}
+    .tip{margin-top:8px;color:var(--muted);font-size:12px}
+    @media (max-width:760px){
+      .cards{grid-template-columns:1fr}
+      .company{text-align:right}
+    }
   </style>
 </head>
 <body>
@@ -89,32 +153,48 @@
     <header class="header">
       <div class="header-accent" aria-hidden="true"></div>
       <div class="header-main">
-        <h1><span aria-hidden="true">&#9992;</span> Export Warehouse Activity Report</h1>
-        <p class="meta">الصفحة الرئيسية بنفس أسلوب التصميم القديم مع اختصارات الأزرار الأساسية.</p>
-      </div>
-    </header>
-
-    <section class="body">
-      <div class="section">
-        <h2>الصفحة الرئيسية</h2>
-        <div class="btn-row">
-          <a class="btn primary" href="./data/report/offload_report.html">فتح التقرير</a>
-          <a class="btn" href="./data/report/offload_report.html#manpowerWrap">Manpower</a>
-          <a class="btn" href="./data/report/offload_report.html#operationalActivities">Operational Activities</a>
-          <a class="btn" href="./data/report/offload_report.html#offloadTableBody">Offload</a>
+        <div class="header-top">
+          <div>
+            <h1><span aria-hidden="true">&#9992;</span> Export Warehouse Activity Report</h1>
+            <p class="meta">اختر المناوبة لعرض تفاصيل الـ Offload · الأيام السابقة مطوية تلقائيًا</p>
+          </div>
+          <div class="company">
+            OMAN AIR<br />
+            CARGO MUSCAT
+            <div class="op">Export Operation</div>
+          </div>
         </div>
-      </div>
-
-      <div class="section">
-        <h2>أزرار البنر (بنفس الأسلوب)</h2>
-        <div class="btn-row">
+        <div class="quick-actions">
           <a class="btn primary" href="./data/report/offload_report.html">Copy</a>
           <a class="btn blue" href="./data/report/offload_report.html">Send Report</a>
           <a class="btn" href="./data/report/offload_report.html">Print</a>
           <a class="btn" href="./data/report/offload_report.html">Export Flight Hints</a>
           <a class="btn reset" href="./data/report/offload_report.html">Reset report</a>
         </div>
-        <p class="tip">هذه الأزرار اختصارات تنقلك لصفحة التقرير بنفس شكل الأزرار المستخدمة في البنر.</p>
+      </div>
+    </header>
+
+    <section class="body">
+      <div class="section">
+        <h2>📅 2026-04-24</h2>
+        <div class="cards">
+          <a class="card" href="./data/report/offload_report.html#manpowerWrap">
+            <div class="card-title">📋 Duty Roster</div>
+            <div class="card-sub">استعراض الطاقم والمناوبة الحالية</div>
+          </a>
+          <a class="card" href="./data/report/offload_report.html#manpowerWrap">
+            <div class="card-title">👥 Manpower</div>
+            <div class="card-sub">فتح قسم القوى العاملة مباشرة</div>
+          </a>
+        </div>
+        <div class="timeline">
+          <h3>الأيام المتاحة</h3>
+          <a class="day-row" href="./data/report/offload_report.html"><span>‹</span><span>📅 2026-04-24 &nbsp; TODAY &nbsp; 2 flights</span></a>
+          <a class="day-row" href="./data/report/offload_report.html"><span>‹</span><span>📅 2026-04-23 &nbsp; 1 flights</span></a>
+          <a class="day-row" href="./data/report/offload_report.html"><span>‹</span><span>📅 2026-04-22 &nbsp; 3 flights</span></a>
+          <a class="day-row" href="./data/report/offload_report.html"><span>‹</span><span>📅 2026-04-21</span></a>
+        </div>
+        <p class="tip">التصميم هنا مقلّد لنفس روح الواجهة القديمة، وجميع العناصر تنقلك لنفس صفحة التقرير الحالية.</p>
       </div>
     </section>
   </main>
