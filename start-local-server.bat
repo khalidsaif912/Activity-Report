@@ -13,6 +13,7 @@ echo.
 echo Open in browser: http://localhost:%PORT%
 echo Press Ctrl+C in this window to stop the server.
 echo.
+start "" "http://localhost:%PORT%/data/report/offload_report.html"
 
 REM Prefer Python launcher on Windows
 where py >nul 2>nul
