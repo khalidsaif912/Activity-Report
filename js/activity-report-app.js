@@ -2196,74 +2196,30 @@
       "mso-ansi-font-size:12.0pt;mso-bidi-font-size:12.0pt;font-size:12.0pt;font-family:Calibri,Arial,sans-serif;font-weight:bold;color:#000000;line-height:1.9;",
   };
 
-  /** Outlook-friendly section title blocks with narrow left accent and rounded box. */
+  /** Keep section titles as simple divs with inline styles matching web exactly. */
   function convertSectionTitlesToOutlookShadeTables(root) {
     root.querySelectorAll(".section-title").forEach((el) => {
-      const bg = "#eef3fc";
-      const accent = "#0b3a78";
-      const frame = "#e4e9f5";
-
-      const text = String(el.textContent || "").trim();
+      // Don't replace with table — just apply inline styles to match web CSS exactly.
       const isMajor = el.classList && el.classList.contains("manpower-block-heading");
-
-      const outer = document.createElement("table");
-      outer.setAttribute("role", "presentation");
-      outer.setAttribute("cellpadding", "0");
-      outer.setAttribute("cellspacing", "0");
-      outer.setAttribute("border", "0");
-      outer.setAttribute("width", "100%");
-      outer.setAttribute(
-        "style",
-        "border-collapse:collapse;border-spacing:0;width:100%;margin:14px 0 0 0;" +
-          "mso-table-lspace:0pt;mso-table-rspace:0pt;"
-      );
-
-      const tr = document.createElement("tr");
-
-      const tdLeft = document.createElement("td");
-      tdLeft.setAttribute("width", "4");
-      tdLeft.setAttribute("bgcolor", accent);
-      tdLeft.setAttribute(
-        "style",
-        "width:4px;min-width:4px;max-width:4px;background-color:" +
-          accent +
-          ";font-size:0;line-height:0;padding:0;margin:0;"
-      );
-      tdLeft.innerHTML = "&nbsp;";
-
-      const tdMain = document.createElement("td");
-      tdMain.setAttribute("bgcolor", bg);
-      tdMain.setAttribute(
-        "style",
-        "background-color:" +
-          bg +
-          ";padding:" +
-          "8px 10px" +
-          ";margin:0;" +
-          "border:1px solid " +
-          frame +
-          ";border-left:none;" +
-          "mso-line-height-rule:exactly;"
-      );
-
-      const span = document.createElement("span");
-      span.setAttribute("lang", "EN-US");
-      span.setAttribute(
-        "style",
-        isMajor
-          ? "font-family:Calibri,Arial,sans-serif;font-size:12.0pt;mso-ansi-font-size:12.0pt;" +
-              "font-weight:bold;letter-spacing:0.06em;color:#0b3a78;line-height:1.3;text-transform:uppercase;"
-          : "font-family:Calibri,Arial,sans-serif;font-size:11.0pt;mso-ansi-font-size:11.0pt;" +
-              "font-weight:bold;letter-spacing:0.06em;color:#0b3a78;line-height:1.3;text-transform:uppercase;"
-      );
-      span.appendChild(document.createTextNode(text));
-      tdMain.appendChild(span);
-
-      tr.appendChild(tdLeft);
-      tr.appendChild(tdMain);
-      outer.appendChild(tr);
-
-      el.replaceWith(outer);
+      const fontSize = isMajor ? "12.5px" : "12.5px";
+      const inlineStyle =
+        "display:block;width:100%;box-sizing:border-box;" +
+        "margin-top:14px;margin-bottom:0;" +
+        "background:#eef3fc !important;" +
+        "padding:8px 12px !important;" +
+        "font-weight:700;" +
+        "border:1px solid #e4e9f5 !important;" +
+        "border-top:1px solid #e4e9f5 !important;" +
+        "border-left:4px solid #0b3a78 !important;" +
+        "border-radius:0 !important;" +
+        "line-height:1.3;" +
+        "color:#0b3a78 !important;" +
+        "text-transform:uppercase;" +
+        "letter-spacing:0.06em;" +
+        "font-size:" + fontSize + ";" +
+        "font-family:Calibri,Arial,sans-serif;" +
+        "mso-line-height-rule:exactly;";
+      el.setAttribute("style", inlineStyle);
     });
   }
 
@@ -2363,13 +2319,7 @@
           (el.getAttribute("style") || "")
       );
     });
-    root.querySelectorAll(".section-title").forEach((el) => {
-      el.setAttribute(
-        "style",
-        "display:block;width:100%;max-width:100%;min-width:0;box-sizing:border-box;margin:16px 0 0 0;" +
-          (el.getAttribute("style") || "")
-      );
-    });
+    // .section-title styles already applied by convertSectionTitlesToOutlookShadeTables — skip.
     root.querySelectorAll(".line-item").forEach((el) => {
       el.setAttribute(
         "style",
@@ -2626,7 +2576,7 @@
     const titleE = escapeHtml(title);
     const bannerBg = "#1e5799";
     const ink = "#ffffff";
-    return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;margin-bottom:14px;max-width:100%;border:1px solid #d0d5e8;table-layout:fixed;"><tr><td width="3" bgcolor="#0b3a78" style="width:3px;min-width:3px;max-width:3px;background-color:#0b3a78;font-size:0;line-height:0;mso-line-height-rule:exactly;">&nbsp;</td><td width="1" bgcolor="#eef3fc" style="width:1px;min-width:1px;max-width:1px;background-color:#eef3fc;font-size:0;line-height:0;mso-line-height-rule:exactly;">&nbsp;</td><td bgcolor="${bannerBg}" style="background-color:${bannerBg};padding:18px 20px;vertical-align:top;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;"><tr><td style="vertical-align:top;font-family:Calibri,Arial,sans-serif;color:${ink};"><div style="mso-ansi-font-size:16.5pt;mso-bidi-font-size:16.5pt;font-size:16.5pt;font-weight:bold;line-height:190%;margin:0 0 10px 0;color:${ink};mso-line-height-rule:at-least;"><span style="mso-ansi-font-size:15.0pt;font-size:15.0pt;margin-right:6px;">&#9992;</span> Export Warehouse Activity Report</div><div style="mso-ansi-font-size:11.0pt;mso-bidi-font-size:11.0pt;font-size:11.0pt;line-height:190%;color:${ink};mso-line-height-rule:at-least;">Shift Date: <span style="color:#fde68a;font-weight:bold;">${dE}</span> &nbsp;|&nbsp; Time: <span style="color:#fde68a;font-weight:bold;">${tE}</span> &nbsp;|&nbsp; <span style="color:#fde68a;font-weight:bold;">${titleE}</span></div></td><td style="vertical-align:top;text-align:right;font-family:Calibri,Arial,sans-serif;mso-ansi-font-size:10.0pt;font-size:10.0pt;color:${ink};width:170px;"><div style="color:${ink};">Transom Cargo LLC.</div><div style="font-weight:bold;margin-top:4px;color:${ink};">Export Operations</div></td></tr></table></td></tr></table>`;
+    return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;margin-bottom:14px;max-width:100%;border:1px solid #d0d5e8;table-layout:fixed;"><tr><td width="3" bgcolor="#0b3a78" style="width:3px;min-width:3px;max-width:3px;background-color:#0b3a78;font-size:0;line-height:0;mso-line-height-rule:exactly;">&nbsp;</td><td width="1" bgcolor="#eef3fc" style="width:1px;min-width:1px;max-width:1px;background-color:#eef3fc;font-size:0;line-height:0;mso-line-height-rule:exactly;">&nbsp;</td><td bgcolor="${bannerBg}" style="background-color:${bannerBg};padding:18px 20px;vertical-align:top;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;"><tr><td style="vertical-align:top;font-family:Calibri,Arial,sans-serif;color:${ink};"><div style="mso-ansi-font-size:16.5pt;mso-bidi-font-size:16.5pt;font-size:16.5pt;font-weight:bold;line-height:190%;margin:0 0 10px 0;color:${ink};mso-line-height-rule:at-least;"><span style="mso-ansi-font-size:15.0pt;font-size:15.0pt;margin-right:6px;">✈️</span> Export Warehouse Activity Report</div><div style="mso-ansi-font-size:11.0pt;mso-bidi-font-size:11.0pt;font-size:11.0pt;line-height:190%;color:${ink};mso-line-height-rule:at-least;">Shift Date: <span style="color:#fde68a;font-weight:bold;">${dE}</span> &nbsp;|&nbsp; Time: <span style="color:#fde68a;font-weight:bold;">${tE}</span> &nbsp;|&nbsp; <span style="color:#fde68a;font-weight:bold;">${titleE}</span></div></td><td style="vertical-align:top;text-align:right;font-family:Calibri,Arial,sans-serif;mso-ansi-font-size:10.0pt;font-size:10.0pt;color:${ink};width:170px;"><div style="color:${ink};">Transom Cargo LLC.</div><div style="font-weight:bold;margin-top:4px;color:${ink};">Export Operations</div></td></tr></table></td></tr></table>`;
   }
 
   function buildOutlookClipboardSignatureHtml(badgeSrcResolved) {
@@ -2639,7 +2589,7 @@
     const badgeSrc =
       typeof rawSrc === "string" && rawSrc.startsWith("data:") ? rawSrc : escapeHtml(rawSrc);
     const badgesImg = `<div style="margin:16px 0 0 0;max-width:100%;"><img src="${badgeSrc}" alt="IATA CEIV PHARMA, IATA CEIV FRESH, ISO 9001:2015, ISO 45001:2018, HACCP, GDP, RA3" width="640" style="max-width:100%;height:auto;border:0;display:block;-ms-interpolation-mode:bicubic;" /></div>`;
-    const signatureText = `<div style="margin-bottom:10px;color:#000000;mso-ansi-font-size:10.0pt;font-size:10.0pt;font-family:'Arial',sans-serif;">Best Regards,</div>${nameBlock}<div style="mso-ansi-font-size:10.0pt;font-size:10.0pt;color:#000000;margin-bottom:14px;font-family:'Arial',sans-serif;">Duty Supervisor – Export Operation</div><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;border-top:1px solid #cbd5e1;padding-top:12px;table-layout:fixed;"><tr><td width="16" style="width:16px;background-color:#dc2626;font-size:0;line-height:0;" bgcolor="#dc2626">&nbsp;</td><td style="border-left:16px solid #dc2626;padding:0 12px 0 10px;vertical-align:top;width:130px;"><div style="mso-ansi-font-size:13.5pt;font-size:13.5pt;font-weight:bold;color:#000000;letter-spacing:0.5px;font-family:'Arial',sans-serif;">TRANSOM</div><div style="mso-ansi-font-size:8.5pt;font-size:8.5pt;color:#000000;letter-spacing:1px;font-family:'Arial',sans-serif;">CARGO</div></td><td style="border-left:4px solid #dc2626;padding-left:14px;vertical-align:top;mso-ansi-font-size:9.0pt;font-size:9.0pt;color:#000000;line-height:115%;font-family:'Arial',sans-serif;mso-line-height-rule:exactly;"><strong style="color:#000000;">Transom Cargo LLC.</strong><br/>P.O. Box: 618, P.C: 111<br/>Sultanate of Oman<br/>Phone No. 97297474<br/><span style="color:#000000;">www.transomcargo.com</span></td></tr></table>`;
+    const signatureText = `<div style="margin-bottom:10px;color:#000000;mso-ansi-font-size:10.0pt;font-size:10.0pt;font-family:'Arial',sans-serif;">Best Regards,</div>${nameBlock}<div style="mso-ansi-font-size:10.0pt;font-size:10.0pt;color:#000000;margin-bottom:14px;font-family:'Arial',sans-serif;">Duty Supervisor – Export Operation</div><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;border-top:1px solid #cbd5e1;padding-top:12px;table-layout:fixed;"><tr><td width="10" style="width:10px;background-color:#dc2626;font-size:0;line-height:0;" bgcolor="#dc2626">&nbsp;</td><td style="border-left:10px solid #dc2626;padding:0 12px 0 10px;vertical-align:top;width:130px;"><div style="mso-ansi-font-size:13.5pt;font-size:13.5pt;font-weight:bold;color:#dc2626;letter-spacing:0.5px;font-family:'Arial',sans-serif;">TRANSOM</div><div style="mso-ansi-font-size:8.5pt;font-size:8.5pt;color:#000000;letter-spacing:1px;font-family:'Arial',sans-serif;">CARGO</div></td><td style="border-left:4px solid #dc2626;padding-left:14px;vertical-align:top;mso-ansi-font-size:9.0pt;font-size:9.0pt;color:#000000;line-height:115%;font-family:'Arial',sans-serif;mso-line-height-rule:exactly;"><strong style="color:#000000;">Transom Cargo LLC.</strong><br/>P.O. Box: 618, P.C: 111<br/>Sultanate of Oman<br/>Phone No. 97297474<br/><span style="color:#000000;">www.transomcargo.com</span></td></tr></table>`;
     return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;margin-top:30px;max-width:100%;"><tr><td style="font-family:'Arial',sans-serif;mso-ansi-font-size:10.0pt;font-size:10.0pt;color:#000000;line-height:115%;padding-top:22px;border-top:1px solid #cbd5e1;mso-line-height-rule:exactly;">${signatureText}${badgesImg}</td></tr></table>`;
   }
 
@@ -2698,7 +2648,7 @@
       "4. CHECKS & COMPLIANCE",
       state.checksCompliance,
       "",
-      "OFFLOADING CARGO #",
+      "OFFLOADING CARGO",
       offloadText,
       "",
       "5. SAFETY",
