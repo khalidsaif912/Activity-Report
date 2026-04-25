@@ -1,338 +1,1102 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Export Warehouse Activity Report</title>
   <style>
-    :root{
-      --bg:#f3f6fb;
-      --line:#dbe3ef;
-      --text:#0f172a;
-      --muted:#475569;
-      --brand:#93c5fd;
-      --brand-deep:#1e3a8a;
+    @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap");
+
+    :root {
+      /* Core palette */
+      --navy-900: #070f1c;
+      --navy-800: #0d1f38;
+      --navy-700: #112844;
+      --navy-600: #163354;
+      --navy-500: #1a4068;
+      --blue-600: #1d4ed8;
+      --blue-500: #2563eb;
+      --blue-400: #3b82f6;
+      --blue-100: #dbeafe;
+      --blue-50:  #eff6ff;
+      --sky-600:  #0284c7;
+      --sky-100:  #e0f2fe;
+      --green-700: #047857;
+      --green-600: #059669;
+      --green-500: #10b981;
+      --green-100: #d1fae5;
+      --green-50:  #ecfdf5;
+      --amber-700: #b45309;
+      --amber-500: #f59e0b;
+      --amber-100: #fef3c7;
+      --slate-800: #1e293b;
+      --slate-600: #475569;
+      --slate-500: #64748b;
+      --slate-400: #94a3b8;
+      --slate-300: #cbd5e1;
+      --slate-200: #e2e8f0;
+      --slate-100: #f1f5f9;
+      --slate-50:  #f8fafc;
+      --red-600:   #dc2626;
+      --red-100:   #fee2e2;
+      /* Semantic aliases */
+      --ink:     var(--slate-800);
+      --muted:   var(--slate-500);
+      --line:    var(--slate-200);
+      --line-xs: var(--slate-100);
+      --surface: #ffffff;
+      --bg:      #eef2f8;
+      /* Elevation */
+      --shadow-xs: 0 1px 3px rgba(15,23,42,0.06);
+      --shadow-sm: 0 2px 8px rgba(15,23,42,0.08), 0 1px 3px rgba(15,23,42,0.04);
+      --shadow-md: 0 6px 20px rgba(15,23,42,0.10), 0 2px 6px rgba(15,23,42,0.05);
+      --shadow-lg: 0 16px 40px rgba(15,23,42,0.14), 0 4px 10px rgba(15,23,42,0.06);
+      /* Shape */
+      --r-xs: 6px;
+      --r-sm: 8px;
+      --r-md: 12px;
+      --r-lg: 16px;
+      --r-xl: 20px;
     }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:Arial,Helvetica,sans-serif;
-      background:var(--bg);
-      color:var(--text);
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      direction: ltr !important;
+      unicode-bidi: isolate !important;
+      text-align: left !important;
     }
-    .page{
-      width:min(1060px,95vw);
-      margin:16px auto;
-      background:#fff;
-      border:1px solid var(--line);
-      box-shadow:0 8px 30px rgba(15,23,42,.05);
+
+    body {
+      font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
     }
-    .header{
-      display:flex;
-      align-items:stretch;
-      background:var(--brand);
-      border-bottom:1px solid #60a5fa;
+
+    /* ======================================================
+       HEADER
+    ====================================================== */
+    .site-header {
+      background: linear-gradient(130deg, var(--navy-800) 0%, var(--navy-600) 55%, #1e4a82 100%);
+      position: relative;
+      overflow: hidden;
     }
-    .header-accent{width:12px;background:var(--brand-deep)}
-    .header-main{padding:18px 20px;flex:1}
-    .header-top{
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      align-items:flex-start;
-      flex-wrap:wrap;
+
+    /* Fine grid texture */
+    .site-header::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 32px 32px;
+      pointer-events: none;
     }
-    .company{
-      text-align:left;
-      font-size:13px;
-      color:#0b2444;
-      line-height:1.45;
-      min-width:180px;
+
+    /* Radial accent bloom */
+    .site-header::after {
+      content: "";
+      position: absolute;
+      top: -120px;
+      right: -60px;
+      width: 480px;
+      height: 480px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(37,99,235,0.18) 0%, transparent 70%);
+      pointer-events: none;
     }
-    .company .op{font-weight:700}
-    h1{
-      margin:0 0 8px;
-      font-size:25px;
-      line-height:1.2;
-      color:#000;
-      display:flex;
-      align-items:center;
-      gap:10px;
+
+    .header-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 32px 32px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 28px;
+      flex-wrap: wrap;
     }
-    .meta{margin:0;color:#0b2444;font-size:14px}
-    .quick-actions{
-      margin-top:12px;
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
+
+    .header-brand { display: flex; flex-direction: column; gap: 8px; }
+
+    .brand-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.52);
     }
-    .body{padding:14px 18px 18px}
-    .section{
-      border:1px solid var(--line);
-      background:#f8fafc;
-      padding:12px;
-      margin-bottom:10px;
+
+    .eyebrow-pulse {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green-500);
+      box-shadow: 0 0 0 0 rgba(16,185,129,0.6);
+      animation: pulse 2.4s ease infinite;
+      flex-shrink: 0;
     }
-    .section h2{
-      margin:0 0 8px;
-      font-size:16px;
-      color:#0f172a;
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.55); }
+      50%       { box-shadow: 0 0 0 5px rgba(16,185,129,0); }
     }
-    .btn-row{
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
+
+    .brand-title {
+      font-size: clamp(22px, 2.6vw, 32px);
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.18;
+      letter-spacing: -0.02em;
     }
-    .btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      min-height:36px;
-      padding:8px 12px;
-      border:1px solid #94a3b8;
-      background:#fff;
-      color:#0f172a;
-      text-decoration:none;
-      font-size:13px;
-      cursor:pointer;
-      transition:background .15s ease,transform .06s ease,box-shadow .15s ease,border-color .15s ease;
-      border-radius:4px;
+
+    .brand-subtitle {
+      font-size: 14px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.58);
+      max-width: 520px;
+      line-height: 1.65;
     }
-    .btn:hover{background:#f1f5f9;box-shadow:0 1px 3px rgba(15,23,42,.1)}
-    .btn:active{transform:translateY(1px)}
-    .btn.primary{background:#0f172a;border-color:#0f172a;color:#fff}
-    .btn.blue{background:#2563eb;border-color:#2563eb;color:#fff}
-    .btn.reset{background:#eef2ff;border-color:#1e3a8a;color:#1e3a8a}
-    .cards{
-      display:grid;
-      grid-template-columns:repeat(2,minmax(220px,1fr));
-      gap:10px;
-      margin-bottom:10px;
+
+    .header-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 16px;
+      flex-shrink: 0;
     }
-    .card{
-      border:1px solid var(--line);
-      background:#fff;
-      padding:10px;
-      min-height:72px;
+
+    .company-logo {
+      height: 52px;
+      width: auto;
+      max-width: 190px;
+      border-radius: var(--r-sm);
+      border: 1px solid rgba(255,255,255,0.18);
+      object-fit: contain;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
     }
-    .card-title{font-weight:700;margin-bottom:4px}
-    .card-sub{font-size:13px;color:var(--muted)}
-    .timeline{
-      border:1px solid var(--line);
-      background:#fff;
-      padding:10px;
+
+    .header-toolbar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
     }
-    .timeline h3{
-      margin:0 0 8px;
-      font-size:14px;
-      color:#334155;
+
+    .toolbar-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.9);
+      background: rgba(255,255,255,0.09);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: var(--r-sm);
+      padding: 9px 16px;
+      letter-spacing: 0.01em;
+      transition: background 0.16s, border-color 0.16s, transform 0.16s;
     }
-    .day-row{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:8px;
-      border:1px solid #e2e8f0;
-      background:#f8fafc;
-      padding:8px 10px;
-      margin-bottom:6px;
-      text-decoration:none;
-      color:#0f172a;
-      font-size:13px;
+
+    .toolbar-btn:hover {
+      background: rgba(255,255,255,0.17);
+      border-color: rgba(255,255,255,0.32);
+      transform: translateY(-1px);
     }
-    .day-row:hover{background:#eff6ff}
-    .accordion-item{
-      border:1px solid #dbe5f1;
-      background:#fff;
-      margin-bottom:8px;
+
+    .toolbar-btn svg { width: 14px; height: 14px; opacity: 0.85; flex-shrink: 0; }
+
+    /* Divider glow strip */
+    .header-divider {
+      height: 1px;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(37,99,235,0.55) 25%,
+        rgba(16,185,129,0.45) 60%,
+        transparent 100%
+      );
     }
-    .accordion-btn{
-      width:100%;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:8px;
-      border:none;
-      background:#f8fafc;
-      padding:10px 12px;
-      cursor:pointer;
-      font-size:14px;
-      color:#0f172a;
-      text-align:right;
+
+    /* ======================================================
+       PAGE WRAPPER
+    ====================================================== */
+    .page-wrap {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 28px 32px 56px;
     }
-    .accordion-btn:hover{background:#eff6ff}
-    .acc-arrow{
-      font-size:12px;
-      color:#334155;
-      transition:transform .16s ease;
+
+    /* ======================================================
+       KPI STRIP
+    ====================================================== */
+    .kpi-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
     }
-    .accordion-btn[aria-expanded="true"] .acc-arrow{transform:rotate(90deg)}
-    .accordion-panel{
-      padding:8px 10px 10px;
-      border-top:1px solid #e2e8f0;
-      background:#fff;
+
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-top: 3px solid var(--blue-400);
+      border-radius: var(--r-md);
+      box-shadow: var(--shadow-sm);
+      padding: 20px 20px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: box-shadow 0.18s, transform 0.18s;
+      position: relative;
+      overflow: hidden;
     }
-    .shift-row{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      border:1px solid #e2e8f0;
-      background:#f8fafc;
-      padding:8px 10px;
-      margin-bottom:6px;
-      text-decoration:none;
-      color:#0f172a;
-      font-size:13px;
+
+    .kpi-card::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 64px;
+      height: 64px;
+      border-radius: 0 0 0 64px;
+      background: var(--blue-50);
+      pointer-events: none;
     }
-    .shift-row:hover{background:#eaf2ff}
-    .shift-name{font-weight:700}
-    .shift-meta{color:#475569;font-size:12px}
-    .tip{margin-top:8px;color:var(--muted);font-size:12px}
-    @media (max-width:760px){
-      .cards{grid-template-columns:1fr}
-      .company{text-align:right}
+
+    .kpi-card.k-green { border-top-color: var(--green-500); }
+    .kpi-card.k-green::after { background: var(--green-50); }
+    .kpi-card.k-sky   { border-top-color: var(--sky-600); }
+    .kpi-card.k-sky::after { background: var(--sky-100); }
+    .kpi-card.k-amber { border-top-color: var(--amber-500); }
+    .kpi-card.k-amber::after { background: var(--amber-100); }
+
+    .kpi-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+
+    .kpi-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .kpi-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .kpi-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: var(--r-xs);
+      background: var(--blue-50);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .kpi-icon.green { background: var(--green-100); }
+    .kpi-icon.sky   { background: var(--sky-100); }
+    .kpi-icon.amber { background: var(--amber-100); }
+    .kpi-icon svg { width: 15px; height: 15px; color: var(--blue-500); }
+    .kpi-icon.green svg { color: var(--green-600); }
+    .kpi-icon.sky svg   { color: var(--sky-600); }
+    .kpi-icon.amber svg { color: var(--amber-700); }
+
+    .kpi-value {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--navy-800);
+      line-height: 1;
+      letter-spacing: -0.03em;
+    }
+
+    .kpi-note {
+      font-size: 12.5px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    /* ======================================================
+       SECTION HEADER
+    ====================================================== */
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 16px;
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--navy-800);
+      letter-spacing: -0.02em;
+    }
+
+    .section-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 3px;
+      font-weight: 400;
+    }
+
+    /* ======================================================
+       DAY CARDS
+    ====================================================== */
+    .days-list { display: flex; flex-direction: column; gap: 14px; }
+
+    .day-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--slate-300);
+      border-radius: var(--r-md);
+      box-shadow: var(--shadow-xs);
+      overflow: hidden;
+      transition: box-shadow 0.18s, border-color 0.18s, border-left-color 0.18s, transform 0.18s;
+      animation: cardIn 0.32s ease both;
+    }
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .day-card:hover {
+      box-shadow: var(--shadow-md);
+      border-color: #c5d6ee;
+      border-left-color: var(--blue-400);
+      transform: translateY(-1px);
+    }
+
+    .day-card.is-today {
+      border-left-color: var(--green-500);
+      box-shadow: 0 0 0 1px rgba(16,185,129,0.12), var(--shadow-sm);
+    }
+
+    .day-card.is-today:hover {
+      box-shadow: var(--shadow-md), 0 0 0 1px rgba(16,185,129,0.2);
+      border-color: #a7f3d0;
+      border-left-color: var(--green-500);
+    }
+
+    /* --- Day summary row --- */
+    .day-summary {
+      padding: 16px 20px 14px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      background: var(--slate-50);
+      border-bottom: 1px solid var(--line-xs);
+    }
+
+    .day-card.is-today .day-summary { background: #f0fdf8; }
+
+    .day-date-block { flex-shrink: 0; }
+
+    .day-date-main {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--navy-800);
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      font-family: "Inter", "Segoe UI", sans-serif;
+    }
+
+    .day-weekday {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    .day-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      flex: 1;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+      line-height: 1.4;
+    }
+
+    .pill-today { background: var(--green-100); color: #065f46; }
+    .pill-count { background: var(--blue-100); color: #1e3a8a; }
+    .pill-empty { background: var(--slate-100); color: var(--slate-500); }
+
+    .day-busiest {
+      margin-left: auto;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--muted);
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .day-busiest-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--amber-500);
+      flex-shrink: 0;
+    }
+
+    /* --- Shift distribution bars --- */
+    .shift-bars {
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--line-xs);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .shift-bar-row {
+      display: grid;
+      grid-template-columns: 90px 1fr 36px;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .shift-bar-label {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--slate-600);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .shift-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .shift-dot.morning   { background: #0ea5e9; }
+    .shift-dot.afternoon { background: #f59e0b; }
+    .shift-dot.night     { background: #475569; }
+
+    .shift-bar-track {
+      height: 5px;
+      background: var(--slate-100);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .shift-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .shift-bar-fill.morning   { background: linear-gradient(90deg, #0284c7, #38bdf8); }
+    .shift-bar-fill.afternoon { background: linear-gradient(90deg, #b45309, #f59e0b); }
+    .shift-bar-fill.night     { background: linear-gradient(90deg, #1e293b, #475569); }
+
+    .shift-bar-count {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--navy-800);
+      text-align: right;
+      font-family: "JetBrains Mono", "Cascadia Code", ui-monospace, monospace;
+    }
+
+    .shift-bar-count.zero { color: var(--slate-400); font-weight: 600; }
+
+    /* --- Shift link cards --- */
+    .shifts-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .shift-link {
+      text-decoration: none;
+      color: inherit;
+      padding: 14px 18px 16px;
+      border-right: 1px solid var(--line-xs);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.15s;
+    }
+
+    .shift-link:last-child { border-right: none; }
+
+    /* Bottom accent line */
+    .shift-link::before {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.22s ease;
+    }
+
+    .shift-link.morning::before   { background: #0ea5e9; }
+    .shift-link.afternoon::before { background: #f59e0b; }
+    .shift-link.night::before     { background: #475569; }
+
+    .shift-link:hover::before { transform: scaleX(1); }
+    .shift-link:hover { background: #f7f9fc; }
+    .shift-link.morning:hover   { background: #f0f9ff; }
+    .shift-link.afternoon:hover { background: #fffbeb; }
+    .shift-link.night:hover     { background: #f8fafc; }
+
+    .shift-link-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .shift-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--navy-800);
+    }
+
+    .shift-count-badge {
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: var(--r-xs);
+    }
+
+    .shift-count-badge.active {
+      background: var(--blue-100);
+      color: #1e3a8a;
+    }
+
+    .shift-link.morning   .shift-count-badge.active { background: var(--sky-100); color: #0c4a6e; }
+    .shift-link.afternoon .shift-count-badge.active { background: var(--amber-100); color: #78350f; }
+    .shift-link.night     .shift-count-badge.active { background: var(--slate-100); color: #334155; }
+
+    .shift-count-badge.inactive { background: var(--slate-100); color: var(--slate-400); }
+
+    .shift-time {
+      font-size: 11.5px;
+      color: var(--muted);
+      font-family: "JetBrains Mono", "Cascadia Code", ui-monospace, monospace;
+      font-weight: 500;
+    }
+
+    /* Chevron icon */
+    .shift-chevron {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 2px;
+      color: var(--slate-300);
+      transition: color 0.15s, transform 0.15s;
+    }
+
+    .shift-link:hover .shift-chevron { color: var(--blue-500); transform: translateX(3px); }
+    .shift-link.night:hover .shift-chevron { color: var(--slate-600); }
+
+    /* ======================================================
+       EMPTY STATE
+    ====================================================== */
+    .empty-state {
+      background: var(--surface);
+      border: 2px dashed var(--slate-300);
+      border-radius: var(--r-lg);
+      padding: 64px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      text-align: center;
+    }
+
+    .empty-icon-wrap {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      background: var(--slate-100);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 4px;
+    }
+
+    .empty-icon-wrap svg { width: 26px; height: 26px; color: var(--slate-400); }
+
+    .empty-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--slate-600);
+      letter-spacing: -0.01em;
+    }
+
+    .empty-sub {
+      font-size: 14px;
+      color: var(--muted);
+      max-width: 340px;
+      line-height: 1.6;
+    }
+
+    /* ======================================================
+       RESPONSIVE
+    ====================================================== */
+    @media (max-width: 1080px) {
+      .kpi-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 768px) {
+      .header-inner { padding: 24px 20px 22px; flex-direction: column; gap: 20px; }
+      .header-right { flex-direction: row; align-items: center; justify-content: space-between; width: 100%; }
+      .page-wrap { padding: 20px 16px 40px; }
+      .kpi-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 24px; }
+      .shifts-row { grid-template-columns: 1fr; }
+      .shift-link { border-right: none; border-bottom: 1px solid var(--line-xs); }
+      .shift-link:last-child { border-bottom: none; }
+      .day-busiest { display: none; }
+      .shift-bars { display: none; }
+    }
+
+    @media (max-width: 520px) {
+      .kpi-strip { grid-template-columns: 1fr; }
+      .day-date-main { font-size: 17px; }
+      .company-logo { height: 38px; }
     }
   </style>
 </head>
 <body>
-  <main class="page">
-    <header class="header">
-      <div class="header-accent" aria-hidden="true"></div>
-      <div class="header-main">
-        <div class="header-top">
-          <div>
-            <h1><span aria-hidden="true">&#9992;</span> Export Warehouse Activity Report</h1>
-            <p class="meta">اختر المناوبة لعرض تفاصيل الـ Offload · الأيام السابقة مطوية تلقائيًا</p>
-          </div>
-          <div class="company">
-            OMAN AIR<br />
-            CARGO MUSCAT
-            <div class="op">Export Operation</div>
-          </div>
-        </div>
-        <div class="quick-actions">
-          <a class="btn primary" href="./data/report/offload_report.html">Copy</a>
-          <a class="btn blue" href="./data/report/offload_report.html">Send Report</a>
-          <a class="btn" href="./data/report/offload_report.html">Print</a>
-          <a class="btn" href="./data/report/offload_report.html">Export Flight Hints</a>
-          <a class="btn reset" href="./data/report/offload_report.html">Reset report</a>
-        </div>
-      </div>
-    </header>
 
-    <section class="body">
-      <div class="section">
-        <h2>📅 2026-04-24</h2>
-        <div class="cards">
-          <a class="card" href="./data/report/offload_report.html#manpowerWrap">
-            <div class="card-title">📋 Duty Roster</div>
-            <div class="card-sub">استعراض الطاقم والمناوبة الحالية</div>
-          </a>
-          <a class="card" href="./data/report/offload_report.html#manpowerWrap">
-            <div class="card-title">👥 Manpower</div>
-            <div class="card-sub">فتح قسم القوى العاملة مباشرة</div>
-          </a>
+  <!-- ===== SITE HEADER ===== -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="header-brand">
+        <div class="brand-eyebrow">
+          <span class="eyebrow-pulse"></span>
+          Export Operations &mdash; Live Dashboard
         </div>
-        <div class="timeline">
-          <h3>الأيام المتاحة</h3>
-          <div id="daysAccordion"></div>
-        </div>
-        <p class="tip">التصميم هنا مقلّد لنفس روح الواجهة القديمة، وجميع العناصر تنقلك لنفس صفحة التقرير الحالية.</p>
+        <h1 class="brand-title">Export Warehouse Activity Report</h1>
+        <p class="brand-subtitle">Live operational summary for shift readiness, daily offload workload, and direct access to shift-level reports.</p>
       </div>
-    </section>
-  </main>
+
+      <div class="header-right">
+        <img class="company-logo" src="./assets/transom-logo.png" alt="Transom Cargo" />
+        <nav class="header-toolbar" aria-label="Quick actions">
+          <a class="toolbar-btn" href="./data/report/offload_report.html#manpowerWrap">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M7 3h10l4 4v14H7V3z" stroke="currentColor" stroke-width="1.7"/>
+              <path d="M17 3v4h4" stroke="currentColor" stroke-width="1.7"/>
+              <path d="M10 12h8M10 16h8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+            </svg>
+            Duty Roster
+          </a>
+          <a class="toolbar-btn" href="./data/report/offload_report.html#manpowerWrap">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="1.7"/>
+              <circle cx="16" cy="9" r="2.5" stroke="currentColor" stroke-width="1.7"/>
+              <path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              <path d="M16 15c1.7 0 4 1 4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+            </svg>
+            Manpower
+          </a>
+        </nav>
+      </div>
+    </div>
+    <div class="header-divider"></div>
+  </header>
+
+  <!-- ===== PAGE CONTENT ===== -->
+  <div class="page-wrap">
+
+    <!-- KPI Strip -->
+    <div class="kpi-strip" id="insightsGrid" aria-live="polite" aria-label="Summary metrics"></div>
+
+    <!-- Days Section -->
+    <div class="section-head">
+      <div>
+        <h2 class="section-title">Operational Days</h2>
+        <p class="section-sub">Daily shift breakdown with workload distribution &mdash; click any shift to open its report.</p>
+      </div>
+    </div>
+
+    <div class="days-list" id="daysTimeline" aria-live="polite" aria-label="Operational days"></div>
+  </div>
+
   <script>
-    const DAY_ITEMS = [
-      { date: "2026-04-24", today: true, total: 2, shifts: [
-        { name: "🌅 صباح / Morning", time: "06:00 – 15:00", flights: 1 },
-        { name: "☀️ ظهر / Afternoon", time: "13:00 – 22:00", flights: 0 },
-        { name: "🌙 ليل / Night", time: "21:00 – 06:00", flights: 1 }
-      ]},
-      { date: "2026-04-23", total: 1, shifts: [
-        { name: "🌅 صباح / Morning", time: "06:00 – 15:00", flights: 0 },
-        { name: "☀️ ظهر / Afternoon", time: "13:00 – 22:00", flights: 0 },
-        { name: "🌙 ليل / Night", time: "21:00 – 06:00", flights: 1 }
-      ]},
-      { date: "2026-04-22", total: 3, shifts: [
-        { name: "🌅 صباح / Morning", time: "06:00 – 15:00", flights: 1 },
-        { name: "☀️ ظهر / Afternoon", time: "13:00 – 22:00", flights: 1 },
-        { name: "🌙 ليل / Night", time: "21:00 – 06:00", flights: 1 }
-      ]},
-      { date: "2026-04-21", total: 0, shifts: [
-        { name: "🌅 صباح / Morning", time: "06:00 – 15:00", flights: 0 },
-        { name: "☀️ ظهر / Afternoon", time: "13:00 – 22:00", flights: 0 },
-        { name: "🌙 ليل / Night", time: "21:00 – 06:00", flights: 0 }
-      ]}
+    const SHIFT_META = [
+      { key: "morning",   name: "Morning",   time: "06:00 - 15:00" },
+      { key: "afternoon", name: "Afternoon", time: "13:00 - 22:00" },
+      { key: "night",     name: "Night",     time: "21:00 - 06:00" }
     ];
 
-    function flightText(n) {
-      return n > 0 ? `${n} flight${n > 1 ? "s" : ""}` : "";
+    // ---- Existing parse/match utilities (unchanged) ----
+
+    function parseStdMinutes(stdLike) {
+      const first = String(stdLike || "").split("/")[0].trim().replace(/\s/g, "");
+      if (!first) return null;
+      const digits = first.replace(/\D/g, "");
+      if (digits.length < 3) return null;
+      const pad = digits.padStart(4, "0").slice(-4);
+      const hh = parseInt(pad.slice(0, 2), 10);
+      const mm = parseInt(pad.slice(2, 4), 10);
+      if (Number.isNaN(hh) || Number.isNaN(mm) || hh > 23 || mm > 59) return null;
+      return hh * 60 + mm;
     }
 
-    function buildAccordion() {
-      const root = document.getElementById("daysAccordion");
-      if (!root) return;
-      const targetUrl = "./data/report/offload_report.html";
-      root.innerHTML = "";
+    function stdMatchesShift(stdMinutes, shiftKey) {
+      if (stdMinutes == null) return false;
+      if (shiftKey === "morning")   return stdMinutes >= 6 * 60 && stdMinutes < 15 * 60;
+      if (shiftKey === "afternoon") return stdMinutes >= 13 * 60 && stdMinutes < 22 * 60;
+      if (shiftKey === "night")     return stdMinutes >= 21 * 60 || stdMinutes < 6 * 60;
+      return false;
+    }
 
-      DAY_ITEMS.forEach((day, idx) => {
-        const item = document.createElement("div");
-        item.className = "accordion-item";
+    function todayIsoLocal() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    }
 
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "accordion-btn";
-        btn.setAttribute("aria-expanded", idx === 0 ? "true" : "false");
+    async function fetchJsonAny(candidates) {
+      for (let i = 0; i < candidates.length; i += 1) {
+        try {
+          const res = await fetch(candidates[i], { cache: "no-store" });
+          if (!res.ok) continue;
+          return await res.json();
+        } catch (_) {}
+      }
+      return null;
+    }
 
-        const left = document.createElement("span");
-        const todayTxt = day.today ? " TODAY" : "";
-        const countTxt = day.total ? ` ${day.total} flights` : "";
-        left.textContent = `📅 ${day.date}${todayTxt}${countTxt}`;
+    function parseOffloadDateToIso(rawDate, knownDates) {
+      const value = String(rawDate || "").trim().toUpperCase();
+      if (!value) return "";
+      const months = { JAN:1, FEB:2, MAR:3, APR:4, MAY:5, JUN:6, JUL:7, AUG:8, SEP:9, OCT:10, NOV:11, DEC:12 };
+      let m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+      if (m) return `${m[1]}-${m[2]}-${m[3]}`;
+      m = /^(\d{1,2})[.\-/]([A-Z]{3})(?:[.\-/](\d{4}))?$/.exec(value);
+      if (!m) return "";
+      const day   = String(parseInt(m[1], 10)).padStart(2, "0");
+      const monNum = months[m[2]];
+      if (!monNum) return "";
+      const month = String(monNum).padStart(2, "0");
+      if (m[3]) return `${m[3]}-${month}-${day}`;
+      const suffix = `-${month}-${day}`;
+      const matches = (knownDates || []).filter((d) => String(d || "").endsWith(suffix));
+      if (matches.length === 1) return matches[0];
+      if (matches.length > 1)   return matches.sort().slice(-1)[0];
+      return `${new Date().getFullYear()}-${month}-${day}`;
+    }
 
-        const right = document.createElement("span");
-        right.className = "acc-arrow";
-        right.textContent = "›";
-
-        btn.appendChild(left);
-        btn.appendChild(right);
-
-        const panel = document.createElement("div");
-        panel.className = "accordion-panel";
-        panel.hidden = idx !== 0;
-
-        day.shifts.forEach((shift) => {
-          const row = document.createElement("a");
-          row.className = "shift-row";
-          row.href = targetUrl;
-
-          const n = document.createElement("div");
-          n.className = "shift-name";
-          n.textContent = shift.name;
-
-          const m = document.createElement("div");
-          m.className = "shift-meta";
-          const ft = flightText(shift.flights);
-          m.textContent = ft ? `${shift.time} · ${ft}` : shift.time;
-
-          row.appendChild(n);
-          row.appendChild(m);
-          panel.appendChild(row);
-        });
-
-        btn.addEventListener("click", () => {
-          const open = btn.getAttribute("aria-expanded") === "true";
-          btn.setAttribute("aria-expanded", open ? "false" : "true");
-          panel.hidden = open;
-        });
-
-        item.appendChild(btn);
-        item.appendChild(panel);
-        root.appendChild(item);
+    function hasRealOffloadItems(items) {
+      if (!Array.isArray(items) || !items.length) return false;
+      return items.some((it) => {
+        const awb = String((it && it.awb) || "").trim().toUpperCase();
+        return awb && awb !== "TOTAL";
       });
     }
 
-    buildAccordion();
+    function buildDayItems(dates, flightHints, offloadLatest) {
+      const flightsByDate = new Map();
+      const offloadDateIso  = parseOffloadDateToIso(offloadLatest && offloadLatest.date, dates);
+      const offloadFlight   = String((offloadLatest && offloadLatest.flight) || "").trim().toUpperCase();
+      const offloadHasData  = hasRealOffloadItems(offloadLatest && offloadLatest.items);
+
+      if (offloadHasData && offloadDateIso && offloadFlight) {
+        const hintKey  = `${offloadDateIso}|${offloadFlight}`;
+        const hintMeta = (flightHints && flightHints[hintKey]) || {};
+        if (!flightsByDate.has(offloadDateIso)) flightsByDate.set(offloadDateIso, new Map());
+        flightsByDate.get(offloadDateIso).set(offloadFlight, hintMeta);
+      }
+
+      const todayIso = todayIsoLocal();
+      return (dates || []).map((isoDate) => {
+        const flightsMap  = flightsByDate.get(isoDate) || new Map();
+        const shiftCounts = { morning: 0, afternoon: 0, night: 0 };
+        flightsMap.forEach((meta) => {
+          const mins = parseStdMinutes(meta && meta.std);
+          SHIFT_META.forEach((shift) => {
+            if (stdMatchesShift(mins, shift.key)) shiftCounts[shift.key] += 1;
+          });
+        });
+        const busiestShift = SHIFT_META.reduce((best, s) => {
+          const c = shiftCounts[s.key] || 0;
+          return c > best.count ? { name: s.name, count: c } : best;
+        }, { name: "-", count: 0 });
+        return {
+          date: isoDate,
+          today: isoDate === todayIso,
+          total: flightsMap.size,
+          busiestShift,
+          shifts: SHIFT_META.map((shift) => ({
+            key:     shift.key,
+            name:    shift.name,
+            time:    shift.time,
+            flights: shiftCounts[shift.key] || 0
+          }))
+        };
+      });
+    }
+
+    // ---- Display helpers ----
+
+    function toDisplayDate(isoDate) {
+      const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(isoDate || ""));
+      if (!m) return String(isoDate || "");
+      return `${m[3]}-${m[2]}-${m[1]}`;
+    }
+
+    function toWeekday(isoDate) {
+      const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(isoDate || ""));
+      if (!m) return "";
+      const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+      return ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][d.getDay()];
+    }
+
+    function pluralFlights(n) {
+      return `${n}\u202Fflight${n === 1 ? "" : "s"}`;
+    }
+
+    // ---- Render KPI strip ----
+
+    function renderInsights(dayItems) {
+      const root = document.getElementById("insightsGrid");
+      if (!root) return;
+      const totalDays    = dayItems.length;
+      const totalFlights = dayItems.reduce((s, d) => s + d.total, 0);
+      const today        = dayItems.find((d) => d.today) || null;
+      const shiftTotals  = { morning: 0, afternoon: 0, night: 0 };
+      dayItems.forEach((d) => d.shifts.forEach((s) => { shiftTotals[s.key] += s.flights; }));
+      const busiest = SHIFT_META.reduce(
+        (best, s) => shiftTotals[s.key] > best.count ? { label: s.name, count: shiftTotals[s.key] } : best,
+        { label: "-", count: 0 }
+      );
+
+      root.innerHTML = `
+        <div class="kpi-card">
+          <div class="kpi-top">
+            <div class="kpi-label">Report Days</div>
+            <div class="kpi-icon">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.7"/>
+                <path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              </svg>
+            </div>
+          </div>
+          <div class="kpi-value">${totalDays}</div>
+          <div class="kpi-note">Available report days</div>
+        </div>
+
+        <div class="kpi-card k-sky">
+          <div class="kpi-top">
+            <div class="kpi-label">Total Flights</div>
+            <div class="kpi-icon sky">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M17.8 19.2L16 11l3.5-3.5C21 6 21 4 19.5 2.5S18 2 16.5 3.5L13 7 4.8 5.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.3c.4-.2.6-.6.5-1.1z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+          <div class="kpi-value">${totalFlights}</div>
+          <div class="kpi-note">Across all visible days</div>
+        </div>
+
+        <div class="kpi-card k-amber">
+          <div class="kpi-top">
+            <div class="kpi-label">Busiest Shift</div>
+            <div class="kpi-icon amber">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+          <div class="kpi-value" style="font-size:22px;padding-top:4px;">${busiest.label}</div>
+          <div class="kpi-note">${pluralFlights(busiest.count)} overall</div>
+        </div>
+
+        <div class="kpi-card k-green">
+          <div class="kpi-top">
+            <div class="kpi-label">Today</div>
+            <div class="kpi-icon green">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+          <div class="kpi-value" style="color:var(--green-600)">${today ? today.total : 0}</div>
+          <div class="kpi-note">${today ? "Active record &mdash; " + pluralFlights(today.total) : "No active day record"}</div>
+        </div>
+      `;
+    }
+
+    // ---- Render day cards ----
+
+    function renderDays(dayItems) {
+      const root = document.getElementById("daysTimeline");
+      if (!root) return;
+      root.innerHTML = "";
+      const targetUrl = "./data/report/offload_report.html";
+
+      if (!dayItems.length) {
+        root.innerHTML = `
+          <div class="empty-state" role="status">
+            <div class="empty-icon-wrap">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M8 15h8M8 19h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="empty-title">No Report Dates Available</div>
+            <div class="empty-sub">The data index contains no operational days. Reports will appear here automatically once data is available.</div>
+          </div>
+        `;
+        return;
+      }
+
+      const maxShiftCount = dayItems.reduce((mx, d) => {
+        d.shifts.forEach((s) => { if (s.flights > mx) mx = s.flights; });
+        return mx;
+      }, 1);
+
+      dayItems.forEach((day, idx) => {
+        const m = day.shifts.find((s) => s.key === "morning")?.flights   || 0;
+        const a = day.shifts.find((s) => s.key === "afternoon")?.flights || 0;
+        const n = day.shifts.find((s) => s.key === "night")?.flights     || 0;
+        const localMax = Math.max(m, a, n, 1);
+
+        const mPct = ((m / localMax) * 100).toFixed(1);
+        const aPct = ((a / localMax) * 100).toFixed(1);
+        const nPct = ((n / localMax) * 100).toFixed(1);
+
+        const weekday     = toWeekday(day.date);
+        const busiestText = day.total > 0
+          ? `Busiest: ${day.busiestShift.name} (${day.busiestShift.count})`
+          : "No active flights";
+
+        const card = document.createElement("article");
+        card.className = `day-card${day.today ? " is-today" : ""}`;
+        card.style.animationDelay = `${(idx * 48)}ms`;
+
+        card.innerHTML = `
+          <div class="day-summary">
+            <div class="day-date-block">
+              <div class="day-date-main">${toDisplayDate(day.date)}</div>
+              ${weekday ? `<div class="day-weekday">${weekday}</div>` : ""}
+            </div>
+            <div class="day-meta">
+              ${day.today ? '<span class="pill pill-today">Today</span>' : ""}
+              <span class="pill ${day.total ? "pill-count" : "pill-empty"}">${day.total ? pluralFlights(day.total) : "No flights"}</span>
+            </div>
+            <div class="day-busiest">
+              ${day.total > 0 ? `<span class="day-busiest-dot"></span>` : ""}
+              ${busiestText}
+            </div>
+          </div>
+
+          <div class="shift-bars" aria-label="Shift distribution">
+            <div class="shift-bar-row">
+              <span class="shift-bar-label"><span class="shift-dot morning"></span>Morning</span>
+              <div class="shift-bar-track"><div class="shift-bar-fill morning" style="width:${mPct}%"></div></div>
+              <span class="shift-bar-count${m === 0 ? " zero" : ""}">${m}</span>
+            </div>
+            <div class="shift-bar-row">
+              <span class="shift-bar-label"><span class="shift-dot afternoon"></span>Afternoon</span>
+              <div class="shift-bar-track"><div class="shift-bar-fill afternoon" style="width:${aPct}%"></div></div>
+              <span class="shift-bar-count${a === 0 ? " zero" : ""}">${a}</span>
+            </div>
+            <div class="shift-bar-row">
+              <span class="shift-bar-label"><span class="shift-dot night"></span>Night</span>
+              <div class="shift-bar-track"><div class="shift-bar-fill night" style="width:${nPct}%"></div></div>
+              <span class="shift-bar-count${n === 0 ? " zero" : ""}">${n}</span>
+            </div>
+          </div>
+
+          <div class="shifts-row"></div>
+        `;
+
+        const shiftsRow = card.querySelector(".shifts-row");
+        day.shifts.forEach((shift) => {
+          const link = document.createElement("a");
+          link.className = `shift-link ${shift.key}`;
+          link.href = `${targetUrl}?date=${encodeURIComponent(day.date)}&shift=${encodeURIComponent(shift.key)}`;
+          link.setAttribute("aria-label", `${shift.name} shift - ${shift.flights ? pluralFlights(shift.flights) : "No flights"}`);
+          link.innerHTML = `
+            <div class="shift-link-top">
+              <span class="shift-name">${shift.name}</span>
+              <span class="shift-count-badge ${shift.flights ? "active" : "inactive"}">${shift.flights ? pluralFlights(shift.flights) : "No flights"}</span>
+            </div>
+            <div class="shift-time">${shift.time}</div>
+            <span class="shift-chevron" aria-hidden="true">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+                <path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+          `;
+          shiftsRow.appendChild(link);
+        });
+
+        root.appendChild(card);
+      });
+    }
+
+    // ---- Bootstrap (unchanged) ----
+
+    async function initDashboard() {
+      const datesIndex = await fetchJsonAny(["./data/report/dates_index.json", "./data/report/latest.json"]);
+      let dates = [];
+      if (datesIndex && Array.isArray(datesIndex.dates)) {
+        dates = datesIndex.dates.slice();
+      } else if (datesIndex && datesIndex.shiftMeta && datesIndex.shiftMeta.date) {
+        dates = [String(datesIndex.shiftMeta.date)];
+      }
+      dates = dates
+        .map((d) => String(d || "").trim())
+        .filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d))
+        .sort((a, b) => (a < b ? 1 : -1));
+
+      const flightHints   = (await fetchJsonAny(["./data/report/flight-hints.json"])) || {};
+      const offloadLatest = (await fetchJsonAny(["./data/offload/report/latest.json"])) || null;
+      const dayItems      = buildDayItems(dates, flightHints, offloadLatest);
+
+      renderInsights(dayItems);
+      renderDays(dayItems);
+    }
+
+    initDashboard();
   </script>
 </body>
 </html>

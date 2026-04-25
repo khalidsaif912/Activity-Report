@@ -147,9 +147,14 @@ window.offloadLoader = {
     const code = fa.normalizeCode(flightCode);
     if (!code) return null;
     const key = this.isoToFlightDateKey(reportIso || "");
-    const upperKey = key.toUpperCase();
+    const normalizedKey =
+      typeof fa.normalizeDateKey === "function" ? fa.normalizeDateKey(key || "") : String(key || "").toUpperCase().replace(/\s/g, "");
     const sameDay = fa.flights.filter(
-      (f) => fa.normalizeCode(f.code) === code && (f.date || "").toUpperCase().replace(/\s/g, "") === upperKey
+      (f) =>
+        fa.normalizeCode(f.code) === code &&
+        (typeof fa.normalizeDateKey === "function"
+          ? fa.normalizeDateKey(f.date || "") === normalizedKey
+          : (f.date || "").toUpperCase().replace(/\s/g, "") === normalizedKey)
     );
     if (sameDay.length === 1) return sameDay[0];
     if (sameDay.length > 1) return sameDay[0];

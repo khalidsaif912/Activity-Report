@@ -119,7 +119,9 @@ window.phraseAutocomplete = {
   _isLearnedPhraseKey(key) {
     return (
       key === "loadPlan" ||
+      key === "loadPlanPhraseOnly" ||
       key === "advanceLoading" ||
+      key === "advanceLoadingPhraseOnly" ||
       key === "handoverDetails" ||
       key === "offloadReason" ||
       key === "offloadRemarks" ||
@@ -153,8 +155,24 @@ window.phraseAutocomplete = {
   },
 
   _phraseSourceKeysFor(key) {
+    if (key === "loadPlanPhraseOnly") return ["loadPlan"];
+    if (key === "advanceLoadingPhraseOnly") return ["advanceLoading"];
     if (key === "handoverDetails") return ["handoverDetails", "specialHO"];
     return [key];
+  },
+
+  _isPhraseOnlyKey(key) {
+    return key === "loadPlanPhraseOnly" || key === "advanceLoadingPhraseOnly";
+  },
+
+  _looksLikeFlightSegment(text) {
+    const t = String(text || "").toUpperCase().trim();
+    if (!t) return false;
+    if (/[A-Z]{2}\d{2,4}\/\d{1,2}[A-Z]{3}\/[A-Z0-9]{2,4}/.test(t)) return true;
+    if (/^[A-Z]{2}$/.test(t)) return true;
+    if (/^[A-Z]{2}\d{0,4}$/.test(t)) return true;
+    if (/^[A-Z]{2}\d{0,4}\b/.test(t)) return true;
+    return false;
   },
 
   _mergedPhraseListForKey(key) {
@@ -207,6 +225,12 @@ window.phraseAutocomplete = {
   },
 
   _normalizeFlightDateKey(value) {
+    try {
+      const fa = window.flightAutocomplete;
+      if (fa && typeof fa.normalizeDateKey === "function") {
+        return fa.normalizeDateKey(value || "");
+      }
+    } catch (_) {}
     const raw = String(value || "").toUpperCase().replace(/\s/g, "");
     const m = raw.match(/^(\d{1,2})([A-Z]{3})$/);
     if (!m) return raw;
@@ -354,7 +378,7 @@ window.phraseAutocomplete = {
   _flightSuggestionStrings(flightQuery, listAllWhenNoFlightToken) {
     const q = this._toAsciiDigits((flightQuery || "").trim().toUpperCase());
     const fa = window.flightAutocomplete;
-    if (!fa || !Array.isArray(fa.flights) || !fa.flights.length) return [];
+    if (!fa || typeof fa.findMatches !== "function") return [];
 
     let reportIso = "";
     try {
@@ -370,53 +394,17 @@ window.phraseAutocomplete = {
     const reportKey = this._isoToFlightKey(reportIso);
     const todayKey = this._isoToFlightKey(todayIso);
 
-    const poolAll = fa.flights.slice();
-    const byDate = new Map();
-    poolAll.forEach((f) => {
-      const key = this._normalizeFlightDateKey(f.date || "");
-      if (!key) return;
-      if (!byDate.has(key)) byDate.set(key, []);
-      byDate.get(key).push(f);
-    });
-
-    let poolDateKey = reportKey && byDate.has(reportKey) ? reportKey : "";
-    if (!poolDateKey && todayKey && byDate.has(todayKey)) poolDateKey = todayKey;
-
-    let pool = poolDateKey ? byDate.get(poolDateKey) : null;
-    if (!pool) {
-      const latestKey = this._pickLatestFlightDateKey(byDate.keys());
-      if (latestKey && byDate.has(latestKey)) {
-        pool = byDate.get(latestKey);
-        poolDateKey = latestKey;
-      }
-    }
-    if (!pool) pool = poolAll;
-
     /*
      * Always show suggestions with the selected report day (or today's day)
      * so users don't keep seeing yesterday's date when source data lags.
      */
-    const displayDateKey = reportKey || todayKey || poolDateKey;
+    const displayDateKey = reportKey || todayKey || "";
     const fmt = (f) => this._formatFlightSuggestionRow(f, displayDateKey, fa.formatFlight);
-
-    if (!q) {
-      if (listAllWhenNoFlightToken) {
-        return pool.slice(0, 14).map(fmt);
-      }
-      return [];
-    }
-
-    const digitsOnly = /^\d{1,4}$/.test(q);
-    pool = pool.filter((f) => {
-      const code = fa.normalizeCode(f.code);
-      if (digitsOnly) {
-        const num = code.replace(/^[A-Z]{2}/, "");
-        return num.startsWith(q) || code.includes(q);
-      }
-      return code.startsWith(q);
+    const matches = fa.findMatches(q, {
+      reportIso,
+      listAllWhenEmpty: !!listAllWhenNoFlightToken
     });
-
-    return pool.slice(0, 14).map(fmt);
+    return matches.map(fmt).slice(0, 14);
   },
 
   /**
@@ -474,6 +462,12 @@ window.phraseAutocomplete = {
       const fixedRaw = (list || [])
         .filter((item) => item && (!q || item.startsWith(q) || (q.length >= 2 && item.includes(q))));
 
+      const phraseOnly = this._isPhraseOnlyKey(key);
+      const scrubFlightLike = (arr) =>
+        phraseOnly ? (arr || []).filter((x) => !this._looksLikeFlightSegment(x)) : arr || [];
+      const learnedFiltered = scrubFlightLike(learnedRaw);
+      const fixedFiltered = scrubFlightLike(fixedRaw);
+
       const flightsRaw = this._isFlightAwarePhraseKey(key)
         ? fq
           ? this._flightSuggestionStrings(fq, false)
@@ -498,11 +492,11 @@ window.phraseAutocomplete = {
         return merged.length >= cap;
       };
 
-      for (const x of learnedRaw) {
+      for (const x of learnedFiltered) {
         if (merged.length >= phraseCap) break;
         pushKind(x, "learned");
       }
-      for (const x of fixedRaw) {
+      for (const x of fixedFiltered) {
         if (merged.length >= phraseCap) break;
         pushKind(x, "fixed");
       }

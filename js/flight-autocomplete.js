@@ -6,6 +6,21 @@ window.flightAutocomplete = {
   activeIndex: -1,
   activeOnPick: null,
   activeMode: "replace",
+  _monthIndex: {
+    JAN: 1,
+    FEB: 2,
+    MAR: 3,
+    APR: 4,
+    MAY: 5,
+    JUN: 6,
+    JUL: 7,
+    AUG: 8,
+    SEP: 9,
+    OCT: 10,
+    NOV: 11,
+    DEC: 12
+  },
+  _monthAbbrevs: ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"],
 
   async load(url = "../../data/report/flights.json", options = {}) {
     const { silent = false } = options || {};
@@ -22,7 +37,7 @@ window.flightAutocomplete = {
             .map((flight) => ({
               ...flight,
               code: this.normalizeCode(flight && flight.code),
-              date: String((flight && flight.date) || "").trim().toUpperCase(),
+              date: this.normalizeDateKey((flight && flight.date) || ""),
               destination: this.normalizeDestination(flight && flight.destination),
               stdEtd: String((flight && flight.stdEtd) || "").trim().toUpperCase()
             }))
@@ -57,9 +72,119 @@ window.flightAutocomplete = {
 
   formatFlight(flight) {
     const code = this.normalizeCode(flight.code);
-    const date = (flight.date || "").trim().toUpperCase();
+    const date = this.normalizeDateKey(flight.date || "");
     const destination = this.normalizeDestination(flight.destination);
     return [code, date, destination].filter(Boolean).join("/");
+  },
+
+  isoToDateKey(iso) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || "").trim());
+    if (!m) return "";
+    const day = parseInt(m[3], 10);
+    const month = parseInt(m[2], 10);
+    if (day < 1 || day > 31 || month < 1 || month > 12) return "";
+    return `${day}${this._monthAbbrevs[month - 1]}`;
+  },
+
+  normalizeDateKey(value) {
+    const raw = String(value || "").trim().toUpperCase().replace(/\s+/g, "");
+    if (!raw) return "";
+
+    let m = /^(\d{1,2})([A-Z]{3})$/.exec(raw);
+    if (m && this._monthIndex[m[2]]) return `${parseInt(m[1], 10)}${m[2]}`;
+
+    m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
+    if (m) return this.isoToDateKey(`${m[1]}-${m[2]}-${m[3]}`);
+
+    m = /^(\d{1,2})[-/.]([A-Z]{3})[-/.](\d{4})$/.exec(raw);
+    if (m && this._monthIndex[m[2]]) return `${parseInt(m[1], 10)}${m[2]}`;
+
+    m = /^(\d{4})[-/.]([A-Z]{3})[-/.](\d{1,2})$/.exec(raw);
+    if (m && this._monthIndex[m[2]]) return `${parseInt(m[3], 10)}${m[2]}`;
+
+    return raw;
+  },
+
+  _todayIso() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  },
+
+  _resolveReportIso(reportIso) {
+    const src = String(reportIso || "").trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(src)) return src;
+    const byWindow = String(window.__flightSuggestIsoDate || "").trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(byWindow)) return byWindow;
+    return this._todayIso();
+  },
+
+  _buildHintFlightsForDate(reportIso) {
+    const out = [];
+    const cache = window.flightHintCache;
+    const memory = cache && cache._memory && typeof cache._memory === "object" ? cache._memory : null;
+    if (!memory) return out;
+    const prefix = `${reportIso}|`;
+    const dateKey = this.isoToDateKey(reportIso);
+    Object.keys(memory).forEach((k) => {
+      if (!k.startsWith(prefix)) return;
+      const code = this.normalizeCode(k.slice(prefix.length));
+      if (!code) return;
+      const meta = memory[k] || {};
+      out.push({
+        code,
+        date: dateKey,
+        destination: this.normalizeDestination(meta.destination || ""),
+        stdEtd: String(meta.std || "").trim().toUpperCase()
+      });
+    });
+    return out;
+  },
+
+  _poolForReportDate(reportIso) {
+    const normalizedIso = this._resolveReportIso(reportIso);
+    const reportKey = this.isoToDateKey(normalizedIso);
+    const all = Array.isArray(this.flights) ? this.flights : [];
+
+    const byDate = new Map();
+    all.forEach((f) => {
+      const key = this.normalizeDateKey(f.date || "");
+      if (!key) return;
+      if (!byDate.has(key)) byDate.set(key, []);
+      byDate.get(key).push({ ...f, date: key });
+    });
+
+    // Start with exact report date.
+    const pool = reportKey && byDate.has(reportKey) ? byDate.get(reportKey).slice() : [];
+
+    const hintFlights = this._buildHintFlightsForDate(normalizedIso);
+    if (hintFlights.length) {
+      const seen = new Set(pool.map((f) => this.normalizeCode(f.code)));
+      hintFlights.forEach((f) => {
+        const c = this.normalizeCode(f.code);
+        if (!c || seen.has(c)) return;
+        seen.add(c);
+        pool.push(f);
+      });
+    }
+
+    // If report-day data is sparse/missing, augment by unique flight codes from all dates,
+    // but pin displayed/stored date to reportKey to avoid showing stale calendar dates.
+    if (reportKey && pool.length < 20 && all.length) {
+      const seen = new Set(pool.map((f) => this.normalizeCode(f.code)));
+      for (let i = 0; i < all.length; i += 1) {
+        const f = all[i] || {};
+        const code = this.normalizeCode(f.code);
+        if (!code || seen.has(code)) continue;
+        seen.add(code);
+        pool.push({
+          ...f,
+          code,
+          date: reportKey
+        });
+      }
+    }
+
+    return pool;
   },
 
   findByCode(code) {
@@ -67,11 +192,16 @@ window.flightAutocomplete = {
     return this.flights.find(f => this.normalizeCode(f.code) === q) || null;
   },
 
-  findMatches(query) {
+  findMatches(query, options = {}) {
     const q = this.normalizeCode(query);
-    if (!q) return [];
+    const reportIso = options && options.reportIso ? String(options.reportIso) : "";
+    const listAllWhenEmpty = !!(options && options.listAllWhenEmpty);
+    const pool = this._poolForReportDate(reportIso);
+    if (!q) {
+      return listAllWhenEmpty ? pool.slice(0, 14) : [];
+    }
     const digitsOnly = /^\d{1,4}$/.test(q);
-    return this.flights
+    return pool
       .filter(f => {
         const code = this.normalizeCode(f.code);
         if (digitsOnly) {
@@ -208,7 +338,7 @@ window.flightAutocomplete = {
   attach(input, key, onPick) {
     input.addEventListener("input", () => {
       input.value = this.normalizeCode(input.value);
-      const matches = this.findMatches(input.value);
+      const matches = this.findMatches(input.value, { reportIso: window.__flightSuggestIsoDate });
       this.renderBox(input, matches, (picked) => {
         onPick(picked);
       }, "replace");
@@ -258,7 +388,7 @@ window.flightAutocomplete = {
       if (onSave) onSave(input.value);
 
       const token = this.extractLastToken(input.value);
-      const matches = this.findMatches(token);
+      const matches = this.findMatches(token, { reportIso: window.__flightSuggestIsoDate });
 
       this.renderBox(input, matches, (picked) => {
         const value = this.replaceLastToken(input.value.toUpperCase(), this.formatFlight(picked));
@@ -312,7 +442,7 @@ window.flightAutocomplete = {
 
       const beforeCursor = textarea.value.slice(0, textarea.selectionStart);
       const token = this.extractLastToken(beforeCursor);
-      const matches = this.findMatches(token);
+      const matches = this.findMatches(token, { reportIso: window.__flightSuggestIsoDate });
 
       this.renderBox(textarea, matches, (picked) => {
         const start = textarea.selectionStart;

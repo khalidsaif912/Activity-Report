@@ -127,8 +127,25 @@
     return !host.endsWith("github.io");
   }
 
+  function configuredApiBase() {
+    const meta = document.querySelector('meta[name="flight-hints-api-base"]');
+    if (meta && String(meta.content || "").trim()) {
+      return String(meta.content).trim().replace(/\/$/, "");
+    }
+    if (typeof window.FLIGHT_HINTS_API_BASE === "string" && window.FLIGHT_HINTS_API_BASE.trim()) {
+      return window.FLIGHT_HINTS_API_BASE.trim().replace(/\/$/, "");
+    }
+    return "";
+  }
+
+  function apiUrl(path) {
+    const base = configuredApiBase();
+    if (!base) return path;
+    return `${base}${path}`;
+  }
+
   function canUseServerGmailApi() {
-    return canUseSameOriginApi();
+    return canUseSameOriginApi() || !!configuredApiBase();
   }
 
   function stripExcludedEmployeesFromManpower() {
@@ -413,6 +430,19 @@
     const meta = document.querySelector('meta[name="activity-report-auto-today"]');
     if (meta && String(meta.getAttribute("content") || "").trim() === "0") return false;
     return true;
+  }
+
+  function parseInitialLaunchContext() {
+    try {
+      const params = new URLSearchParams(window.location.search || "");
+      const dateRaw = String(params.get("date") || "").trim();
+      const shiftRaw = String(params.get("shift") || "").trim().toLowerCase();
+      const date = /^\d{4}-\d{2}-\d{2}$/.test(dateRaw) ? dateRaw : "";
+      const shift = shiftRaw === "morning" || shiftRaw === "afternoon" || shiftRaw === "night" ? shiftRaw : "";
+      return { date, shift };
+    } catch (_) {
+      return { date: "", shift: "" };
+    }
   }
 
   /** Align JSON dates with the selected report day (usually today). */
@@ -737,6 +767,7 @@
 
   async function loadData() {
     try {
+      const launch = parseInitialLaunchContext();
       const foundBase = await resolveReportAssetBase();
       const assetBase = foundBase || reportAssetsRoot();
       if (foundBase === null && window.employeeAutocomplete) {
@@ -788,7 +819,9 @@
       const todayIso = getReportDateIsoLocal();
       state.availableDates = idx && Array.isArray(idx.dates) ? idx.dates.slice().sort() : [];
       state.datesList = buildDatesListTodayFirst(state.availableDates, todayIso);
-      if (getUseAutoToday()) {
+      if (launch.date) {
+        state.activeDate = launch.date;
+      } else if (getUseAutoToday()) {
         state.activeDate = todayIso;
       } else if (idx && Array.isArray(idx.dates) && idx.dates.length) {
         const def = idx.default && state.datesList.includes(idx.default) ? idx.default : state.datesList[0];
@@ -796,6 +829,7 @@
       } else {
         state.activeDate = state.datesList[0] || null;
       }
+      if (launch.shift) state.activeShift = launch.shift;
 
       await loadReportPayload();
       renderAll();
@@ -1088,7 +1122,9 @@
           editable.phraseInput.dataset.index = itemIndex;
           editable.phraseInput.classList.add("opact-input");
           editable.phraseInput.classList.add("opact-phrase-input");
-          editable.phraseInput.dataset.phraseKey = opPhraseKeysStatic[groupIndex] || "";
+          const phraseOnlyKey =
+            groupIndex === 0 ? "loadPlanPhraseOnly" : groupIndex === 1 ? "advanceLoadingPhraseOnly" : "";
+          editable.phraseInput.dataset.phraseKey = phraseOnlyKey || opPhraseKeysStatic[groupIndex] || "";
           editable.phraseInput.dataset.segment = "phrase";
           box.appendChild(editable.row);
           return;
@@ -1285,6 +1321,21 @@
     return (state.activeDate || state.shiftMeta.date || "").trim();
   }
 
+  function compactOffloadDate(value) {
+    const raw = String(value || "").trim().toUpperCase();
+    if (!raw) return "";
+    if (/^\d{1,2}[A-Z]{3}$/.test(raw)) return raw;
+
+    const normalized =
+      window.offloadLoader && typeof window.offloadLoader.normalizeOffloadDate === "function"
+        ? String(window.offloadLoader.normalizeOffloadDate(raw) || "").trim().toUpperCase()
+        : raw;
+
+    const m = normalized.match(/^(\d{1,2})-([A-Z]{3})(?:-(\d{4}))?$/);
+    if (m) return `${parseInt(m[1], 10)}${m[2]}`;
+    return normalized.replace(/[\s\-\/.]/g, "");
+  }
+
   function looksLikeFlightCode(s) {
     return /^[A-Z]{2}\d{1,4}$/.test(String(s || "").trim().toUpperCase());
   }
@@ -1377,7 +1428,8 @@
 
       offloadFieldOrder.forEach((field) => {
         const td = document.createElement("td");
-        const isCompactSingleLine = field === "date" || field === "flight" || field === "std" || field === "destination";
+        const isCompactSingleLine =
+          field === "date" || field === "flight" || field === "std" || field === "destination" || field === "trolley";
         const cellInput = isCompactSingleLine ? document.createElement("input") : document.createElement("textarea");
         if (isCompactSingleLine) {
           cellInput.type = "text";
@@ -1386,11 +1438,12 @@
           cellInput.className = "offload-cell";
           cellInput.rows = 2;
         }
-        cellInput.value = row[field] || "";
+        cellInput.value = field === "date" ? compactOffloadDate(row[field] || "") : row[field] || "";
         cellInput.dataset.row = String(rowIndex);
         cellInput.dataset.field = field;
         cellInput.oninput = (e) => {
-          const value = field === "flight" ? e.target.value.toUpperCase() : e.target.value;
+          let value = field === "flight" ? e.target.value.toUpperCase() : e.target.value;
+          if (field === "date") value = compactOffloadDate(value);
           e.target.value = value;
           state.offloads[rowIndex][field] = value;
           saveDraft();
@@ -1804,7 +1857,7 @@
       return;
     }
     try {
-      const r = await fetch("/api/gmail/status", { cache: "no-store" });
+      const r = await fetch(apiUrl("/api/gmail/status"), { cache: "no-store" });
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const st = await r.json();
       _gmailStatus = {
@@ -1832,7 +1885,7 @@
       return;
     }
     try {
-      const r = await fetch("/api/gmail/auth-url", { cache: "no-store" });
+      const r = await fetch(apiUrl("/api/gmail/auth-url"), { cache: "no-store" });
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const out = await r.json();
       if (!out.url) throw new Error("Missing auth URL");
@@ -1849,7 +1902,11 @@
     if (!recipients.to.length && !recipients.cc.length && !recipients.bcc.length) return false;
 
     if (!canUseServerGmailApi()) {
-      return openEmailComposerWithClipboardHint();
+      const statusEl = el("gmailStatus");
+      if (statusEl) {
+        statusEl.textContent = "Direct send is unavailable: start the local API server and connect Gmail.";
+      }
+      return false;
     }
 
     const subject = "Export Warehouse Activity Report";
@@ -1857,7 +1914,7 @@
     const html = await buildReportHtmlForClipboard();
 
     try {
-      const r = await fetch("/api/gmail/send", {
+      const r = await fetch(apiUrl("/api/gmail/send"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1876,7 +1933,11 @@
     } catch (_) {
       /* fallback below */
     }
-    return openEmailComposerWithClipboardHint();
+    const statusEl = el("gmailStatus");
+    if (statusEl) {
+      statusEl.textContent = "Direct send failed. Check Gmail connection and API server.";
+    }
+    return false;
   }
 
   function setEmailButtonState(mode) {
@@ -1969,24 +2030,26 @@
     const table = root.querySelector("table.offload-table");
     if (!table) return;
 
-    const colPct = ["2%", "8%", "7%", "7%", "6%", "8%", "10%", "8%", "10%", "8%", "8%", "18%"];
+    // Outlook-safe fixed column plan (prevents header letter breaking).
+    const colPx = [28, 84, 72, 74, 56, 74, 110, 90, 100, 90, 72, 150];
 
-    table.setAttribute("width", "100%");
     const existingTableStyle = table.getAttribute("style") || "";
     const stripped = existingTableStyle.replace(/\b(min-)?width\s*:\s*[^;]+;?/gi, "");
+    table.setAttribute("width", "1000");
     table.setAttribute(
       "style",
-      "width:100%;max-width:100%;min-width:0;table-layout:fixed;border-collapse:collapse;box-sizing:border-box;" + stripped
+      "width:1000px;max-width:1000px;min-width:1000px;table-layout:fixed;border-collapse:collapse;box-sizing:border-box;margin:0;" +
+        stripped
     );
 
     const headerCells = table.querySelectorAll("thead tr th");
     headerCells.forEach((th, i) => {
-      const pct = colPct[i] || `${(100 / colPct.length).toFixed(2)}%`;
+      const px = colPx[i] || 110;
       let prev = th.getAttribute("style") || "";
       prev = prev.replace(/\bwidth\s*:\s*[^;]+;?/gi, "");
       th.setAttribute(
         "style",
-        `width:${pct};max-width:${pct};min-width:0;word-wrap:normal;overflow-wrap:normal;word-break:keep-all;hyphens:none;white-space:normal;line-height:1.25;box-sizing:border-box;${prev}`
+        `width:${px}px;max-width:${px}px;min-width:${px}px;background:rgba(238,243,252,0.85);border:1px solid #d0d5e8;white-space:normal;word-wrap:normal;overflow-wrap:normal;word-break:keep-all;hyphens:none;line-height:1.35;font-size:9.2pt;mso-ansi-font-size:9.2pt;padding:10px 8px;text-align:center;vertical-align:middle;box-sizing:border-box;${prev}`
       );
     });
 
@@ -1999,18 +2062,105 @@
         if (span > 1) {
           td.setAttribute(
             "style",
-            "width:100%;max-width:100%;min-width:0;word-wrap:break-word;overflow-wrap:anywhere;word-break:normal;box-sizing:border-box;" + prev
+            "width:100%;max-width:100%;min-width:0;word-wrap:normal;overflow-wrap:normal;word-break:normal;box-sizing:border-box;" + prev
           );
           return;
         }
-        const pct = colPct[colIndex] || `${(100 / colPct.length).toFixed(2)}%`;
+        const px = colPx[colIndex] || 110;
         colIndex += 1;
         td.setAttribute(
           "style",
-          `width:${pct};max-width:${pct};min-width:0;word-wrap:break-word;overflow-wrap:anywhere;word-break:normal;box-sizing:border-box;${prev}`
+          `width:${px}px;max-width:${px}px;min-width:${px}px;border:1px solid #d0d5e8;word-wrap:normal;overflow-wrap:normal;word-break:normal;font-size:10.2pt;mso-ansi-font-size:10.2pt;padding:12px;box-sizing:border-box;line-height:1.9;${prev}`
         );
+        // DATE column (2nd visible column, index 1 after item): smaller text for cleaner fit.
+        if (colIndex - 1 === 1) {
+          const s = td.getAttribute("style") || "";
+          td.setAttribute(
+            "style",
+            `font-size:9.0pt;mso-ansi-font-size:9.0pt;line-height:1.5;word-break:normal;overflow-wrap:normal;` + s
+          );
+        }
       });
     });
+  }
+
+  /** Outlook-friendly alternative: convert wide offload table into stacked record cards. */
+  function convertOffloadTableToRecordCardsForClipboard(root) {
+    const table = root.querySelector("table.offload-table");
+    if (!table) return false;
+    const bodyRows = Array.from(table.querySelectorAll("tbody tr"));
+    if (!bodyRows.length) return false;
+
+    const labels = [
+      "ITEM",
+      "DATE",
+      "FLIGHT",
+      "STD/ETD",
+      "DEST",
+      "Email Received Time",
+      "Physical Cargo Received from Ramp",
+      "Trolley / ULD Number",
+      "Offloading Process Completed in CMS",
+      "Offloading Pieces Verification",
+      "Offloading Reason",
+      "Remarks / Additional Information",
+    ];
+
+    const cardsWrap = document.createElement("div");
+    cardsWrap.className = "offload-cards-wrap";
+    cardsWrap.setAttribute(
+      "style",
+      "width:100%;max-width:100%;box-sizing:border-box;margin-top:8px;"
+    );
+
+    bodyRows.forEach((tr) => {
+      const cells = Array.from(tr.querySelectorAll("td"));
+      if (!cells.length) return;
+
+      const values = cells.map((td) => String(td.textContent || "").replace(/\s+/g, " ").trim());
+      const card = document.createElement("table");
+      card.setAttribute("role", "presentation");
+      card.setAttribute("cellpadding", "0");
+      card.setAttribute("cellspacing", "0");
+      card.setAttribute("border", "0");
+      card.setAttribute("width", "100%");
+      card.setAttribute(
+        "style",
+        "border-collapse:collapse;width:100%;table-layout:fixed;margin:0 0 10px 0;border:1px solid #cbd5e1;border-radius:8px;background:#f8fafc;"
+      );
+
+      for (let i = 0; i < Math.min(labels.length, values.length); i += 1) {
+        const row = document.createElement("tr");
+        const tdLabel = document.createElement("td");
+        tdLabel.setAttribute(
+          "style",
+          "width:230px;min-width:230px;max-width:230px;vertical-align:top;padding:6px 8px;border-bottom:1px solid #e2e8f0;font-family:Arial,sans-serif;font-size:10.0pt;mso-ansi-font-size:10.0pt;font-weight:700;color:#1e3a8a;background:#eff6ff;"
+        );
+        tdLabel.textContent = `${labels[i]}:`;
+
+        const tdVal = document.createElement("td");
+        tdVal.setAttribute(
+          "style",
+          "vertical-align:top;padding:6px 8px;border-bottom:1px solid #e2e8f0;font-family:Arial,sans-serif;font-size:10.5pt;mso-ansi-font-size:10.5pt;color:#000000;background:#ffffff;"
+        );
+        tdVal.textContent = values[i] || "";
+
+        row.appendChild(tdLabel);
+        row.appendChild(tdVal);
+        card.appendChild(row);
+      }
+
+      cardsWrap.appendChild(card);
+    });
+
+    const offloadWrap = root.querySelector(".offload-wrap");
+    if (offloadWrap) {
+      offloadWrap.innerHTML = "";
+      offloadWrap.appendChild(cardsWrap);
+    } else {
+      table.replaceWith(cardsWrap);
+    }
+    return true;
   }
 
   /** Word respects pt + mso-* on spans more than px on table cells. */
@@ -2024,69 +2174,102 @@
 
   const WORD_CLIPBOARD = {
     body:
-      "mso-ansi-font-size:11.0pt;mso-bidi-font-size:11.0pt;font-size:11.0pt;font-family:'Arial',sans-serif;color:#000000;line-height:115%;mso-line-height-rule:exactly;",
+      "mso-ansi-font-size:11.0pt;mso-bidi-font-size:11.0pt;font-size:11.0pt;font-family:Calibri,Arial,sans-serif;color:#000000;line-height:190%;mso-line-height-rule:at-least;",
     bullet:
-      "mso-ansi-font-size:11.0pt;font-size:11.0pt;font-family:'Georgia',serif;mso-ascii-font-family:Georgia;mso-hansi-font-family:Georgia;font-weight:bold;color:#000000;",
+      "mso-ansi-font-size:11.0pt;font-size:11.0pt;font-family:Calibri,Arial,sans-serif;mso-ascii-font-family:Calibri;mso-hansi-font-family:Calibri;font-weight:bold;color:#000000;",
     sectionTitle:
-      "mso-ansi-font-size:12.0pt;mso-bidi-font-size:12.0pt;font-size:12.0pt;font-family:'Georgia',serif;mso-ascii-font-family:Georgia;mso-hansi-font-family:Georgia;font-weight:bold;letter-spacing:0.02em;color:#000000;",
+      "mso-ansi-font-size:12.0pt;mso-bidi-font-size:12.0pt;font-size:12.0pt;font-family:Calibri,Arial,sans-serif;mso-ascii-font-family:Calibri;mso-hansi-font-family:Calibri;font-weight:bold;letter-spacing:0.02em;color:#000000;",
     bannerMajor:
-      "mso-ansi-font-size:14.0pt;mso-bidi-font-size:14.0pt;font-size:14.0pt;font-family:'Georgia',serif;mso-ascii-font-family:Georgia;mso-hansi-font-family:Georgia;font-weight:bold;letter-spacing:0.02em;color:#000000;line-height:1.35;",
+      "mso-ansi-font-size:14.0pt;mso-bidi-font-size:14.0pt;font-size:14.0pt;font-family:Calibri,Arial,sans-serif;mso-ascii-font-family:Calibri;mso-hansi-font-family:Calibri;font-weight:bold;letter-spacing:0.02em;color:#000000;line-height:1.9;",
     bannerDefault:
-      "mso-ansi-font-size:12.0pt;mso-bidi-font-size:12.0pt;font-size:12.0pt;font-family:'Arial',sans-serif;font-weight:bold;color:#000000;line-height:1.45;",
+      "mso-ansi-font-size:12.0pt;mso-bidi-font-size:12.0pt;font-size:12.0pt;font-family:Calibri,Arial,sans-serif;font-weight:bold;color:#000000;line-height:1.9;",
   };
 
-  /** Outlook/Word often drops CSS background on divs; table &lt;td bgcolor&gt; keeps section shading on paste. */
+  /** Outlook-friendly section title blocks with narrow left accent and rounded box. */
   function convertSectionTitlesToOutlookShadeTables(root) {
     root.querySelectorAll(".section-title").forEach((el) => {
-      let bg = "#bfdbfe";
-      let borderLeft = "#1e3a8a";
-      if (el.classList.contains("green")) {
-        bg = "#dcfce7";
-        borderLeft = "#15803d";
-      } else if (el.classList.contains("orange")) {
-        bg = "#bfdbfe";
-        borderLeft = "#1e3a8a";
-      } else if (el.classList.contains("amber")) {
-        bg = "#fef3c7";
-        borderLeft = "#a16207";
-      } else if (el.classList.contains("slate")) {
-        bg = "#e2e8f0";
-        borderLeft = "#475569";
-      }
-      const text = el.textContent ?? "";
-      const isManpowerMajor = el.classList && el.classList.contains("manpower-block-heading");
-      const table = document.createElement("table");
-      table.setAttribute("width", "100%");
-      table.setAttribute("cellpadding", "0");
-      table.setAttribute("cellspacing", "0");
-      table.setAttribute("border", "0");
-      table.setAttribute(
+      const bg = "#eef3fc";
+      const accent = "#0b3a78";
+      const frame = "#d0d5e8";
+
+      const text = String(el.textContent || "").trim();
+      const isMajor = el.classList && el.classList.contains("manpower-block-heading");
+
+      const outer = document.createElement("table");
+      outer.setAttribute("role", "presentation");
+      outer.setAttribute("cellpadding", "0");
+      outer.setAttribute("cellspacing", "0");
+      outer.setAttribute("border", "0");
+      outer.setAttribute("width", "100%");
+      outer.setAttribute(
         "style",
-        "border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;margin-top:16px;width:100%;table-layout:fixed;"
+        "border-collapse:separate;border-spacing:0;width:100%;margin:16px 0 0 0;" +
+          "mso-table-lspace:0pt;mso-table-rspace:0pt;"
       );
+
       const tr = document.createElement("tr");
-      const tdAccent = document.createElement("td");
-      tdAccent.setAttribute("width", "2");
-      tdAccent.setAttribute("bgcolor", borderLeft);
-      tdAccent.setAttribute(
+
+      const tdLeft = document.createElement("td");
+      tdLeft.setAttribute("width", "3");
+      tdLeft.setAttribute("bgcolor", accent);
+      tdLeft.setAttribute(
         "style",
-        `width:2px;min-width:2px;max-width:2px;background-color:${borderLeft};padding:0;margin:0;font-size:0;line-height:0;mso-line-height-rule:exactly;mso-padding-alt:0;`
+        "width:3px;min-width:3px;max-width:3px;background-color:" +
+          accent +
+          ";font-size:0;line-height:0;padding:0;margin:0;" +
+          "border-top-left-radius:10px;border-bottom-left-radius:10px;"
       );
-      tdAccent.innerHTML = "&nbsp;";
-      const td = document.createElement("td");
-      td.setAttribute("bgcolor", bg);
-      td.setAttribute(
+      tdLeft.innerHTML = "&nbsp;";
+
+      const tdGap = document.createElement("td");
+      tdGap.setAttribute("width", "1");
+      tdGap.setAttribute("bgcolor", "#eef3fc");
+      tdGap.setAttribute(
         "style",
-        isManpowerMajor
-          ? `background-color:${bg};padding:9px 12px 9px 10px;mso-line-height-rule:exactly;`
-          : `background-color:${bg};padding:7px 10px 7px 8px;mso-line-height-rule:exactly;`
+        "width:1px;min-width:1px;max-width:1px;background-color:#eef3fc;" +
+          "font-size:0;line-height:0;padding:0;margin:0;"
       );
-      const runStyle = isManpowerMajor ? WORD_CLIPBOARD.bannerMajor : WORD_CLIPBOARD.bannerDefault;
-      td.appendChild(wordStyledSpan(text, runStyle));
-      tr.appendChild(tdAccent);
-      tr.appendChild(td);
-      table.appendChild(tr);
-      el.replaceWith(table);
+      tdGap.innerHTML = "&nbsp;";
+
+      const tdMain = document.createElement("td");
+      tdMain.setAttribute("bgcolor", bg);
+      tdMain.setAttribute(
+        "style",
+        "background-color:" +
+          bg +
+          ";padding:" +
+          (isMajor ? "9px 12px 9px 10px" : "7px 10px 7px 8px") +
+          ";margin:0;" +
+          "border-top:1px solid " +
+          frame +
+          ";border-right:1px solid " +
+          frame +
+          ";border-bottom:1px solid " +
+          frame +
+          ";" +
+          "border-top-right-radius:10px;border-bottom-right-radius:10px;" +
+          "mso-line-height-rule:exactly;"
+      );
+
+      const span = document.createElement("span");
+      span.setAttribute("lang", "EN-US");
+      span.setAttribute(
+        "style",
+        isMajor
+          ? "font-family:Calibri,Arial,sans-serif;font-size:14.0pt;mso-ansi-font-size:14.0pt;" +
+              "font-weight:bold;letter-spacing:0.02em;color:#0b3a78;line-height:1.35;"
+          : "font-family:Calibri,Arial,sans-serif;font-size:12.0pt;mso-ansi-font-size:12.0pt;" +
+              "font-weight:bold;color:#0b3a78;line-height:1.45;"
+      );
+      span.appendChild(document.createTextNode(text));
+      tdMain.appendChild(span);
+
+      tr.appendChild(tdLeft);
+      tr.appendChild(tdGap);
+      tr.appendChild(tdMain);
+      outer.appendChild(tr);
+
+      el.replaceWith(outer);
     });
   }
 
@@ -2131,11 +2314,47 @@
     });
   }
 
+  /**
+   * Outlook/Word may reflow flex/span rows unexpectedly.
+   * Convert generic line rows to single-cell tables to preserve one-line output.
+   */
+  function restructureLineItemsForWordPaste(root) {
+    root.querySelectorAll(".line-item").forEach((row) => {
+      const textParts = Array.from(row.querySelectorAll(".export-val"))
+        .map((el) => String(el.textContent || "").trim())
+        .filter(Boolean);
+      if (!textParts.length) return;
+      const text = textParts.join(" ");
+      const table = document.createElement("table");
+      table.setAttribute("cellpadding", "0");
+      table.setAttribute("cellspacing", "0");
+      table.setAttribute("border", "0");
+      table.setAttribute("width", "100%");
+      table.className = "line-item-paste-row";
+      table.setAttribute(
+        "style",
+        "border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;width:100%;margin:0 0 6px 0;"
+      );
+      const tr = document.createElement("tr");
+      const td = document.createElement("td");
+      td.setAttribute("style", "vertical-align:top;padding:2px 0;mso-line-height-rule:exactly;");
+      td.appendChild(wordStyledSpan(text, WORD_CLIPBOARD.body));
+      tr.appendChild(td);
+      table.appendChild(tr);
+      row.replaceWith(table);
+    });
+  }
+
   /** Outlook uses Word HTML; it often strips &lt;style&gt; — inline CSS + bgcolor where needed. */
   function applyOutlookInlineClipboardStyles(root) {
     const baseFont =
-      "font-family:'Arial',sans-serif;font-size:11.0pt;mso-ansi-font-size:11.0pt;color:#000000;line-height:115%;";
-    root.setAttribute("style", baseFont + (root.getAttribute("style") || ""));
+      "font-family:Calibri,Arial,sans-serif;font-size:11.0pt;mso-ansi-font-size:11.0pt;color:#000000;line-height:190%;";
+    root.setAttribute(
+      "style",
+      "width:800px;max-width:800px;min-width:800px;box-sizing:border-box;margin:0;padding:0;" +
+        baseFont +
+        (root.getAttribute("style") || "")
+    );
 
     root.querySelectorAll(".block").forEach((el) => {
       el.setAttribute("style", "padding:12px 4px 0;" + (el.getAttribute("style") || ""));
@@ -2147,6 +2366,13 @@
       el.setAttribute(
         "style",
         "font-weight:700;color:#000000;margin-bottom:6px;mso-ansi-font-size:11.0pt;font-size:11.0pt;font-family:'Arial',sans-serif;" +
+          (el.getAttribute("style") || "")
+      );
+    });
+    root.querySelectorAll(".section-title").forEach((el) => {
+      el.setAttribute(
+        "style",
+        "display:block;width:100%;max-width:100%;min-width:0;box-sizing:border-box;margin:16px 0 0 0;" +
           (el.getAttribute("style") || "")
       );
     });
@@ -2175,7 +2401,7 @@
     root.querySelectorAll(".manpower-bullet").forEach((el) => {
       el.setAttribute(
         "style",
-        "display:inline-block;min-width:1em;font-weight:700;font-size:15px;line-height:1.5;color:#000000;padding-top:2px;font-family:Georgia,'Times New Roman',serif;" +
+        "display:inline-block;min-width:1em;font-weight:700;font-size:15px;line-height:1.9;color:#000000;padding-top:2px;font-family:Calibri,Arial,sans-serif;" +
           (el.getAttribute("style") || "")
       );
     });
@@ -2204,6 +2430,14 @@
         el.setAttribute("style", "display:block;" + wordBody + prev);
       }
     });
+    // Keep bullet rows (including Load Plan / Advance Loading) on one visual line in Outlook.
+    root.querySelectorAll(".line-item > .export-val").forEach((el) => {
+      el.setAttribute(
+        "style",
+        (el.getAttribute("style") || "") +
+          ";display:inline !important;min-height:0 !important;line-height:115%;vertical-align:baseline;"
+      );
+    });
     root.querySelectorAll(".export-multiline").forEach((el) => {
       el.setAttribute("style", "white-space:pre-wrap;" + (el.getAttribute("style") || ""));
     });
@@ -2219,32 +2453,33 @@
     root.querySelectorAll(".offload-wrap").forEach((el) => {
       el.setAttribute(
         "style",
-        "max-width:100%;width:100%;box-sizing:border-box;overflow:visible;margin-top:10px;" + (el.getAttribute("style") || "")
+        "max-width:100%;width:100%;min-width:0;box-sizing:border-box;overflow:visible;margin:10px 0 0 0;" +
+          (el.getAttribute("style") || "")
       );
     });
 
     root.querySelectorAll("table").forEach((t) => {
       t.setAttribute("border", "1");
       t.setAttribute("cellspacing", "0");
-      t.setAttribute("cellpadding", "6");
+      t.setAttribute("cellpadding", "9");
       t.setAttribute(
         "style",
-          "width:100%;max-width:100%;min-width:0;border-collapse:collapse;table-layout:fixed;font-size:11.0pt;mso-ansi-font-size:11.0pt;font-family:'Arial',sans-serif;mso-table-lspace:0pt;mso-table-rspace:0pt;box-sizing:border-box;" +
+          "width:100%;max-width:100%;min-width:0;border-collapse:collapse;table-layout:fixed;font-size:11.0pt;mso-ansi-font-size:11.0pt;font-family:Calibri,Arial,sans-serif;mso-table-lspace:0pt;mso-table-rspace:0pt;box-sizing:border-box;line-height:190%;mso-line-height-rule:at-least;" +
           (t.getAttribute("style") || "")
       );
     });
     root.querySelectorAll("th, td").forEach((cell) => {
       cell.setAttribute(
         "style",
-        "border:1px solid #cbd5e1;padding:6px;vertical-align:top;word-wrap:break-word;overflow-wrap:break-word;min-width:0;" +
+        "border:1px solid #d0d5e8;padding:10px;vertical-align:top;word-wrap:break-word;overflow-wrap:break-word;min-width:0;line-height:190%;mso-line-height-rule:at-least;background-color:#ffffff;" +
           (cell.getAttribute("style") || "")
       );
     });
     root.querySelectorAll("th").forEach((cell) => {
-      cell.setAttribute("bgcolor", "#e0f2fe");
+      cell.setAttribute("bgcolor", "#eef3fc");
       cell.setAttribute(
         "style",
-        "background-color:#e0f2fe;font-weight:bold;text-align:center;border:1px solid #cbd5e1;padding:6px;vertical-align:top;mso-line-height-rule:exactly;" +
+        "background-color:#eef3fc;font-weight:bold;text-align:center;border:1px solid #d0d5e8;padding:10px;vertical-align:top;line-height:190%;mso-line-height-rule:at-least;" +
           (cell.getAttribute("style") || "")
       );
     });
@@ -2253,22 +2488,27 @@
     root.querySelectorAll("table.offload-table").forEach((t) => {
       t.setAttribute(
         "style",
-        "width:100%;max-width:100%;min-width:0;border-collapse:collapse;table-layout:fixed;font-size:10.5pt;mso-ansi-font-size:10.5pt;font-family:'Arial',sans-serif;mso-table-lspace:0pt;mso-table-rspace:0pt;box-sizing:border-box;" +
+        "width:100%;max-width:100%;min-width:0;border-collapse:collapse;table-layout:fixed;font-size:10.8pt;mso-ansi-font-size:10.8pt;font-family:Calibri,Arial,sans-serif;mso-table-lspace:0pt;mso-table-rspace:0pt;box-sizing:border-box;line-height:190%;mso-line-height-rule:at-least;" +
           (t.getAttribute("style") || "")
       );
       t.querySelectorAll("thead th").forEach((th) => {
         th.setAttribute(
           "style",
-          "background-color:#e0f2fe;font-weight:bold;text-align:center;border:1px solid #cbd5e1;padding:4px 3px;vertical-align:top;white-space:normal;word-break:keep-all;overflow-wrap:normal;hyphens:none;line-height:1.2;mso-line-height-rule:exactly;" +
+          `background-color:#eef3fc;font-weight:bold;text-align:center;border:1px solid #d0d5e8;padding:10px 8px;vertical-align:middle;white-space:normal;word-break:keep-all;overflow-wrap:normal;word-wrap:normal;hyphens:none;line-height:1.35;font-size:9.2pt;mso-ansi-font-size:9.2pt;mso-line-height-rule:at-least;` +
             (th.getAttribute("style") || "")
         );
       });
       t.querySelectorAll("tbody td").forEach((td) => {
+        const idx = Array.prototype.indexOf.call(td.parentNode ? td.parentNode.children : [], td);
         td.setAttribute(
           "style",
-          "border:1px solid #cbd5e1;padding:4px;vertical-align:top;word-break:normal;overflow-wrap:anywhere;line-height:1.2;mso-line-height-rule:exactly;" +
+          "border:1px solid #d0d5e8;padding:12px;vertical-align:top;word-break:normal;overflow-wrap:normal;word-wrap:normal;line-height:1.9;mso-line-height-rule:at-least;background-color:#ffffff;" +
             (td.getAttribute("style") || "")
         );
+        if (idx === 1) {
+          const s = td.getAttribute("style") || "";
+          td.setAttribute("style", "font-size:9.0pt;mso-ansi-font-size:9.0pt;line-height:1.5;" + s);
+        }
       });
     });
   }
@@ -2310,7 +2550,7 @@
       '<meta name="Generator" content="Microsoft Word 15">',
       '<meta name="Originator" content="Microsoft Word 15">',
       "<style>",
-      "body,table,td,th,div,p,span,li{font-family:Arial,sans-serif;mso-ansi-font-family:Arial;mso-hansi-font-family:Arial;font-size:11.0pt;mso-ansi-font-size:11.0pt;color:#000000;line-height:115%;mso-line-height-rule:exactly;}",
+      "body,table,td,th,div,p,span,li{font-family:Calibri,Arial,sans-serif;mso-ansi-font-family:Calibri;mso-hansi-font-family:Calibri;font-size:11.0pt;mso-ansi-font-size:11.0pt;color:#000000;line-height:190%;mso-line-height-rule:at-least;}",
       "table{border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;}",
       "p{margin:0 0 8px 0;}",
       "</style>",
@@ -2320,8 +2560,12 @@
   function wrapWordClipboardDocument(innerHtml) {
     const head = buildWordClipboardHeadHtml();
     const bodyStyle =
-      "margin:0;padding:0;font-family:Arial,sans-serif;mso-ansi-font-family:Arial;mso-hansi-font-family:Arial;font-size:11.0pt;mso-ansi-font-size:11.0pt;color:#000000;line-height:115%;mso-line-height-rule:exactly;";
+      "margin:0;padding:0;font-family:Calibri,Arial,sans-serif;mso-ansi-font-family:Calibri;mso-hansi-font-family:Calibri;font-size:11.0pt;mso-ansi-font-size:11.0pt;color:#000000;line-height:190%;mso-line-height-rule:at-least;";
     return `<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head>${head}</head><body style="${bodyStyle}">${innerHtml}</body></html>`;
+  }
+
+  function wrapOutlookFixedReportContainer(innerHtml) {
+    return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="1000" style="width:1000px;max-width:1000px;min-width:1000px;border-collapse:collapse;table-layout:fixed;mso-table-lspace:0pt;mso-table-rspace:0pt;margin:0;"><tr><td style="width:1000px;max-width:1000px;min-width:1000px;padding:0;margin:0;vertical-align:top;">${innerHtml}</td></tr></table>`;
   }
 
   /** Outlook can ignore head-level CSS; force font family/size inline on every node. */
@@ -2329,15 +2573,15 @@
     const ensureStyleToken = (style, token, re) => (re.test(style) ? style : token + style);
     root.querySelectorAll("*").forEach((el) => {
       let s = el.getAttribute("style") || "";
-      s = ensureStyleToken(s, "font-family:'Arial',sans-serif;", /\bfont-family\s*:/i);
-      s = ensureStyleToken(s, "mso-ansi-font-family:Arial;", /\bmso-ansi-font-family\s*:/i);
-      s = ensureStyleToken(s, "mso-hansi-font-family:Arial;", /\bmso-hansi-font-family\s*:/i);
-      s = ensureStyleToken(s, "mso-bidi-font-family:Arial;", /\bmso-bidi-font-family\s*:/i);
+      s = ensureStyleToken(s, "font-family:Calibri,Arial,sans-serif;", /\bfont-family\s*:/i);
+      s = ensureStyleToken(s, "mso-ansi-font-family:Calibri;", /\bmso-ansi-font-family\s*:/i);
+      s = ensureStyleToken(s, "mso-hansi-font-family:Calibri;", /\bmso-hansi-font-family\s*:/i);
+      s = ensureStyleToken(s, "mso-bidi-font-family:Calibri;", /\bmso-bidi-font-family\s*:/i);
       s = ensureStyleToken(s, "font-size:11.0pt;", /\bfont-size\s*:/i);
       s = ensureStyleToken(s, "mso-ansi-font-size:11.0pt;", /\bmso-ansi-font-size\s*:/i);
       s = ensureStyleToken(s, "mso-bidi-font-size:11.0pt;", /\bmso-bidi-font-size\s*:/i);
-      s = ensureStyleToken(s, "line-height:115%;", /\bline-height\s*:/i);
-      s = ensureStyleToken(s, "mso-line-height-rule:exactly;", /\bmso-line-height-rule\s*:/i);
+      s = ensureStyleToken(s, "line-height:190%;", /\bline-height\s*:/i);
+      s = ensureStyleToken(s, "mso-line-height-rule:at-least;", /\bmso-line-height-rule\s*:/i);
       s = s.replace(/\bcolor\s*:[^;]*;?/i, "");
       s = `color:#000000;${s}`;
       el.setAttribute("style", s);
@@ -2380,7 +2624,7 @@
     }
   }
 
-  /** Outlook paste: black text on light banner (Word often keeps this better than white-on-blue). */
+  /** Outlook paste header tuned to match homepage visual identity. */
   function buildOutlookClipboardHeaderHtml() {
     const d = formatDisplayDate(state.shiftMeta.date || "");
     const t = state.shiftMeta.time || "";
@@ -2388,17 +2632,17 @@
     const dE = escapeHtml(d);
     const tE = escapeHtml(t);
     const titleE = escapeHtml(title);
-    const bannerBg = "#93c5fd";
-    const ink = "#000000";
-    return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;margin-bottom:14px;max-width:100%;border:1px solid #cbd5e1;table-layout:fixed;"><tr><td width="12" bgcolor="#1e3a8a" style="width:12px;background-color:#1e3a8a;font-size:0;line-height:0;">&nbsp;</td><td bgcolor="${bannerBg}" style="background-color:${bannerBg};border-left:12px solid #1e3a8a;padding:18px 20px;vertical-align:top;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;"><tr><td style="vertical-align:top;font-family:'Arial',sans-serif;color:${ink};"><div style="mso-ansi-font-size:16.5pt;mso-bidi-font-size:16.5pt;font-size:16.5pt;font-weight:bold;line-height:115%;margin:0 0 10px 0;color:${ink};mso-line-height-rule:exactly;"><span style="mso-ansi-font-size:15.0pt;font-size:15.0pt;margin-right:6px;">&#9992;</span> Export Warehouse Activity Report</div><div style="mso-ansi-font-size:11.0pt;mso-bidi-font-size:11.0pt;font-size:11.0pt;line-height:115%;color:${ink};mso-line-height-rule:exactly;">Shift Date: <span style="color:${ink};font-weight:bold;">${dE}</span> &nbsp;|&nbsp; Time: <span style="color:${ink};font-weight:bold;">${tE}</span> &nbsp;|&nbsp; <span style="color:${ink};font-weight:bold;">${titleE}</span></div></td><td style="vertical-align:top;text-align:right;font-family:'Arial',sans-serif;mso-ansi-font-size:10.0pt;font-size:10.0pt;color:${ink};width:170px;"><div style="color:${ink};">Transom Cargo LLC.</div><div style="font-weight:bold;margin-top:4px;color:${ink};">Export Operations</div></td></tr></table></td></tr></table>`;
+    const bannerBg = "#1e5799";
+    const ink = "#ffffff";
+    return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;margin-bottom:14px;max-width:100%;border:1px solid #d0d5e8;table-layout:fixed;"><tr><td width="3" bgcolor="#0b3a78" style="width:3px;min-width:3px;max-width:3px;background-color:#0b3a78;font-size:0;line-height:0;mso-line-height-rule:exactly;">&nbsp;</td><td width="1" bgcolor="#eef3fc" style="width:1px;min-width:1px;max-width:1px;background-color:#eef3fc;font-size:0;line-height:0;mso-line-height-rule:exactly;">&nbsp;</td><td bgcolor="${bannerBg}" style="background-color:${bannerBg};padding:18px 20px;vertical-align:top;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;"><tr><td style="vertical-align:top;font-family:Calibri,Arial,sans-serif;color:${ink};"><div style="mso-ansi-font-size:16.5pt;mso-bidi-font-size:16.5pt;font-size:16.5pt;font-weight:bold;line-height:190%;margin:0 0 10px 0;color:${ink};mso-line-height-rule:at-least;"><span style="mso-ansi-font-size:15.0pt;font-size:15.0pt;margin-right:6px;">&#9992;</span> Export Warehouse Activity Report</div><div style="mso-ansi-font-size:11.0pt;mso-bidi-font-size:11.0pt;font-size:11.0pt;line-height:190%;color:${ink};mso-line-height-rule:at-least;">Shift Date: <span style="color:#fde68a;font-weight:bold;">${dE}</span> &nbsp;|&nbsp; Time: <span style="color:#fde68a;font-weight:bold;">${tE}</span> &nbsp;|&nbsp; <span style="color:#fde68a;font-weight:bold;">${titleE}</span></div></td><td style="vertical-align:top;text-align:right;font-family:Calibri,Arial,sans-serif;mso-ansi-font-size:10.0pt;font-size:10.0pt;color:${ink};width:170px;"><div style="color:${ink};">Transom Cargo LLC.</div><div style="font-weight:bold;margin-top:4px;color:${ink};">Export Operations</div></td></tr></table></td></tr></table>`;
   }
 
   function buildOutlookClipboardSignatureHtml(badgeSrcResolved) {
     const nameRaw = getDutySupervisorDisplayName();
     const nameE = escapeHtml(nameRaw);
     const nameBlock = nameRaw
-      ? `<div style="font-family:'Arial',sans-serif;mso-ansi-font-size:11.0pt;font-size:11.0pt;font-weight:bold;color:#000000;margin:4px 0 2px 0;">${nameE}</div>`
-      : `<div style="font-family:'Arial',sans-serif;mso-ansi-font-size:9.0pt;font-size:9.0pt;color:#000000;margin:4px 0;">(Add name under Manpower → Supervisor)</div>`;
+      ? `<div style="font-family:Calibri,Arial,sans-serif;mso-ansi-font-size:11.0pt;font-size:11.0pt;font-weight:bold;color:#000000;margin:4px 0 2px 0;">${nameE}</div>`
+      : `<div style="font-family:Calibri,Arial,sans-serif;mso-ansi-font-size:9.0pt;font-size:9.0pt;color:#000000;margin:4px 0;">(Add name under Manpower → Supervisor)</div>`;
     const rawSrc = badgeSrcResolved || reportSignatureBadgesImageUrl();
     const badgeSrc =
       typeof rawSrc === "string" && rawSrc.startsWith("data:") ? rawSrc : escapeHtml(rawSrc);
@@ -2543,21 +2787,24 @@
     const sigHtml = buildOutlookClipboardSignatureHtml(badgeDataUri);
     if (!inner.trim()) {
       return wrapWordClipboardDocument(
-        `${headerHtml}<p style="font-family:Arial,sans-serif;font-size:14px;color:#64748b;">${escapeHtml(
+        `${wrapOutlookFixedReportContainer(
+          `${headerHtml}<p style="font-family:Arial,sans-serif;font-size:14px;color:#64748b;">${escapeHtml(
           "(Report body is empty.)"
-        )}</p>${sigHtml}`
+          )}</p>${sigHtml}`
+        )}`
       );
     }
     const wrap = document.createElement("div");
     wrap.className = "report-fragment";
     wrap.innerHTML = inner;
-    convertSectionTitlesToOutlookShadeTables(wrap);
+    // Section titles now carry inline Outlook-safe styles in HTML; keep as-is.
     normalizeOffloadTableForClipboard(wrap);
+    restructureLineItemsForWordPaste(wrap);
     applyOutlookInlineClipboardStyles(wrap);
     restructureManpowerItemsForWordPaste(wrap);
     hardInlineWordFonts(wrap);
     const fragmentHtml = wrap.outerHTML;
-    return wrapWordClipboardDocument(`${headerHtml}${fragmentHtml}${sigHtml}`);
+    return wrapWordClipboardDocument(wrapOutlookFixedReportContainer(`${headerHtml}${fragmentHtml}${sigHtml}`));
   }
 
   async function copyReportToClipboard() {
@@ -2828,21 +3075,27 @@
         });
       }
     });
-    el("copyBtn").addEventListener("click", async () => {
-      await copyReportToClipboard();
-    });
-    el("emailBtn").addEventListener("click", async () => {
-      setEmailButtonState("sending");
-      const ok = await sendEmailNow();
-      const statusEl = el("gmailStatus");
-      if (ok) {
-        setEmailButtonState("success");
-        if (statusEl) statusEl.textContent = "Email sent successfully via Gmail.";
-      } else {
-        setEmailButtonState("idle");
-        if (statusEl) statusEl.textContent = "Send failed. Please connect Gmail or check recipients.";
-      }
-    });
+    const copyBtn = el("copyBtn");
+    if (copyBtn) {
+      copyBtn.addEventListener("click", async () => {
+        await copyReportToClipboard();
+      });
+    }
+    const emailBtn = el("emailBtn");
+    if (emailBtn) {
+      emailBtn.addEventListener("click", async () => {
+        setEmailButtonState("sending");
+        const ok = await sendEmailNow();
+        const statusEl = el("gmailStatus");
+        if (ok) {
+          setEmailButtonState("success");
+          if (statusEl) statusEl.textContent = "Email sent successfully via Gmail.";
+        } else {
+          setEmailButtonState("idle");
+          if (statusEl) statusEl.textContent = "Send failed. Please connect Gmail or check recipients.";
+        }
+      });
+    }
     const connectGmailBtn = el("connectGmailBtn");
     if (connectGmailBtn) {
       connectGmailBtn.addEventListener("click", () => {
@@ -2884,7 +3137,10 @@
         scheduleSendTimerFromState();
       });
     }
-    el("printBtn").addEventListener("click", () => window.print());
+    const printBtn = el("printBtn");
+    if (printBtn) {
+      printBtn.addEventListener("click", () => window.print());
+    }
 
     const exportHintsBtn = el("exportFlightHintsBtn");
     if (exportHintsBtn && window.flightHintCache) {
