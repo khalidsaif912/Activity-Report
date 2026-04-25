@@ -45,18 +45,44 @@
     .shift-tabs .shift-tab.active{background:#93c5fd;color:#000000;border-color:#3b82f6;font-weight:700;}
     .toolbar{padding:14px 18px;border-bottom:1px solid var(--line);background:#fbfdff;}
     .toolbar-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
-    button{border:1px solid #94a3b8;background:#fff;color:#0f172a;padding:9px 14px;cursor:pointer;font-size:14px;border-radius:10px;transition:background .15s ease,transform .06s ease,box-shadow .15s ease,border-color .15s ease,filter .12s ease;}
-    button:hover{filter:brightness(0.97);box-shadow:0 1px 3px rgba(15,23,42,0.1);}
-    button:active{transform:translateY(1px);filter:brightness(0.9);box-shadow:none;}
-    button.primary{background:#0f172a;color:#fff;border-color:#0f172a;}
-    button.primary:hover{background:#020617;border-color:#020617;filter:none;}
-    button.primary:active{filter:brightness(0.85);}
-    button.blue{background:#2563eb;color:#fff;border-color:#2563eb;}
-    button.blue:hover{background:#1d4ed8;border-color:#1d4ed8;filter:none;}
-    button.blue:active{filter:brightness(0.88);}
-    button.btn-reset{border-color:#1e3a8a;background:#eef2ff;color:#1e3a8a;}
-    button.btn-reset:hover{background:#bfdbfe;border-color:#1e40af;filter:none;}
-    button.btn-reset:active{filter:brightness(0.92);}
+    button{border:1px solid #94a3b8;background:#fff;color:#0f172a;padding:9px 14px;cursor:pointer;font-size:14px;border-radius:10px;transition:background .18s ease,transform .08s ease,box-shadow .18s ease,border-color .18s ease,filter .12s ease,opacity .15s ease;}
+    button:hover{filter:brightness(0.99);box-shadow:0 3px 10px rgba(15,23,42,0.12);transform:translateY(-1px);}
+    button:active{transform:translateY(1px) scale(0.99);filter:brightness(0.96);box-shadow:0 1px 4px rgba(15,23,42,0.1);}
+    button:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(37,99,235,0.22),0 3px 10px rgba(15,23,42,0.12);}
+    button.primary{
+      background:linear-gradient(180deg,#0f2e63 0%,#0b3a78 100%);
+      color:#fff;border-color:#0b3a78;
+      box-shadow:0 4px 12px rgba(11,58,120,0.26);
+    }
+    button.primary:hover{
+      background:linear-gradient(180deg,#0d2957 0%,#082f63 100%);
+      border-color:#082f63;filter:none;
+      box-shadow:0 7px 16px rgba(8,47,99,0.32);
+    }
+    button.primary:active{filter:none;box-shadow:0 2px 8px rgba(8,47,99,0.26);}
+    button.blue{
+      background:linear-gradient(180deg,#2d6cff 0%,#2563eb 100%);
+      color:#fff;border-color:#2563eb;
+      box-shadow:0 4px 12px rgba(37,99,235,0.26);
+    }
+    button.blue:hover{
+      background:linear-gradient(180deg,#255fe0 0%,#1d4ed8 100%);
+      border-color:#1d4ed8;filter:none;
+      box-shadow:0 7px 16px rgba(29,78,216,0.32);
+    }
+    button.blue:active{filter:none;box-shadow:0 2px 8px rgba(29,78,216,0.26);}
+    button.btn-reset{
+      border-color:#1e3a8a;
+      background:linear-gradient(180deg,#f6f9ff 0%,#e8efff 100%);
+      color:#163473;
+      box-shadow:0 2px 8px rgba(30,58,138,0.12);
+    }
+    button.btn-reset:hover{
+      background:linear-gradient(180deg,#eaf1ff 0%,#dbe7ff 100%);
+      border-color:#1e40af;filter:none;
+      box-shadow:0 5px 12px rgba(30,64,175,0.18);
+    }
+    button.btn-reset:active{filter:none;box-shadow:0 1px 5px rgba(30,64,175,0.14);}
     .content{padding:18px 20px 26px;}
     .section-title{margin-top:14px;background:#eef3fc !important;padding:8px 12px !important;font-weight:700;border-left:4px solid #0b3a78 !important;border-radius:0 !important;line-height:1.3;color:#0b3a78 !important;border:1px solid #e4e9f5 !important;border-top:1px solid #e4e9f5 !important;display:block;width:100%;box-sizing:border-box;text-transform:uppercase;letter-spacing:.06em;font-size:12.5px;}
     .section-title.green{background:#eef3fc !important;border-left-color:#0b3a78 !important;color:#0b3a78 !important;border:1px solid #e4e9f5 !important;border-top:1px solid #e4e9f5 !important;}
@@ -146,12 +172,12 @@
     .btn-danger{padding:9px 16px;border:1px solid #dc2626;background:#dc2626;color:#fff;cursor:pointer;font-size:14px;border-radius:6px;transition:background .15s ease,transform .06s ease,filter .12s ease;}
     .btn-danger:hover{background:#b91c1c;border-color:#b91c1c;}
     .btn-danger:active{transform:translateY(1px);filter:brightness(0.9);}
-    .web-signature-block{margin-top:34px;padding-top:18px;border-top:1px solid var(--line);}
+    .web-signature-block{margin-top:38px;padding-top:24px;border-top:1px solid var(--line);}
     .web-signature-inner{max-width:100%;}
     .web-sig-badges-img{max-width:100%;height:auto;display:block;margin:16px 0 0 0;}
     .web-sig-text-block{font-size:13px;color:#000000;line-height:1.5;}
     .web-sig-regards{color:#000000;margin:0 0 8px 0;}
-    .web-sig-name{font-size:15px;font-weight:700;color:#000000;margin:0 0 6px 0;}
+    .web-sig-name{font-size:16px;font-weight:700;color:#000000;margin:0 0 6px 0;}
     .web-sig-name.web-sig-name-empty{color:#94a3b8;font-weight:400;font-style:italic;}
     .web-sig-role{color:#000000;margin:0 0 14px 0;}
     .web-sig-company-table{display:flex;gap:0;align-items:flex-start;border-top:1px solid #e2e8f0;padding-top:12px;margin-top:4px;max-width:100%;}
@@ -331,10 +357,6 @@
         <div class="toolbar-row">
           <button type="button" class="primary" id="copyBtn">Copy</button>
           <button type="button" class="blue" id="emailBtn">Send Report</button>
-          <button type="button" id="printBtn">Print</button>
-          <button type="button" id="exportFlightHintsBtn" title="Download current flight hints (same data as on the server after sync)">
-            Export flight hints
-          </button>
           <button type="button" class="btn-reset" id="resetReportBtn">Reset report</button>
         </div>
 
@@ -363,6 +385,6 @@
   <script src="../../js/csd-route-hint-cache.js?v=1"></script>
   <script src="../../js/phrase-usage-cache.js?v=5"></script>
   <script src="../../js/phrase-autocomplete.js?v=29"></script>
-  <script src="../../js/activity-report-app.js?v=93"></script>
+  <script src="../../js/activity-report-app.js?v=97"></script>
 </body>
 </html>
