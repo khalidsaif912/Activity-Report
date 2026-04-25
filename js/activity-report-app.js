@@ -767,6 +767,17 @@
 
   async function loadData() {
     try {
+      if (String(location.protocol || "").toLowerCase() === "file:") {
+        try {
+          const nextUrl = `http://localhost:8000/data/report/offload_report.html${location.search || ""}${location.hash || ""}`;
+          window.location.replace(nextUrl);
+          return;
+        } catch (_) {}
+        applyMissingDateView(
+          "This report cannot load data over file:// due to browser security. Run start-local-server.bat and open http://localhost:8000/data/report/offload_report.html"
+        );
+        return;
+      }
       const launch = parseInitialLaunchContext();
       const foundBase = await resolveReportAssetBase();
       const assetBase = foundBase || reportAssetsRoot();
@@ -2190,7 +2201,7 @@
     root.querySelectorAll(".section-title").forEach((el) => {
       const bg = "#eef3fc";
       const accent = "#0b3a78";
-      const frame = "#d0d5e8";
+      const frame = "#e4e9f5";
 
       const text = String(el.textContent || "").trim();
       const isMajor = el.classList && el.classList.contains("manpower-block-heading");
@@ -2203,33 +2214,22 @@
       outer.setAttribute("width", "100%");
       outer.setAttribute(
         "style",
-        "border-collapse:separate;border-spacing:0;width:100%;margin:16px 0 0 0;" +
+        "border-collapse:collapse;border-spacing:0;width:100%;margin:14px 0 0 0;" +
           "mso-table-lspace:0pt;mso-table-rspace:0pt;"
       );
 
       const tr = document.createElement("tr");
 
       const tdLeft = document.createElement("td");
-      tdLeft.setAttribute("width", "3");
+      tdLeft.setAttribute("width", "4");
       tdLeft.setAttribute("bgcolor", accent);
       tdLeft.setAttribute(
         "style",
-        "width:3px;min-width:3px;max-width:3px;background-color:" +
+        "width:4px;min-width:4px;max-width:4px;background-color:" +
           accent +
-          ";font-size:0;line-height:0;padding:0;margin:0;" +
-          "border-top-left-radius:10px;border-bottom-left-radius:10px;"
+          ";font-size:0;line-height:0;padding:0;margin:0;"
       );
       tdLeft.innerHTML = "&nbsp;";
-
-      const tdGap = document.createElement("td");
-      tdGap.setAttribute("width", "1");
-      tdGap.setAttribute("bgcolor", "#eef3fc");
-      tdGap.setAttribute(
-        "style",
-        "width:1px;min-width:1px;max-width:1px;background-color:#eef3fc;" +
-          "font-size:0;line-height:0;padding:0;margin:0;"
-      );
-      tdGap.innerHTML = "&nbsp;";
 
       const tdMain = document.createElement("td");
       tdMain.setAttribute("bgcolor", bg);
@@ -2238,16 +2238,11 @@
         "background-color:" +
           bg +
           ";padding:" +
-          (isMajor ? "9px 12px 9px 10px" : "7px 10px 7px 8px") +
+          "8px 10px" +
           ";margin:0;" +
-          "border-top:1px solid " +
+          "border:1px solid " +
           frame +
-          ";border-right:1px solid " +
-          frame +
-          ";border-bottom:1px solid " +
-          frame +
-          ";" +
-          "border-top-right-radius:10px;border-bottom-right-radius:10px;" +
+          ";border-left:none;" +
           "mso-line-height-rule:exactly;"
       );
 
@@ -2256,16 +2251,15 @@
       span.setAttribute(
         "style",
         isMajor
-          ? "font-family:Calibri,Arial,sans-serif;font-size:14.0pt;mso-ansi-font-size:14.0pt;" +
-              "font-weight:bold;letter-spacing:0.02em;color:#0b3a78;line-height:1.35;"
-          : "font-family:Calibri,Arial,sans-serif;font-size:12.0pt;mso-ansi-font-size:12.0pt;" +
-              "font-weight:bold;color:#0b3a78;line-height:1.45;"
+          ? "font-family:Calibri,Arial,sans-serif;font-size:12.0pt;mso-ansi-font-size:12.0pt;" +
+              "font-weight:bold;letter-spacing:0.06em;color:#0b3a78;line-height:1.3;text-transform:uppercase;"
+          : "font-family:Calibri,Arial,sans-serif;font-size:11.0pt;mso-ansi-font-size:11.0pt;" +
+              "font-weight:bold;letter-spacing:0.06em;color:#0b3a78;line-height:1.3;text-transform:uppercase;"
       );
       span.appendChild(document.createTextNode(text));
       tdMain.appendChild(span);
 
       tr.appendChild(tdLeft);
-      tr.appendChild(tdGap);
       tr.appendChild(tdMain);
       outer.appendChild(tr);
 
@@ -2582,8 +2576,6 @@
       s = ensureStyleToken(s, "mso-bidi-font-size:11.0pt;", /\bmso-bidi-font-size\s*:/i);
       s = ensureStyleToken(s, "line-height:190%;", /\bline-height\s*:/i);
       s = ensureStyleToken(s, "mso-line-height-rule:at-least;", /\bmso-line-height-rule\s*:/i);
-      s = s.replace(/\bcolor\s*:[^;]*;?/i, "");
-      s = `color:#000000;${s}`;
       el.setAttribute("style", s);
     });
   }
@@ -2733,7 +2725,24 @@
   function cloneReportExportInnerHtml() {
     const root = el("reportExportRoot");
     if (!root) return "";
+
+    // cloneNode(true) copies HTML *attributes*, not the live .value/.checked properties.
+    // Snapshot all values from the live DOM first, then apply them to the clone by position.
+    const liveInputs = Array.from(root.querySelectorAll("input"));
+    const liveTextareas = Array.from(root.querySelectorAll("textarea"));
+    const inputVals = liveInputs.map((inp) => inp.value);
+    const textareaVals = liveTextareas.map((ta) => ta.value);
+
     const clone = root.cloneNode(true);
+
+    // Restore values on the clone (same tree order, so index positions match).
+    Array.from(clone.querySelectorAll("input")).forEach((inp, i) => {
+      if (i < inputVals.length) inp.value = inputVals[i];
+    });
+    Array.from(clone.querySelectorAll("textarea")).forEach((ta, i) => {
+      if (i < textareaVals.length) ta.value = textareaVals[i];
+    });
+
     clone.querySelectorAll(".delete-btn").forEach((n) => n.remove());
     clone.querySelectorAll("input").forEach((inp) => {
       const span = document.createElement("span");
@@ -2797,7 +2806,8 @@
     const wrap = document.createElement("div");
     wrap.className = "report-fragment";
     wrap.innerHTML = inner;
-    // Section titles now carry inline Outlook-safe styles in HTML; keep as-is.
+    // Force unified section-title look in clipboard HTML every time.
+    convertSectionTitlesToOutlookShadeTables(wrap);
     normalizeOffloadTableForClipboard(wrap);
     restructureLineItemsForWordPaste(wrap);
     applyOutlookInlineClipboardStyles(wrap);
@@ -2807,70 +2817,56 @@
     return wrapWordClipboardDocument(wrapOutlookFixedReportContainer(`${headerHtml}${fragmentHtml}${sigHtml}`));
   }
 
-  async function copyReportToClipboard() {
-    const plain = buildReportPlainBody();
-    const html = await buildReportHtmlForClipboard();
+  async function copyReportAsEmail() {
+    const inner = cloneReportExportInnerHtml();
+    const headerHtml = buildOutlookClipboardHeaderHtml();
+    // Keep direct image URLs for better email-client fetch behavior.
+    const sigHtml = buildOutlookClipboardSignatureHtml(reportSignatureBadgesImageUrl());
+    const wrap = document.createElement("div");
+    wrap.className = "report-fragment";
+    wrap.innerHTML = inner;
+
+    convertSectionTitlesToOutlookShadeTables(wrap);
+    normalizeOffloadTableForClipboard(wrap);
+    restructureLineItemsForWordPaste(wrap);
+    applyOutlookInlineClipboardStyles(wrap);
+    restructureManpowerItemsForWordPaste(wrap);
+    hardInlineWordFonts(wrap);
+
+    // Remove interactive/web-only leftovers.
+    wrap.querySelectorAll("button, script, .hidden-print, .delete-btn, .toolbar, .bottom-tools, .modal-backdrop").forEach((n) =>
+      n.remove()
+    );
+    wrap.querySelectorAll("[contenteditable]").forEach((n) => n.removeAttribute("contenteditable"));
+
+    const fragmentHtml = wrap.outerHTML;
+    const html = wrapWordClipboardDocument(
+      wrapOutlookFixedReportContainer(`${headerHtml}${fragmentHtml}${sigHtml}`)
+    );
     const htmlBlob = new Blob([html], { type: "text/html;charset=utf-8" });
-    const plainBlob = new Blob([plain], { type: "text/plain;charset=utf-8" });
 
-    try {
-      if (navigator.clipboard && typeof ClipboardItem !== "undefined") {
-        await navigator.clipboard.write([
-          new ClipboardItem({
-            "text/html": htmlBlob,
-            "text/plain": plainBlob,
-          }),
-        ]);
-        return;
-      }
-    } catch (err) {
-      console.warn("Rich clipboard failed, using plain text", err);
+    if (navigator.clipboard && typeof ClipboardItem !== "undefined") {
+      await navigator.clipboard.write([new ClipboardItem({ "text/html": htmlBlob })]);
+      return;
     }
 
-    try {
-      let copiedViaHtmlEvent = false;
-      const onCopy = (ev) => {
-        try {
-          if (!ev.clipboardData) return;
-          ev.clipboardData.setData("text/html", html);
-          ev.clipboardData.setData("text/plain", plain);
-          ev.preventDefault();
-          copiedViaHtmlEvent = true;
-        } catch (_) {}
-      };
-      document.addEventListener("copy", onCopy);
-      const ok = document.execCommand("copy");
-      document.removeEventListener("copy", onCopy);
-      if (ok && copiedViaHtmlEvent) return;
-    } catch (fallbackErr2) {
-      console.warn("copy-event HTML fallback failed", fallbackErr2);
+    let copiedViaHtmlEvent = false;
+    const onCopy = (ev) => {
+      if (!ev.clipboardData) return;
+      ev.clipboardData.setData("text/html", html);
+      ev.preventDefault();
+      copiedViaHtmlEvent = true;
+    };
+    document.addEventListener("copy", onCopy);
+    const ok = document.execCommand("copy");
+    document.removeEventListener("copy", onCopy);
+    if (!ok || !copiedViaHtmlEvent) {
+      throw new Error("HTML clipboard copy failed");
     }
+  }
 
-    try {
-      const holder = document.createElement("div");
-      holder.setAttribute("contenteditable", "true");
-      holder.style.position = "fixed";
-      holder.style.left = "-10000px";
-      holder.style.top = "0";
-      holder.style.fontFamily = "Arial, sans-serif";
-      holder.style.fontSize = "11pt";
-      holder.style.lineHeight = "1.15";
-      holder.innerHTML = html.includes("</body>") ? html.replace(/^[\s\S]*<body[^>]*>/i, "").replace(/<\/body>[\s\S]*$/i, "") : html;
-      document.body.appendChild(holder);
-      const sel = window.getSelection();
-      const range = document.createRange();
-      range.selectNodeContents(holder);
-      sel.removeAllRanges();
-      sel.addRange(range);
-      const ok = document.execCommand("copy");
-      sel.removeAllRanges();
-      document.body.removeChild(holder);
-      if (ok) return;
-    } catch (fallbackErr) {
-      console.warn("execCommand copy fallback failed", fallbackErr);
-    }
-
-    await navigator.clipboard.writeText(plain);
+  async function copyReportToClipboard() {
+    await copyReportAsEmail();
   }
 
   function saveDraft() {
