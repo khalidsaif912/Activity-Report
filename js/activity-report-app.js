@@ -2070,14 +2070,14 @@
         colIndex += 1;
         td.setAttribute(
           "style",
-          `width:${px}px;max-width:${px}px;min-width:${px}px;border:1px solid #d0d5e8;word-wrap:normal;overflow-wrap:normal;word-break:normal;font-size:10.2pt;mso-ansi-font-size:10.2pt;padding:12px;box-sizing:border-box;line-height:1.9;${prev}`
+          `width:${px}px;max-width:${px}px;min-width:${px}px;border:1px solid #d0d5e8;word-wrap:normal;overflow-wrap:normal;word-break:normal;font-size:11.5pt;mso-ansi-font-size:11.5pt;padding:12px;box-sizing:border-box;line-height:1.9;${prev}`
         );
         // DATE column (2nd visible column, index 1 after item): smaller text for cleaner fit.
         if (colIndex - 1 === 1) {
           const s = td.getAttribute("style") || "";
           td.setAttribute(
             "style",
-            `font-size:9.0pt;mso-ansi-font-size:9.0pt;line-height:1.5;word-break:normal;overflow-wrap:normal;` + s
+            `font-size:9.8pt;mso-ansi-font-size:9.8pt;line-height:1.5;word-break:normal;overflow-wrap:normal;` + s
           );
         }
       });
@@ -2488,7 +2488,7 @@
     root.querySelectorAll("table.offload-table").forEach((t) => {
       t.setAttribute(
         "style",
-        "width:100%;max-width:100%;min-width:0;border-collapse:collapse;table-layout:fixed;font-size:10.8pt;mso-ansi-font-size:10.8pt;font-family:Calibri,Arial,sans-serif;mso-table-lspace:0pt;mso-table-rspace:0pt;box-sizing:border-box;line-height:190%;mso-line-height-rule:at-least;" +
+        "width:100%;max-width:100%;min-width:0;border-collapse:collapse;table-layout:fixed;font-size:11.5pt;mso-ansi-font-size:11.5pt;font-family:Calibri,Arial,sans-serif;mso-table-lspace:0pt;mso-table-rspace:0pt;box-sizing:border-box;line-height:190%;mso-line-height-rule:at-least;" +
           (t.getAttribute("style") || "")
       );
       t.querySelectorAll("thead th").forEach((th) => {
