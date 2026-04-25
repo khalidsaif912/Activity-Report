@@ -205,6 +205,8 @@
       padding: 9px 16px;
       letter-spacing: 0.01em;
       transition: background 0.16s, border-color 0.16s, transform 0.16s;
+      cursor: pointer;
+      appearance: none;
     }
 
     .toolbar-btn:hover {
@@ -675,6 +677,211 @@
     }
 
     /* ======================================================
+       MANPOWER MODAL
+    ====================================================== */
+    .manpower-modal[hidden] { display: none; }
+    .manpower-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 1200;
+      background: rgba(8, 20, 38, 0.58);
+      backdrop-filter: blur(2px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .manpower-dialog {
+      width: min(1020px, 100%);
+      max-height: 96vh;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .manpower-head {
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, #f9fbff 0%, #f2f7ff 100%);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .manpower-title {
+      font-size: clamp(20px, 2.6vw, 30px);
+      line-height: 1.15;
+      font-weight: 800;
+      color: var(--navy-800);
+      letter-spacing: -0.02em;
+    }
+    .manpower-sub {
+      margin-top: 4px;
+      font-size: clamp(12px, 1.4vw, 15px);
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .manpower-controls {
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .manpower-controls label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--slate-600);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .manpower-date-picker {
+      border: 1px solid #c9d8ef;
+      background: #ffffff;
+      color: #0f172a;
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 13px;
+      font-weight: 600;
+      min-width: 172px;
+      outline: none;
+    }
+    .manpower-date-picker:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+    }
+    .manpower-close {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 10px;
+      width: 42px;
+      height: 42px;
+      font-size: 26px;
+      line-height: 1;
+      color: var(--slate-600);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .manpower-close:hover { background: #f8fafc; color: var(--navy-800); }
+    .manpower-tabs {
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      background: #fff;
+    }
+    .manpower-tab {
+      border: 1px solid #c9d8ef;
+      background: #f8fbff;
+      color: #1e3a8a;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .manpower-tab.active {
+      background: #1d4ed8;
+      border-color: #1d4ed8;
+      color: #fff;
+    }
+    .manpower-body {
+      padding: 14px 16px 18px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      background: #fcfdff;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 8px;
+      align-content: start;
+    }
+    .manpower-section-card {
+      border: 1px solid #dbe4f2;
+      border-radius: 12px;
+      background: #fff;
+      overflow: hidden;
+    }
+    .manpower-section-head {
+      background: #eef3fc;
+      border: 1px solid #dbe4f2;
+      color: #0b3a78;
+      font-size: clamp(13px, 1.25vw, 16px);
+      font-weight: 800;
+      letter-spacing: 0.01em;
+      padding: 8px 10px;
+      margin: 0 0 8px 0;
+      border-radius: 0;
+    }
+    .manpower-list {
+      list-style: none;
+      margin: 0;
+      padding: 4px 10px 6px;
+    }
+    .manpower-list li {
+      font-size: clamp(12.5px, 1.25vw, 15px);
+      line-height: 1.35;
+      font-weight: 550;
+      color: #0f172a;
+      padding: 4px 0;
+      border-bottom: 1px solid #f0f4fb;
+      word-break: break-word;
+    }
+    .manpower-list li:last-child { border-bottom: none; }
+    .manpower-subgroup {
+      padding-top: 8px;
+      margin-top: 8px;
+    }
+    .manpower-subgroup:first-child {
+      padding-top: 0;
+      margin-top: 0;
+    }
+    .manpower-subgroup + .manpower-subgroup {
+      border-top: 1px solid #dbe4f2;
+    }
+    .manpower-subgroup-title {
+      background: #eef3fc;
+      border: 1px solid #dbe4f2;
+      color: #0b3a78;
+      font-size: clamp(13px, 1.25vw, 16px);
+      font-weight: 800;
+      letter-spacing: 0.01em;
+      padding: 8px 10px;
+      margin-bottom: 6px;
+      border-radius: 0;
+    }
+    .manpower-subgroup:first-child .manpower-subgroup-title {
+      background: #e2ebfb;
+      border-color: #cfdbf1;
+    }
+    .manpower-empty {
+      grid-column: 1 / -1;
+      border: 1px dashed #c9d8ef;
+      border-radius: 12px;
+      padding: 28px 16px;
+      text-align: center;
+      color: var(--slate-600);
+      font-weight: 600;
+      font-size: clamp(15px, 1.7vw, 20px);
+      background: #fff;
+    }
+    .manpower-empty .empty-main {
+      display: block;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 4px;
+    }
+    .manpower-empty .empty-subtext {
+      display: block;
+      font-size: clamp(12px, 1.2vw, 14px);
+      font-weight: 500;
+      color: #475569;
+    }
+
+    /* ======================================================
        RESPONSIVE
     ====================================================== */
     @media (max-width: 1080px) {
@@ -691,6 +898,7 @@
       .shift-link:last-child { border-bottom: none; }
       .day-busiest { display: none; }
       .shift-bars { display: none; }
+      .manpower-body { grid-template-columns: 1fr; }
     }
 
     @media (max-width: 520px) {
@@ -717,15 +925,15 @@
       <div class="header-right">
         <img class="company-logo" src="./assets/transom-logo.png" alt="Transom Cargo" />
         <nav class="header-toolbar" aria-label="Quick actions">
-          <a class="toolbar-btn" href="./data/report/offload_report.html#manpowerWrap">
+          <button type="button" class="toolbar-btn" id="dutyRosterBtn" aria-haspopup="dialog" aria-controls="manpowerModal">
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M7 3h10l4 4v14H7V3z" stroke="currentColor" stroke-width="1.7"/>
               <path d="M17 3v4h4" stroke="currentColor" stroke-width="1.7"/>
               <path d="M10 12h8M10 16h8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
             </svg>
             Duty Roster
-          </a>
-          <a class="toolbar-btn" href="./data/report/offload_report.html#manpowerWrap">
+          </button>
+          <button type="button" class="toolbar-btn" id="manpowerBtn" aria-haspopup="dialog" aria-controls="manpowerModal">
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="1.7"/>
               <circle cx="16" cy="9" r="2.5" stroke="currentColor" stroke-width="1.7"/>
@@ -733,7 +941,7 @@
               <path d="M16 15c1.7 0 4 1 4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
             </svg>
             Manpower
-          </a>
+          </button>
         </nav>
       </div>
     </div>
@@ -755,6 +963,24 @@
     </div>
 
     <div class="days-list" id="daysTimeline" aria-live="polite" aria-label="Operational days"></div>
+  </div>
+
+  <div class="manpower-modal" id="manpowerModal" hidden>
+    <div class="manpower-dialog" role="dialog" aria-modal="true" aria-labelledby="manpowerModalTitle">
+      <div class="manpower-head">
+        <div>
+          <div class="manpower-title" id="manpowerModalTitle">Duty Manpower</div>
+          <div class="manpower-sub" id="manpowerModalMeta"></div>
+          <div class="manpower-controls">
+            <label for="manpowerDatePicker">Date</label>
+            <input type="date" id="manpowerDatePicker" class="manpower-date-picker" />
+          </div>
+        </div>
+        <button type="button" class="manpower-close" id="manpowerCloseBtn" aria-label="Close">&times;</button>
+      </div>
+      <div class="manpower-tabs" id="manpowerShiftTabs"></div>
+      <div class="manpower-body" id="manpowerModalBody"></div>
+    </div>
   </div>
 
   <script>
@@ -889,6 +1115,388 @@
 
     function pluralFlights(n) {
       return `${n}\u202Fflight${n === 1 ? "" : "s"}`;
+    }
+
+    let manpowerData = null;
+    let manpowerDates = [];
+    const manpowerDataByDate = new Map();
+    let remoteSchedulesIndex = null;
+    const remoteEmployeeScheduleCache = new Map();
+    let manpowerActiveDate = "";
+    let manpowerActiveShift = "";
+
+    function capitalize(s) {
+      const v = String(s || "").trim();
+      return v ? v[0].toUpperCase() + v.slice(1) : "";
+    }
+
+    function manpowerShiftPayload(latest, shiftKey) {
+      if (!latest || typeof latest !== "object") return null;
+      if (latest.shifts && latest.shifts[shiftKey]) return latest.shifts[shiftKey];
+      if (latest.shiftMeta || latest.manpowerSections) {
+        return {
+          shiftMeta: latest.shiftMeta || { key: shiftKey, title: `${capitalize(shiftKey)} Shift` },
+          manpowerSections: Array.isArray(latest.manpowerSections) ? latest.manpowerSections : []
+        };
+      }
+      return null;
+    }
+
+    function makeEmptyShiftPayload(key, date) {
+      const title = key === "morning" ? "Morning Shift" : key === "afternoon" ? "Afternoon Shift" : "Night Shift";
+      const time = key === "morning" ? "06:00 - 15:00" : key === "afternoon" ? "13:00 - 22:00" : "21:00 - 06:00";
+      return { shiftMeta: { key, title, date, time }, manpowerSections: [] };
+    }
+
+    function deptLabel(raw) {
+      const d = String(raw || "").trim();
+      if (!d) return "Other";
+      if (d.toLowerCase() === "supervisors") return "Supervisor";
+      return d;
+    }
+
+    function sectionOrder(title) {
+      const t = String(title || "").trim().toLowerCase();
+      const rank = {
+        "officers": 1,
+        "supervisor": 2,
+        "supervisors": 2,
+        "load control": 3,
+        "export checker": 4,
+        "export operators": 5,
+        "flight dispatch": 6,
+        "ctu staff on duty": 7,
+        "inventory": 8,
+        "support team": 9,
+        "sick leave / no show / others": 10,
+        "annual leave / course / off in lieu": 11,
+        "trainee": 12,
+        "overtime justification": 13
+      };
+      return rank[t] || 999;
+    }
+
+    async function fetchRemoteSchedulesIndex() {
+      if (remoteSchedulesIndex) return remoteSchedulesIndex;
+      const idx = await fetchJsonAny(["https://khalidsaif912.github.io/roster-site/schedules/index.json"]);
+      remoteSchedulesIndex = idx && Array.isArray(idx.employees) ? idx : { employees: [] };
+      return remoteSchedulesIndex;
+    }
+
+    async function fetchRemoteEmployeeSchedule(empId) {
+      const key = String(empId || "").trim();
+      if (!key) return null;
+      if (remoteEmployeeScheduleCache.has(key)) return remoteEmployeeScheduleCache.get(key);
+      const data = await fetchJsonAny([`https://khalidsaif912.github.io/roster-site/schedules/${encodeURIComponent(key)}.json`]);
+      const payload = data && typeof data === "object" ? data : null;
+      remoteEmployeeScheduleCache.set(key, payload);
+      return payload;
+    }
+
+    async function buildRemoteRosterForDate(isoDate) {
+      const date = String(isoDate || "").trim();
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
+      const monthKey = date.slice(0, 7);
+      const index = await fetchRemoteSchedulesIndex();
+      const emps = (index.employees || []).filter((e) => Array.isArray(e.months) && e.months.includes(monthKey));
+      if (!emps.length) return null;
+
+      const shiftsMap = {
+        morning: new Map(),
+        afternoon: new Map(),
+        night: new Map()
+      };
+
+      // Fetch employee schedules in parallel (much faster than sequential requests).
+      const schedulePairs = await Promise.all(
+        emps.map(async (emp) => {
+          const schedule = await fetchRemoteEmployeeSchedule(emp.id);
+          return { emp, schedule };
+        })
+      );
+
+      schedulePairs.forEach(({ emp, schedule }) => {
+        const monthRows = schedule && schedule.schedules && Array.isArray(schedule.schedules[monthKey])
+          ? schedule.schedules[monthKey]
+          : [];
+        const row = monthRows.find((r) => String((r && r.date) || "") === date);
+        if (!row) return;
+        const grp = String((row.shift_group || "")).toLowerCase();
+        const shiftKey = grp === "morning" ? "morning" : grp === "afternoon" ? "afternoon" : grp === "night" ? "night" : "";
+        if (!shiftKey) return;
+        const department = deptLabel(emp.department);
+        if (!shiftsMap[shiftKey].has(department)) shiftsMap[shiftKey].set(department, []);
+        shiftsMap[shiftKey].get(department).push(`SN${emp.id} ${emp.name}`);
+      });
+
+      const toSections = (mapObj) =>
+        Array.from(mapObj.entries())
+          .sort((a, b) => {
+            const ao = sectionOrder(a[0]);
+            const bo = sectionOrder(b[0]);
+            if (ao !== bo) return ao - bo;
+            return String(a[0]).localeCompare(String(b[0]));
+          })
+          .map(([title, items]) => ({ title, items }));
+
+      const payload = {
+        shiftMeta: { date, key: "morning", title: "Morning Shift", time: "06:00 - 15:00" },
+        shifts: {
+          morning: makeEmptyShiftPayload("morning", date),
+          afternoon: makeEmptyShiftPayload("afternoon", date),
+          night: makeEmptyShiftPayload("night", date)
+        },
+        defaultShift: "morning"
+      };
+      payload.shifts.morning.manpowerSections = toSections(shiftsMap.morning);
+      payload.shifts.afternoon.manpowerSections = toSections(shiftsMap.afternoon);
+      payload.shifts.night.manpowerSections = toSections(shiftsMap.night);
+
+      const firstWithData = SHIFT_META.find((s) => (payload.shifts[s.key].manpowerSections || []).length);
+      if (firstWithData) {
+        payload.defaultShift = firstWithData.key;
+        payload.shiftMeta = { ...payload.shifts[firstWithData.key].shiftMeta };
+      }
+      return payload;
+    }
+
+    async function loadManpowerDataForDate(isoDate) {
+      const key = String(isoDate || "").trim();
+      if (!key) return {};
+      if (manpowerDataByDate.has(key)) return manpowerDataByDate.get(key);
+      let loaded = await buildRemoteRosterForDate(key);
+      // Fallback to local file only when remote source is unreachable.
+      if (!loaded || typeof loaded !== "object") {
+        const byDatePath = `./data/roster/by-date/${encodeURIComponent(key)}/latest.json`;
+        loaded = await fetchJsonAny([byDatePath]);
+      }
+
+      const payload = loaded && typeof loaded === "object"
+        ? JSON.parse(JSON.stringify(loaded))
+        : {
+            _missingRosterForDate: true,
+            shiftMeta: { date: key },
+            shifts: {
+              morning: { shiftMeta: { key: "morning", title: "Morning Shift", date: key, time: "06:00 - 15:00" }, manpowerSections: [] },
+              afternoon: { shiftMeta: { key: "afternoon", title: "Afternoon Shift", date: key, time: "13:00 - 22:00" }, manpowerSections: [] },
+              night: { shiftMeta: { key: "night", title: "Night Shift", date: key, time: "21:00 - 06:00" }, manpowerSections: [] }
+            },
+            defaultShift: "morning"
+          };
+
+      // Preserve selected date in UI for accurate operator context.
+      if (payload && typeof payload === "object") {
+        payload.shiftMeta = payload.shiftMeta || {};
+        payload.shiftMeta.date = key;
+        if (payload.shifts && typeof payload.shifts === "object") {
+          Object.keys(payload.shifts).forEach((k) => {
+            const sh = payload.shifts[k];
+            if (sh && typeof sh === "object") {
+              sh.shiftMeta = sh.shiftMeta || {};
+              sh.shiftMeta.date = key;
+            }
+          });
+        }
+      }
+
+      manpowerDataByDate.set(key, payload);
+      return payload;
+    }
+
+    async function ensureManpowerData() {
+      if (manpowerData) return manpowerData;
+      const datesIndex = await fetchJsonAny(["./data/roster/dates_index.json", "./data/report/dates_index.json"]);
+      manpowerDates = Array.isArray(datesIndex && datesIndex.dates)
+        ? datesIndex.dates.map((d) => String(d || "").trim()).filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d))
+        : [];
+      manpowerDates.sort();
+      const defaultDate = String((datesIndex && datesIndex.default) || manpowerDates[manpowerDates.length - 1] || "");
+      manpowerActiveDate = defaultDate || "";
+      const latest = manpowerActiveDate
+        ? await loadManpowerDataForDate(manpowerActiveDate)
+        : (await fetchJsonAny(["./data/roster/latest.json"])) || {};
+      manpowerData = latest && typeof latest === "object" ? latest : {};
+      const defaultShift = String((manpowerData && manpowerData.defaultShift) || (manpowerData.shiftMeta && manpowerData.shiftMeta.key) || "morning");
+      manpowerActiveShift = SHIFT_META.some((s) => s.key === defaultShift) ? defaultShift : "morning";
+      return manpowerData;
+    }
+
+    async function setManpowerDate(isoDate) {
+      const normalized = String(isoDate || "").trim();
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(normalized)) return;
+      manpowerActiveDate = normalized;
+      manpowerData = await loadManpowerDataForDate(normalized);
+      const defaultShift = String((manpowerData && manpowerData.defaultShift) || (manpowerData.shiftMeta && manpowerData.shiftMeta.key) || "morning");
+      manpowerActiveShift = SHIFT_META.some((s) => s.key === defaultShift) ? defaultShift : "morning";
+      renderManpowerModal();
+    }
+
+    function renderManpowerModal() {
+      const tabsRoot = document.getElementById("manpowerShiftTabs");
+      const bodyRoot = document.getElementById("manpowerModalBody");
+      const metaRoot = document.getElementById("manpowerModalMeta");
+      const datePicker = document.getElementById("manpowerDatePicker");
+      if (!tabsRoot || !bodyRoot || !metaRoot || !datePicker) return;
+
+      if (manpowerActiveDate) datePicker.value = manpowerActiveDate;
+      // Allow selecting any date (including future dates).
+      datePicker.removeAttribute("min");
+      datePicker.removeAttribute("max");
+
+      const available = SHIFT_META.filter((s) => manpowerShiftPayload(manpowerData, s.key));
+      tabsRoot.innerHTML = "";
+      available.forEach((shift) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = `manpower-tab${shift.key === manpowerActiveShift ? " active" : ""}`;
+        btn.textContent = `${shift.name} (${shift.time})`;
+        btn.addEventListener("click", () => {
+          manpowerActiveShift = shift.key;
+          renderManpowerModal();
+        });
+        tabsRoot.appendChild(btn);
+      });
+
+      const shiftHasEntries = (shiftKey) => {
+        const p = manpowerShiftPayload(manpowerData, shiftKey) || {};
+        const secs = Array.isArray(p.manpowerSections) ? p.manpowerSections : [];
+        return secs.some((sec) => Array.isArray(sec.items) && sec.items.some((x) => String(x || "").trim()));
+      };
+
+      // If selected shift is empty, move automatically to first shift that has names.
+      if (!shiftHasEntries(manpowerActiveShift)) {
+        const firstNonEmpty = SHIFT_META.find((s) => shiftHasEntries(s.key));
+        if (firstNonEmpty) manpowerActiveShift = firstNonEmpty.key;
+      }
+
+      const payload = manpowerShiftPayload(manpowerData, manpowerActiveShift) || {};
+      const shiftMeta = payload.shiftMeta || {};
+      const sections = Array.isArray(payload.manpowerSections) ? payload.manpowerSections : [];
+      const missingRoster = !!payload._missingRosterForDate;
+
+      const displayShiftDate = toDisplayDate(shiftMeta.date || "");
+      metaRoot.textContent = `${shiftMeta.title || `${capitalize(manpowerActiveShift)} Shift`} | ${displayShiftDate || "-"} | ${shiftMeta.time || ""}`;
+      bodyRoot.innerHTML = "";
+
+      const namedSections = sections
+        .filter((sec) => Array.isArray(sec.items))
+        .map((sec) => ({
+          ...sec,
+          items: (sec.items || []).map((x) => String(x || "").trim()).filter(Boolean)
+        }))
+        .filter((sec) => sec.items.length > 0);
+      const byTitle = new Map(
+        namedSections.map((sec) => [String(sec.title || "").trim().toLowerCase(), sec])
+      );
+      const cards = [];
+      namedSections.forEach((sec) => {
+        cards.push(sec);
+      });
+      cards.sort((a, b) => {
+        const ao = sectionOrder(a && a.title);
+        const bo = sectionOrder(b && b.title);
+        if (ao !== bo) return ao - bo;
+        return String((a && a.title) || "").localeCompare(String((b && b.title) || ""));
+      });
+
+      const totalNames = cards.reduce((sum, sec) => {
+        if (Array.isArray(sec.groups)) {
+          return sum + sec.groups.reduce(
+            (s, g) => s + (g.items || []).filter((x) => String(x || "").trim()).length,
+            0
+          );
+        }
+        return sum + ((sec.items || []).filter((x) => String(x || "").trim()).length);
+      }, 0);
+
+      if (!cards.length) {
+        const empty = document.createElement("div");
+        empty.className = "manpower-empty";
+        empty.innerHTML = missingRoster
+          ? `<span class="empty-main">No published roster for this date.</span><span class="empty-subtext">Please add roster data for ${displayShiftDate || "the selected date"} in the monthly roster source.</span>`
+          : `<span class="empty-main">No manpower entries available for this shift.</span>`;
+        bodyRoot.appendChild(empty);
+        return;
+      }
+      metaRoot.textContent =
+        `${shiftMeta.title || `${capitalize(manpowerActiveShift)} Shift`} | ${displayShiftDate || "-"} | ${shiftMeta.time || ""} | ${totalNames} staff`;
+
+      cards.forEach((sec) => {
+        const card = document.createElement("section");
+        card.className = "manpower-section-card";
+        const sectionCount = ((sec.items || []).length);
+
+        if (String(sec.title || "").trim()) {
+          const head = document.createElement("div");
+          head.className = "manpower-section-head";
+          head.textContent = `${sec.title || "Section"} (${sectionCount})`;
+          card.appendChild(head);
+        }
+
+        const list = document.createElement("ul");
+        list.className = "manpower-list";
+        (sec.items || []).forEach((raw) => {
+          const txt = String(raw || "").trim();
+          if (!txt) return;
+          const li = document.createElement("li");
+          li.textContent = txt;
+          list.appendChild(li);
+        });
+
+        if (!list.children.length) {
+          const li = document.createElement("li");
+          li.textContent = "No staff assigned";
+          list.appendChild(li);
+        }
+        card.appendChild(list);
+        bodyRoot.appendChild(card);
+      });
+    }
+
+    async function openManpowerModal() {
+      await ensureManpowerData();
+      renderManpowerModal();
+      const modal = document.getElementById("manpowerModal");
+      if (modal) modal.hidden = false;
+    }
+
+    function closeManpowerModal() {
+      const modal = document.getElementById("manpowerModal");
+      if (modal) modal.hidden = true;
+    }
+
+    function wireManpowerModal() {
+      const openBtn = document.getElementById("manpowerBtn");
+      const dutyRosterBtn = document.getElementById("dutyRosterBtn");
+      const closeBtn = document.getElementById("manpowerCloseBtn");
+      const modal = document.getElementById("manpowerModal");
+      const datePicker = document.getElementById("manpowerDatePicker");
+      if (openBtn) {
+        openBtn.addEventListener("click", () => {
+          openManpowerModal();
+        });
+      }
+      if (dutyRosterBtn) {
+        dutyRosterBtn.addEventListener("click", () => {
+          openManpowerModal();
+        });
+      }
+      if (datePicker) {
+        datePicker.addEventListener("change", async (e) => {
+          const selected = String((e.target && e.target.value) || "").trim();
+          if (!selected || selected === manpowerActiveDate) return;
+          await setManpowerDate(selected);
+        });
+      }
+      if (closeBtn) closeBtn.addEventListener("click", closeManpowerModal);
+      if (modal) {
+        modal.addEventListener("click", (e) => {
+          if (e.target === modal) closeManpowerModal();
+        });
+      }
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeManpowerModal();
+      });
     }
 
     // ---- Render KPI strip ----
@@ -1096,6 +1704,7 @@
       renderDays(dayItems);
     }
 
+    wireManpowerModal();
     initDashboard();
   </script>
 </body>

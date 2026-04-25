@@ -1099,7 +1099,7 @@
                 state.operationalActivities[groupIndex].items.splice(itemIndex + 1, 0, "");
                 saveDraft();
                 renderOperationalActivities();
-                focusOperational(groupIndex, itemIndex + 1);
+                focusOperational(groupIndex, itemIndex + 1, "flight");
               }
               if (
                 e.key === "Backspace" &&
@@ -1209,11 +1209,20 @@
     attachCsdRouteLearning();
   }
 
-  function focusOperational(groupIndex, itemIndex) {
+  function focusOperational(groupIndex, itemIndex, segment) {
     setTimeout(() => {
-      document.querySelectorAll(".opact-input").forEach((inp) => {
-        if (+inp.dataset.group === groupIndex && +inp.dataset.index === itemIndex) inp.focus();
-      });
+      const inputs = Array.from(document.querySelectorAll(".opact-input"));
+      const matches = inputs.filter(
+        (inp) => +inp.dataset.group === groupIndex && +inp.dataset.index === itemIndex
+      );
+      if (!matches.length) return;
+
+      const requested = segment ? matches.find((inp) => (inp.dataset.segment || "") === segment) : null;
+      const preferred =
+        requested ||
+        matches.find((inp) => (inp.dataset.segment || "") === "flight") ||
+        matches[0];
+      preferred.focus();
     }, 0);
   }
 
