@@ -262,6 +262,11 @@
       position: relative;
       overflow: hidden;
     }
+    .kpi-card-link {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+    }
 
     .kpi-card::after {
       content: "";
@@ -326,6 +331,27 @@
       color: var(--navy-800);
       line-height: 1;
       letter-spacing: -0.03em;
+    }
+    .kpi-emoji {
+      display: inline-block;
+      transform-origin: center;
+      will-change: transform;
+    }
+    .kpi-emoji.takeoff {
+      animation: planeTakeoff 2.4s ease-in-out infinite;
+    }
+    .kpi-emoji.landing {
+      animation: planeLanding 2.4s ease-in-out infinite;
+    }
+    @keyframes planeTakeoff {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      35% { transform: translate(4px, -3px) rotate(-8deg); }
+      65% { transform: translate(2px, -1px) rotate(-4deg); }
+    }
+    @keyframes planeLanding {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      35% { transform: translate(4px, 3px) rotate(8deg); }
+      65% { transform: translate(2px, 1px) rotate(4deg); }
     }
 
     .kpi-note {
@@ -925,14 +951,14 @@
       <div class="header-right">
         <img class="company-logo" src="./assets/transom-logo.png" alt="Transom Cargo" />
         <nav class="header-toolbar" aria-label="Quick actions">
-          <button type="button" class="toolbar-btn" id="dutyRosterBtn" aria-haspopup="dialog" aria-controls="manpowerModal">
+          <a class="toolbar-btn" href="./data/report/offload_report.html">
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M7 3h10l4 4v14H7V3z" stroke="currentColor" stroke-width="1.7"/>
               <path d="M17 3v4h4" stroke="currentColor" stroke-width="1.7"/>
               <path d="M10 12h8M10 16h8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
             </svg>
             Duty Roster
-          </button>
+          </a>
           <button type="button" class="toolbar-btn" id="manpowerBtn" aria-haspopup="dialog" aria-controls="manpowerModal">
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="1.7"/>
@@ -1122,6 +1148,7 @@
     const manpowerDataByDate = new Map();
     let remoteSchedulesIndex = null;
     const remoteEmployeeScheduleCache = new Map();
+    let dashboardShiftKey = "";
     let manpowerActiveDate = "";
     let manpowerActiveShift = "";
 
@@ -1305,6 +1332,8 @@
 
     async function ensureManpowerData() {
       if (manpowerData) return manpowerData;
+      const reportLatest = await fetchJsonAny(["./data/report/latest.json"]);
+      dashboardShiftKey = String((reportLatest && reportLatest.shiftMeta && reportLatest.shiftMeta.key) || "").toLowerCase();
       const datesIndex = await fetchJsonAny(["./data/roster/dates_index.json", "./data/report/dates_index.json"]);
       manpowerDates = Array.isArray(datesIndex && datesIndex.dates)
         ? datesIndex.dates.map((d) => String(d || "").trim()).filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d))
@@ -1316,7 +1345,12 @@
         ? await loadManpowerDataForDate(manpowerActiveDate)
         : (await fetchJsonAny(["./data/roster/latest.json"])) || {};
       manpowerData = latest && typeof latest === "object" ? latest : {};
-      const defaultShift = String((manpowerData && manpowerData.defaultShift) || (manpowerData.shiftMeta && manpowerData.shiftMeta.key) || "morning");
+      const defaultShift = String(
+        dashboardShiftKey ||
+        (manpowerData && manpowerData.defaultShift) ||
+        (manpowerData.shiftMeta && manpowerData.shiftMeta.key) ||
+        "morning"
+      ).toLowerCase();
       manpowerActiveShift = SHIFT_META.some((s) => s.key === defaultShift) ? defaultShift : "morning";
       return manpowerData;
     }
@@ -1326,8 +1360,16 @@
       if (!/^\d{4}-\d{2}-\d{2}$/.test(normalized)) return;
       manpowerActiveDate = normalized;
       manpowerData = await loadManpowerDataForDate(normalized);
-      const defaultShift = String((manpowerData && manpowerData.defaultShift) || (manpowerData.shiftMeta && manpowerData.shiftMeta.key) || "morning");
-      manpowerActiveShift = SHIFT_META.some((s) => s.key === defaultShift) ? defaultShift : "morning";
+      // Keep current shift tab if valid; otherwise fallback to data/default.
+      if (!SHIFT_META.some((s) => s.key === manpowerActiveShift)) {
+        const defaultShift = String(
+          dashboardShiftKey ||
+          (manpowerData && manpowerData.defaultShift) ||
+          (manpowerData.shiftMeta && manpowerData.shiftMeta.key) ||
+          "morning"
+        ).toLowerCase();
+        manpowerActiveShift = SHIFT_META.some((s) => s.key === defaultShift) ? defaultShift : "morning";
+      }
       renderManpowerModal();
     }
 
@@ -1467,17 +1509,11 @@
 
     function wireManpowerModal() {
       const openBtn = document.getElementById("manpowerBtn");
-      const dutyRosterBtn = document.getElementById("dutyRosterBtn");
       const closeBtn = document.getElementById("manpowerCloseBtn");
       const modal = document.getElementById("manpowerModal");
       const datePicker = document.getElementById("manpowerDatePicker");
       if (openBtn) {
         openBtn.addEventListener("click", () => {
-          openManpowerModal();
-        });
-      }
-      if (dutyRosterBtn) {
-        dutyRosterBtn.addEventListener("click", () => {
           openManpowerModal();
         });
       }
@@ -1515,9 +1551,10 @@
       );
 
       root.innerHTML = `
+        <a class="kpi-card-link" href="https://khalidsaif912.github.io/roster-site/" target="_blank" rel="noopener noreferrer">
         <div class="kpi-card">
           <div class="kpi-top">
-            <div class="kpi-label">Report Days</div>
+            <div class="kpi-label">EXPORT ROSTER</div>
             <div class="kpi-icon">
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.7"/>
@@ -1525,48 +1562,55 @@
               </svg>
             </div>
           </div>
-          <div class="kpi-value">${totalDays}</div>
-          <div class="kpi-note">Available report days</div>
+          <div class="kpi-value"><span class="kpi-emoji landing">✈️</span></div>
+          <div class="kpi-note">Open full monthly duty roster</div>
         </div>
+        </a>
 
+        <a class="kpi-card-link" href="https://khalidsaif912.github.io/roster-site/import" target="_blank" rel="noopener noreferrer">
         <div class="kpi-card k-sky">
           <div class="kpi-top">
-            <div class="kpi-label">Total Flights</div>
+            <div class="kpi-label">Import Roster</div>
             <div class="kpi-icon sky">
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M17.8 19.2L16 11l3.5-3.5C21 6 21 4 19.5 2.5S18 2 16.5 3.5L13 7 4.8 5.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.3c.4-.2.6-.6.5-1.1z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
               </svg>
             </div>
           </div>
-          <div class="kpi-value">${totalFlights}</div>
-          <div class="kpi-note">Across all visible days</div>
+          <div class="kpi-value">✈️</div>
+          <div class="kpi-note">Go to import duty roster page</div>
         </div>
+        </a>
 
+        <a class="kpi-card-link" href="https://khalidsaif912.github.io/roster-site/training/" target="_blank" rel="noopener noreferrer">
         <div class="kpi-card k-amber">
           <div class="kpi-top">
-            <div class="kpi-label">Busiest Shift</div>
+            <div class="kpi-label">Training</div>
             <div class="kpi-icon amber">
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
               </svg>
             </div>
           </div>
-          <div class="kpi-value" style="font-size:22px;padding-top:4px;">${busiest.label}</div>
-          <div class="kpi-note">${pluralFlights(busiest.count)} overall</div>
+          <div class="kpi-value">📚</div>
+          <div class="kpi-note">View training courses and sessions</div>
         </div>
+        </a>
 
+        <a class="kpi-card-link" href="https://khalidsaif912.github.io/roster-site/a-cup-of-book/" target="_blank" rel="noopener noreferrer">
         <div class="kpi-card k-green">
           <div class="kpi-top">
-            <div class="kpi-label">Today</div>
+            <div class="kpi-label">A Cup of Book</div>
             <div class="kpi-icon green">
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </div>
           </div>
-          <div class="kpi-value" style="color:var(--green-600)">${today ? today.total : 0}</div>
-          <div class="kpi-note">${today ? "Active record &mdash; " + pluralFlights(today.total) : "No active day record"}</div>
+          <div class="kpi-value" style="color:var(--green-600)">☕</div>
+          <div class="kpi-note">Open reading gallery and topics</div>
         </div>
+        </a>
       `;
     }
 
