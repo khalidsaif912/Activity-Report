@@ -2351,7 +2351,7 @@
       "font-family:Calibri,Arial,sans-serif;font-size:11.0pt;mso-ansi-font-size:11.0pt;color:#000000;line-height:190%;";
     root.setAttribute(
       "style",
-      "width:800px;max-width:800px;min-width:800px;box-sizing:border-box;margin:0;padding:0;" +
+      "width:1000px;max-width:1000px;min-width:1000px;box-sizing:border-box;margin:0;padding:0;" +
         baseFont +
         (root.getAttribute("style") || "")
     );
