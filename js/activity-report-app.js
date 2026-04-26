@@ -999,6 +999,10 @@
   function renderAll() {
     state.flightPerformance = normalizeIndentedBullets(toSentenceCaseText(state.flightPerformance));
     state.checksCompliance = normalizeIndentedBullets(toSentenceCaseText(state.checksCompliance));
+    state.equipmentStatus = normalizeIndentedBullets(toSentenceCaseText(state.equipmentStatus));
+    state.handoverDetails = normalizeIndentedBullets(toSentenceCaseText(state.handoverDetails));
+    state.specialHO = normalizeIndentedBullets(toSentenceCaseText(state.specialHO));
+    state.otherText = normalizeIndentedBullets(toSentenceCaseText(state.otherText));
     renderMeta();
     renderOperationalActivities();
     renderBriefings();
