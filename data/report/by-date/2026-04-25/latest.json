@@ -1,52 +1,52 @@
 {
   "shiftMeta": {
-    "key": "afternoon",
-    "title": "Afternoon Shift",
+    "key": "night",
+    "title": "Night Shift",
     "date": "2026-04-25",
-    "time": "13:00 - 22:00"
+    "time": "21:00 - 06:00"
   },
   "manpowerSections": [
     {
       "title": "Supervisor",
       "items": [
-        "SN82593 Mohamed Al Kalbani"
+        "SN82546 Saleh Al Rashdi"
       ]
     },
     {
       "title": "Load Control",
       "items": [
-        "SN82437 Marwan Al Difai",
-        "SN82550 Saleh Al Aufi",
-        "SN81348 Assad Al Omairi"
+        "SN82441 Mudathir Al Hajri",
+        "SN82551 Omar Al Obaidi",
+        "SN82657 Bushra Al Wahiebi"
       ]
     },
     {
       "title": "Export Checker",
       "items": [
-        "SN82671 Khalil Al Hinai",
-        "SN82615 Rashid Al Farsi",
-        "SN81393 Ali Al Farsi",
-        "SN80482 Waleed Al Hadabi",
-        "SN82666 Mohamed Al Maskari",
-        "SN82439 Ghaith Al Habsi",
-        "SN82661 Mohamed Al Maskari"
+        "SN82673 Khalifa Al Maqbali",
+        "SN82464 Wissam Al Kharusi",
+        "SN82672 Dawood Al Siyabi",
+        "SN82645 Abdullah Al Shukeili",
+        "SN82547 Mazin Al Hajri",
+        "SN82577 Ali Al Marjubi",
+        "SN8715 Khalid Al Raqadi"
       ]
     },
     {
       "title": "Export Operators",
       "items": [
-        "SN82467 Khamis Al Hinai",
-        "SN82429 Zakariya Al Balushi",
-        "SN8542 Salim Al Harassi"
+        "SN81223 Mazin Al Siyabi",
+        "SN8941 Adil Al Oraimi",
+        "SN82468 Badar Al Fulaiti"
       ]
     },
     {
       "title": "Flight Dispatch",
       "items": [
-        "SN82414 BADAR AL BUSAIDI",
-        "SN82420 MOHAMMED AL SAADI",
-        "SN82537 KHALIFA AL SAADI",
-        "SN80479 SAMI AL HADABI"
+        "SN82419 HAITHAM AL BALUSHI",
+        "SN82425 ALI AL SHAMSI",
+        "SN80480 YOUNIS AL SIYABI",
+        "SN82566 ANWAR AL AMRI"
       ]
     },
     {
@@ -321,5 +321,5 @@
       ]
     }
   },
-  "defaultShift": "afternoon"
+  "defaultShift": "night"
 }
