@@ -1,42 +1,42 @@
 {
   "shiftMeta": {
-    "key": "morning",
-    "title": "Morning Shift",
+    "key": "afternoon",
+    "title": "Afternoon Shift",
     "date": "2026-04-26",
-    "time": "06:00 - 15:00"
+    "time": "13:00 - 22:00"
   },
   "manpowerSections": [
     {
       "title": "Supervisor",
       "items": [
-        "SN81300 Talal Al Balushi"
+        "SN81404 Mohamed Al Amri"
       ]
     },
     {
       "title": "Load Control",
       "items": [
-        "SN82575 Ahmed Al Kharusi",
-        "SN81258 Jaafar Al Balushi",
-        "SN81402 Mohamed Al Siyabi"
+        "SN82596 Hamed Al Fulaiti",
+        "SN82437 Marwan Al Difai",
+        "SN82550 Saleh Al Aufi"
       ]
     },
     {
       "title": "Export Checker",
       "items": [
-        "SN80270 Marlon Esmilla",
-        "SN990752 Ali Yousuf Al Balushi",
-        "SN82578 Raad Al Farsi",
-        "SN82674 Mohamed Al Mamari",
-        "SN82555 Riyadh Al Jabri"
+        "SN82658 Mohamed Al Mazroie",
+        "SN82671 Khalil Al Hinai",
+        "SN81393 Ali Al Farsi",
+        "SN81832 Ahmed Al Bakari",
+        "SN82616 Ahmed Al Hashmi"
       ]
     },
     {
       "title": "Export Operators",
       "items": [
-        "SN8714 Mohana Al Subhi",
-        "SN81224 Mohamed Al Amri",
-        "SN8762 Mohamed Al Falahi",
-        "SN8744 Said Al Fahkri"
+        "SN82415 Ahmed Al Balushi",
+        "SN8647 Issa Al Douyani",
+        "SN8722 Salim Sulieman",
+        "SN82429 Zakariya Al Balushi"
       ]
     },
     {
@@ -44,19 +44,17 @@
       "items": []
     },
     {
-      "title": "Inventory",
-      "items": [
-        "SN990737 Said Al Amri"
-      ]
-    },
-    {
       "title": "Support Team",
       "items": [
-        "SN82565 Jamal Al Hadi"
+        "SN82653 Ahmed Al Sabii"
       ]
     },
     {
       "title": "CTU Staff On Duty",
+      "items": []
+    },
+    {
+      "title": "Inventory",
       "items": []
     },
     {
@@ -309,5 +307,5 @@
       ]
     }
   },
-  "defaultShift": "morning"
+  "defaultShift": "afternoon"
 }
