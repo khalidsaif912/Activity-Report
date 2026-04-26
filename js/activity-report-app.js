@@ -77,6 +77,18 @@
         const data = JSON.parse(t);
         if (window.employeeAutocomplete) {
           window.employeeAutocomplete.employees = filterActivityReportEmployeeList(Array.isArray(data) ? data : []);
+          try {
+            const ctuRes = await fetch(b + "ctu_staff_suggestions.json", { cache: "no-store" });
+            if (ctuRes.ok) {
+              const ctuText = await ctuRes.text();
+              if (!ctuText.trimStart().startsWith("<")) {
+                const ctuData = JSON.parse(ctuText);
+                window.employeeAutocomplete.ctuSuggestions = Array.isArray(ctuData) ? ctuData.slice() : [];
+              }
+            }
+          } catch (_) {
+            window.employeeAutocomplete.ctuSuggestions = [];
+          }
         }
         return b;
       } catch (_) {
@@ -913,6 +925,8 @@
   }
 
   function renderAll() {
+    state.flightPerformance = normalizeIndentedBullets(toSentenceCaseText(state.flightPerformance));
+    state.checksCompliance = normalizeIndentedBullets(toSentenceCaseText(state.checksCompliance));
     renderMeta();
     renderOperationalActivities();
     renderBriefings();
@@ -995,6 +1009,10 @@
   function splitOperationalTwoFieldLine(raw) {
     const line = String(raw || "").trim();
     if (!line) return { flight: "", phrase: "" };
+    const dashSplit = line.match(/^(.+?)\s-\s(.+)$/);
+    if (dashSplit) {
+      return { flight: String(dashSplit[1] || "").trim(), phrase: String(dashSplit[2] || "").trim() };
+    }
     const slashPattern = /^(\S+\/\d{1,2}[A-Za-z]{3}\/\S+)\s+(.*)$/;
     const slashMatch = line.match(slashPattern);
     if (slashMatch) {
@@ -1010,8 +1028,33 @@
   function composeOperationalTwoFieldLine(flight, phrase) {
     const f = String(flight || "").trim();
     const p = String(phrase || "").trim();
-    if (f && p) return `${f} ${p}`;
+    if (f && p) return `${f} - ${p}`;
     return f || p;
+  }
+
+  function toSentenceCaseText(value) {
+    const src = String(value || "");
+    if (!src.trim()) return src;
+    const acronyms = new Set(["AWB", "DG", "ULD", "CTU", "STC", "CSD", "IATA", "ISO", "GDP", "RA3", "MHS", "ETA", "ETD", "STD", "WY", "OV"]);
+    const lower = src.toLowerCase();
+    let out = "";
+    let capitalizeNext = true;
+    for (let i = 0; i < lower.length; i += 1) {
+      const ch = lower[i];
+      if (capitalizeNext && /[a-z]/.test(ch)) {
+        out += ch.toUpperCase();
+        capitalizeNext = false;
+      } else {
+        out += ch;
+      }
+      if (/[.!?]/.test(ch)) capitalizeNext = true;
+      if (ch === "\n") capitalizeNext = true;
+    }
+    out = out.replace(/\b[A-Za-z]{2,5}\b/g, (word) => {
+      const up = word.toUpperCase();
+      return acronyms.has(up) ? up : word;
+    });
+    return out;
   }
 
   function makeDualEditableRow(parts, onInput, onKeyDown, onDelete) {
@@ -1037,6 +1080,11 @@
     phraseInput.oninput = () => onInput(flightInput.value, phraseInput.value);
     phraseInput.onkeydown = onKeyDown;
 
+    const separator = document.createElement("span");
+    separator.className = "opact-separator";
+    separator.textContent = "-";
+    separator.setAttribute("aria-hidden", "true");
+
     const del = document.createElement("button");
     del.type = "button";
     del.className = "delete-btn hidden-print";
@@ -1045,6 +1093,7 @@
     del.onclick = onDelete;
 
     row.appendChild(flightInput);
+    row.appendChild(separator);
     row.appendChild(phraseInput);
     row.appendChild(del);
     return { row, flightInput, phraseInput };
@@ -1137,6 +1186,13 @@
             groupIndex === 0 ? "loadPlanPhraseOnly" : groupIndex === 1 ? "advanceLoadingPhraseOnly" : "";
           editable.phraseInput.dataset.phraseKey = phraseOnlyKey || opPhraseKeysStatic[groupIndex] || "";
           editable.phraseInput.dataset.segment = "phrase";
+          editable.row.classList.add("opact-line-item");
+          const bullet = document.createElement("span");
+          bullet.className = "opact-bullet";
+          bullet.setAttribute("aria-hidden", "true");
+          bullet.textContent = "\u2022";
+          bullet.style.marginLeft = "24px";
+          editable.row.insertBefore(bullet, editable.row.firstChild);
           box.appendChild(editable.row);
           return;
         }
@@ -1181,6 +1237,13 @@
           editable.input.title =
             "After the policy number, press Space — then destination suggestions (codes & routes). Advance Loading phrases never appear here.";
         }
+        editable.row.classList.add("opact-line-item");
+        const bullet = document.createElement("span");
+        bullet.className = "opact-bullet";
+        bullet.setAttribute("aria-hidden", "true");
+        bullet.textContent = "\u2022";
+        bullet.style.marginLeft = "24px";
+        editable.row.insertBefore(bullet, editable.row.firstChild);
         box.appendChild(editable.row);
       });
 
@@ -1263,6 +1326,13 @@
       );
       editable.input.classList.add("briefing-input");
       editable.input.dataset.index = index;
+      editable.row.classList.add("bullet-line-item");
+      const bullet = document.createElement("span");
+      bullet.className = "opact-bullet";
+      bullet.setAttribute("aria-hidden", "true");
+      bullet.textContent = "\u2022";
+      bullet.style.marginLeft = "24px";
+      editable.row.insertBefore(bullet, editable.row.firstChild);
       wrap.appendChild(editable.row);
     });
   }
@@ -1311,6 +1381,13 @@
       );
       editable.input.classList.add("opnote-input");
       editable.input.dataset.index = index;
+      editable.row.classList.add("bullet-line-item");
+      const bullet = document.createElement("span");
+      bullet.className = "opact-bullet";
+      bullet.setAttribute("aria-hidden", "true");
+      bullet.textContent = "\u2022";
+      bullet.style.marginLeft = "24px";
+      editable.row.insertBefore(bullet, editable.row.firstChild);
       wrap.appendChild(editable.row);
     });
   }
@@ -1449,7 +1526,7 @@
       offloadFieldOrder.forEach((field) => {
         const td = document.createElement("td");
         const isCompactSingleLine =
-          field === "date" || field === "flight" || field === "std" || field === "destination" || field === "trolley";
+          field === "date" || field === "flight" || field === "std" || field === "destination";
         const cellInput = isCompactSingleLine ? document.createElement("input") : document.createElement("textarea");
         if (isCompactSingleLine) {
           cellInput.type = "text";
@@ -1672,6 +1749,7 @@
         bullet.className = "manpower-bullet";
         bullet.setAttribute("aria-hidden", "true");
         bullet.textContent = "\u2022";
+        bullet.style.marginLeft = "24px";
 
         const input = document.createElement("input");
         input.type = "text";
@@ -1828,7 +1906,7 @@
   }
 
   function openEmailComposer(options = {}) {
-    const { includePlainBody = true } = options || {};
+    const { includePlainBody = true, bodyOverride = "" } = options || {};
     const to = recipientsMailtoValue("to");
     const cc = recipientsMailtoValue("cc");
     const bcc = recipientsMailtoValue("bcc");
@@ -1836,7 +1914,8 @@
     const subject = "Export Warehouse Activity Report";
     const parts = [`subject=${encodeURIComponent(subject)}`];
     if (includePlainBody) {
-      const body = encodeURIComponent(buildReportPlainBody());
+      const bodyText = String(bodyOverride || "").trim() || buildReportPlainBody();
+      const body = encodeURIComponent(bodyText);
       parts.push(`body=${body}`);
     }
     if (cc) parts.push(`cc=${encodeURIComponent(cc)}`);
@@ -1858,10 +1937,16 @@
     } catch (err) {
       console.warn("Could not pre-copy rich report before mailto fallback", err);
     }
-    const opened = openEmailComposer({ includePlainBody: !copied });
+    const opened = copied
+      ? openEmailComposer({
+          includePlainBody: true,
+          bodyOverride:
+            "\u200EFormatted report is copied to clipboard.\n\u200EPaste inside the email body with Ctrl+V."
+        })
+      : openEmailComposer({ includePlainBody: true });
     if (statusEl && opened) {
       statusEl.textContent = copied
-        ? "Mail draft opened. The formatted report is copied — paste with Ctrl+V in Outlook body."
+        ? "Mail draft opened with text body. The formatted report is copied — paste with Ctrl+V in Outlook body."
         : "Mail draft opened. If the body appears plain in Outlook, use Copy then paste with Ctrl+V.";
     }
     return opened;
@@ -1924,7 +2009,7 @@
     if (!canUseServerGmailApi()) {
       const statusEl = el("gmailStatus");
       if (statusEl) {
-        statusEl.textContent = "Direct send is unavailable: start the local API server and connect Gmail.";
+        statusEl.textContent = "Direct send is unavailable. Start the local API server and connect Gmail.";
       }
       return false;
     }
@@ -2051,7 +2136,7 @@
     if (!table) return;
 
     // Outlook-safe fixed column plan (prevents header letter breaking).
-    const colPx = [28, 84, 72, 74, 56, 74, 110, 90, 100, 90, 72, 150];
+    const colPx = [28, 80, 88, 70, 52, 70, 96, 120, 96, 86, 76, 138];
 
     const existingTableStyle = table.getAttribute("style") || "";
     const stripped = existingTableStyle.replace(/\b(min-)?width\s*:\s*[^;]+;?/gi, "");
@@ -2257,13 +2342,13 @@
       const tdBullet = document.createElement("td");
       tdBullet.setAttribute(
         "style",
-        "vertical-align:top;width:22px;padding:2px 8px 0 0;white-space:nowrap;mso-line-height-rule:exactly;"
+        "vertical-align:top;width:18px;padding:2px 2px 0 14px;white-space:nowrap;mso-line-height-rule:exactly;border:none;"
       );
-      tdBullet.appendChild(wordStyledSpan(bulletChar, WORD_CLIPBOARD.bullet));
+      tdBullet.appendChild(wordStyledSpan(`\u00A0\u00A0\u00A0\u00A0${bulletChar}`, WORD_CLIPBOARD.bullet));
       const tdText = document.createElement("td");
       tdText.setAttribute(
         "style",
-        "vertical-align:top;padding:0;width:99%;mso-line-height-rule:exactly;"
+        "vertical-align:top;padding:0 0 0 1px;width:99%;mso-line-height-rule:exactly;border:none;"
       );
       tdText.appendChild(wordStyledSpan(text, WORD_CLIPBOARD.body));
       tr.appendChild(tdBullet);
@@ -2282,8 +2367,10 @@
       const textParts = Array.from(row.querySelectorAll(".export-val"))
         .map((el) => String(el.textContent || "").trim())
         .filter(Boolean);
-      if (!textParts.length) return;
-      const text = textParts.join(" ");
+      const needsBullet = row.classList.contains("opact-line-item") || row.classList.contains("bullet-line-item");
+      if (!textParts.length && !needsBullet) return;
+      const lineCore = textParts.join(" ");
+      const text = needsBullet ? lineCore : lineCore;
       const table = document.createElement("table");
       table.setAttribute("cellpadding", "0");
       table.setAttribute("cellspacing", "0");
@@ -2295,10 +2382,28 @@
         "border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;width:100%;margin:0 0 6px 0;"
       );
       const tr = document.createElement("tr");
-      const td = document.createElement("td");
-      td.setAttribute("style", "vertical-align:top;padding:2px 0;mso-line-height-rule:exactly;");
-      td.appendChild(wordStyledSpan(text, WORD_CLIPBOARD.body));
-      tr.appendChild(td);
+      if (needsBullet) {
+        const tdIndent = document.createElement("td");
+        tdIndent.setAttribute(
+          "style",
+          "vertical-align:top;width:22px;padding:2px 0 0 0;white-space:nowrap;mso-line-height-rule:exactly;border:none;"
+        );
+        tdIndent.appendChild(wordStyledSpan("\u00A0\u00A0\u00A0\u00A0\u2022", WORD_CLIPBOARD.bullet));
+
+        const tdText = document.createElement("td");
+        tdText.setAttribute(
+          "style",
+          "vertical-align:top;padding:2px 0 0 8px;mso-line-height-rule:exactly;border:none;"
+        );
+        tdText.appendChild(wordStyledSpan(text, WORD_CLIPBOARD.body));
+        tr.appendChild(tdIndent);
+        tr.appendChild(tdText);
+      } else {
+        const td = document.createElement("td");
+        td.setAttribute("style", "vertical-align:top;padding:2px 0;mso-line-height-rule:exactly;");
+        td.appendChild(wordStyledSpan(text, WORD_CLIPBOARD.body));
+        tr.appendChild(td);
+      }
       table.appendChild(tr);
       row.replaceWith(table);
     });
@@ -2346,7 +2451,7 @@
     root.querySelectorAll(".manpower-section-title").forEach((el) => {
       el.setAttribute(
         "style",
-          "display:block;width:100%;box-sizing:border-box;border:none;border-bottom:1px solid #cbd5e1;padding:6px 2px 8px 2px;margin-bottom:8px;" +
+          "display:block;width:100%;box-sizing:border-box;border:none;padding:6px 2px 8px 2px;margin-bottom:8px;" +
           WORD_CLIPBOARD.sectionTitle +
           (el.getAttribute("style") || "")
       );
@@ -2376,12 +2481,15 @@
       if (el.classList.contains("manpower-line")) return;
       const prev = el.getAttribute("style") || "";
       const wordBody =
-        "font-size:11.0pt;mso-ansi-font-size:11.0pt;font-family:'Arial',sans-serif;color:#000000;";
+        "font-size:11.0pt;mso-ansi-font-size:11.0pt;font-family:'Arial',sans-serif;color:#000000;text-decoration:none;border:none;outline:none;background:transparent;";
       if (!/min-height/i.test(prev)) {
         el.setAttribute("style", "display:block;min-height:1.2em;" + wordBody + prev);
       } else {
         el.setAttribute("style", "display:block;" + wordBody + prev);
       }
+    });
+    root.querySelectorAll(".line-item-paste-row, .line-item-paste-row tr, .line-item-paste-row td").forEach((el) => {
+      el.setAttribute("style", "border:none !important;outline:none !important;" + (el.getAttribute("style") || ""));
     });
     // Keep bullet rows (including Load Plan / Advance Loading) on one visual line in Outlook.
     root.querySelectorAll(".line-item > .export-val").forEach((el) => {
@@ -2412,6 +2520,17 @@
     });
 
     root.querySelectorAll("table").forEach((t) => {
+      if (t.classList && t.classList.contains("line-item-paste-row")) {
+        t.setAttribute("border", "0");
+        t.setAttribute("cellspacing", "0");
+        t.setAttribute("cellpadding", "0");
+        t.setAttribute(
+          "style",
+          "width:100%;border-collapse:collapse;table-layout:fixed;mso-table-lspace:0pt;mso-table-rspace:0pt;border:none;" +
+            (t.getAttribute("style") || "")
+        );
+        return;
+      }
       t.setAttribute("border", "1");
       t.setAttribute("cellspacing", "0");
       t.setAttribute("cellpadding", "9");
@@ -2422,6 +2541,15 @@
       );
     });
     root.querySelectorAll("th, td").forEach((cell) => {
+      if (cell.closest && cell.closest("table.offload-table")) return;
+      if (cell.closest && cell.closest("table.line-item-paste-row")) {
+        cell.setAttribute(
+          "style",
+          "border:none;padding:2px 0;vertical-align:top;line-height:1.35;background-color:transparent;" +
+            (cell.getAttribute("style") || "")
+        );
+        return;
+      }
       cell.setAttribute(
         "style",
         "border:1px solid #d0d5e8;padding:10px;vertical-align:top;word-wrap:break-word;overflow-wrap:break-word;min-width:0;line-height:190%;mso-line-height-rule:at-least;background-color:#ffffff;" +
@@ -2455,12 +2583,22 @@
         const idx = Array.prototype.indexOf.call(td.parentNode ? td.parentNode.children : [], td);
         td.setAttribute(
           "style",
-          "border:1px solid #d0d5e8;padding:12px;vertical-align:top;word-break:normal;overflow-wrap:normal;word-wrap:normal;line-height:1.9;mso-line-height-rule:at-least;background-color:#ffffff;" +
+          "border:1px solid #d0d5e8;padding:12px;vertical-align:top;word-break:normal !important;overflow-wrap:normal !important;word-wrap:normal !important;line-height:1.9;mso-line-height-rule:at-least;background-color:#ffffff;" +
             (td.getAttribute("style") || "")
         );
         if (idx === 1) {
           const s = td.getAttribute("style") || "";
           td.setAttribute("style", "font-size:9.0pt;mso-ansi-font-size:9.0pt;line-height:1.5;" + s);
+        }
+        // Keep short identifiers on one line (DATE/FLIGHT/STD/DEST).
+        if (idx >= 1 && idx <= 4) {
+          const s = td.getAttribute("style") || "";
+          td.setAttribute("style", "white-space:nowrap;word-break:keep-all !important;overflow-wrap:normal !important;" + s);
+        }
+        // Keep ULD entries multiline when needed.
+        if (idx === 7) {
+          const s = td.getAttribute("style") || "";
+          td.setAttribute("style", "white-space:pre-wrap;word-break:normal !important;overflow-wrap:normal !important;" + s);
         }
       });
     });
@@ -2485,14 +2623,25 @@
       .filter((line) => line);
     if (!lines.length) return "";
     return lines
-      .map((line) => `\u2022 ${line.replace(/^[\u2022\-*]\s*/, "")}`)
+      .map((line) => `    \u2022 ${line.replace(/^[\u2022\-*]\s*/, "")}`)
       .join("\n");
   }
 
   /** For copy/paste output: keep one visible bullet even when section is empty. */
   function toBulletedLinesWithFallback(raw) {
     const bullets = toBulletedLines(raw);
-    return bullets || "\u2022";
+    return bullets || "    \u2022";
+  }
+
+  function normalizeIndentedBullets(raw) {
+    const lines = String(raw || "").split(/\r?\n/);
+    return lines
+      .map((line) => {
+        const text = String(line || "").trim();
+        if (!text) return "";
+        return `    \u2022 ${text.replace(/^[\u2022\-*]\s*/, "")}`;
+      })
+      .join("\n");
   }
 
   function buildWordClipboardHeadHtml() {
@@ -2592,7 +2741,7 @@
     const nameRaw = getDutySupervisorDisplayName();
     const nameE = escapeHtml(nameRaw);
     const nameBlock = nameRaw
-      ? `<div style="font-family:Calibri,Arial,sans-serif;mso-ansi-font-size:12.0pt;font-size:12.0pt;font-weight:bold;color:#000000;margin:4px 0 2px 0;">${nameE}</div>`
+      ? `<div style="margin:4px 0 2px 0;"><span style="font-family:'Segoe Script','Brush Script MT','Lucida Handwriting',cursive;font-size:24px;font-weight:normal;color:#111111;">${nameE}</span></div>`
       : `<div style="font-family:Calibri,Arial,sans-serif;mso-ansi-font-size:9.0pt;font-size:9.0pt;color:#000000;margin:4px 0;">(Add name under Manpower → Supervisor)</div>`;
     const rawSrc = badgeSrcResolved || reportSignatureBadgesImageUrl();
     const badgeSrc =
@@ -2623,12 +2772,16 @@
       "www.transomcargo.com",
     ].join("\n");
     const groupedText = state.operationalActivities
-      .map((group) => `${group.title}:\n${group.items.length ? group.items.map((i) => `- ${i}`).join("\n") : "NIL"}`)
+      .map((group) =>
+        `${group.title}:\n${
+          group.items.length ? group.items.map((i) => `    \u2022 ${String(i || "").trim()}`).join("\n") : "NIL"
+        }`
+      )
       .join("\n\n");
     const manpowerText = state.manpowerSections
       .map((section) => {
         const lines = (section.items || []).map((i) => String(i).trim()).filter((i) => i);
-        return `${section.title}:\n${lines.length ? lines.map((i) => `\u2022 ${i}`).join("\n") : "NIL"}`;
+        return `${section.title}:\n${lines.length ? lines.map((i) => `    \u2022 ${i}`).join("\n") : "NIL"}`;
       })
       .join("\n\n");
     const offloadLine = (v) => String(v ?? "").replace(/\r?\n/g, " ").trim();
@@ -2646,22 +2799,22 @@
       groupedText,
       "",
       "2. BRIEFINGS CONDUCTED",
-      state.briefings.map((i) => `- ${i}`).join("\n"),
+      state.briefings.map((i) => `    \u2022 ${String(i || "").trim()}`).join("\n"),
       "",
       "3. FLIGHT PERFORMANCE",
-      state.flightPerformance,
+      toBulletedLinesWithFallback(state.flightPerformance),
       "",
       "OPERATIONAL NOTES",
-      state.operationalNotes.map((i) => `- ${i}`).join("\n"),
+      state.operationalNotes.map((i) => `    \u2022 ${String(i || "").trim()}`).join("\n"),
       "",
       "4. CHECKS & COMPLIANCE",
-      state.checksCompliance,
+      toBulletedLinesWithFallback(state.checksCompliance),
       "",
       "OFFLOADING CARGO",
       offloadText,
       "",
       "5. SAFETY",
-      state.safety,
+      toBulletedLinesWithFallback(state.safety),
       "",
       "6. MANPOWER",
       manpowerText,
@@ -2705,20 +2858,26 @@
     clone.querySelectorAll(".delete-btn").forEach((n) => n.remove());
     clone.querySelectorAll("input").forEach((inp) => {
       const span = document.createElement("span");
-      const keepClasses = String(inp.className || "")
-        .split(/\s+/)
-        .filter((c) => c && c !== "opact-input");
-      span.className = ["export-val", ...keepClasses].join(" ").trim();
+      const isManpowerLine = inp.classList && inp.classList.contains("manpower-line");
+      const isManpowerSectionTitle = inp.classList && inp.classList.contains("manpower-section-title");
+      if (isManpowerLine) {
+        span.className = "export-val manpower-line";
+      } else if (isManpowerSectionTitle) {
+        span.className = "export-val manpower-section-title";
+      } else {
+        span.className = "export-val";
+      }
+      span.dataset.segment = String(inp.dataset.segment || "").trim();
       span.textContent = inp.value;
       inp.replaceWith(span);
     });
     clone.querySelectorAll(".line-item").forEach((row) => {
-      const flight = row.querySelector("span.opact-flight-input");
-      const phrase = row.querySelector("span.opact-phrase-input");
+      const flight = row.querySelector('span.export-val[data-segment="flight"]');
+      const phrase = row.querySelector('span.export-val[data-segment="phrase"]');
       if (!flight && !phrase) return;
-      const joined = [String((flight && flight.textContent) || "").trim(), String((phrase && phrase.textContent) || "").trim()]
-        .filter(Boolean)
-        .join(" ");
+      const f = String((flight && flight.textContent) || "").trim();
+      const p = String((phrase && phrase.textContent) || "").trim();
+      const joined = f && p ? `${f} - ${p}` : f || p;
       const one = document.createElement("span");
       one.className = "export-val";
       one.textContent = joined;
@@ -2734,8 +2893,21 @@
         .filter((c) => c && c !== "offload-cell");
       div.className = ["export-val", "export-multiline", ...keepClasses].join(" ").trim();
       const id = String(ta.id || "").trim();
-      const shouldBullet = id === "handoverDetails" || id === "specialHO" || id === "otherText";
-      const shouldBulletWithFallback = id === "equipmentStatus" || id === "specialHO" || id === "otherText";
+      const shouldBullet =
+        id === "flightPerformance" ||
+        id === "checksCompliance" ||
+        id === "safety" ||
+        id === "handoverDetails" ||
+        id === "specialHO" ||
+        id === "otherText";
+      const shouldBulletWithFallback =
+        id === "flightPerformance" ||
+        id === "checksCompliance" ||
+        id === "safety" ||
+        id === "equipmentStatus" ||
+        id === "handoverDetails" ||
+        id === "specialHO" ||
+        id === "otherText";
       if (shouldBulletWithFallback) {
         div.textContent = toBulletedLinesWithFallback(ta.value);
       } else if (shouldBullet) {
@@ -2955,58 +3127,67 @@
       if (segment === "flight") return;
       const phraseKey = (inp.dataset.phraseKey || "").trim() || (segment === "full" ? opPhraseKeys[gi] : "");
       if (!phraseKey) return;
-      window.phraseAutocomplete.attachInput(inp, phraseKey, (value) => {
-        const g = +inp.dataset.group;
-        const ii = +inp.dataset.index;
-        if (state.operationalActivities[g] && state.operationalActivities[g].items[ii] !== undefined) {
-          if (segment === "phrase") {
-            const current = splitOperationalTwoFieldLine(state.operationalActivities[g].items[ii]);
-            state.operationalActivities[g].items[ii] = composeOperationalTwoFieldLine(current.flight, value);
-          } else if (segment === "flight") {
-            const current = splitOperationalTwoFieldLine(state.operationalActivities[g].items[ii]);
-            state.operationalActivities[g].items[ii] = composeOperationalTwoFieldLine(value, current.phrase);
-          } else {
-            state.operationalActivities[g].items[ii] = value;
+      window.phraseAutocomplete.attachInput(
+        inp,
+        phraseKey,
+        (value) => {
+          const g = +inp.dataset.group;
+          const ii = +inp.dataset.index;
+          if (state.operationalActivities[g] && state.operationalActivities[g].items[ii] !== undefined) {
+            if (segment === "phrase") {
+              const current = splitOperationalTwoFieldLine(state.operationalActivities[g].items[ii]);
+              const normalized = toSentenceCaseText(value);
+              inp.value = normalized;
+              state.operationalActivities[g].items[ii] = composeOperationalTwoFieldLine(current.flight, normalized);
+            } else if (segment === "flight") {
+              const current = splitOperationalTwoFieldLine(state.operationalActivities[g].items[ii]);
+              state.operationalActivities[g].items[ii] = composeOperationalTwoFieldLine(value, current.phrase);
+            } else {
+              const normalized = phraseKey === "csdRescreening" ? String(value || "").toUpperCase() : toSentenceCaseText(value);
+              inp.value = normalized;
+              state.operationalActivities[g].items[ii] = normalized;
+            }
+            saveDraft();
           }
-          saveDraft();
-        }
-      });
+        },
+        { preserveCase: segment === "phrase" }
+      );
     });
 
     window.phraseAutocomplete.attachTextarea(el("handoverDetails"), "handoverDetails", (value) => {
-      state.handoverDetails = value;
+      state.handoverDetails = normalizeIndentedBullets(toSentenceCaseText(value));
       saveDraft();
-    });
+    }, { preserveCase: true });
 
     window.phraseAutocomplete.attachTextarea(el("otherText"), "other", (value) => {
-      state.otherText = value;
+      state.otherText = normalizeIndentedBullets(toSentenceCaseText(value));
       saveDraft();
-    });
+    }, { preserveCase: true });
 
     window.phraseAutocomplete.attachTextarea(el("specialHO"), "specialHO", (value) => {
-      state.specialHO = value;
+      state.specialHO = normalizeIndentedBullets(toSentenceCaseText(value));
       saveDraft();
-    });
+    }, { preserveCase: true });
   }
 
   function bindStaticEvents() {
     el("flightPerformance").addEventListener("input", (e) => {
-      state.flightPerformance = e.target.value.toUpperCase();
+      state.flightPerformance = normalizeIndentedBullets(toSentenceCaseText(e.target.value));
       e.target.value = state.flightPerformance;
       saveDraft();
     });
     el("checksCompliance").addEventListener("input", (e) => {
-      state.checksCompliance = e.target.value.toUpperCase();
+      state.checksCompliance = normalizeIndentedBullets(toSentenceCaseText(e.target.value));
       e.target.value = state.checksCompliance;
       saveDraft();
     });
     el("safety").addEventListener("input", (e) => {
-      state.safety = e.target.value.toUpperCase();
+      state.safety = normalizeIndentedBullets(toSentenceCaseText(e.target.value));
       e.target.value = state.safety;
       saveDraft();
     });
     el("equipmentStatus").addEventListener("input", (e) => {
-      state.equipmentStatus = e.target.value.toUpperCase();
+      state.equipmentStatus = normalizeIndentedBullets(toSentenceCaseText(e.target.value));
       e.target.value = state.equipmentStatus;
       saveDraft();
     });

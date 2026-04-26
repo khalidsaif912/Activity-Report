@@ -24,8 +24,7 @@ TAIL_TITLES: list[str] = [
     "CTU Staff On Duty",
     "Inventory",
     "Support Team",
-    "Sick Leave / No Show / Others",
-    "Annual Leave / Course / Off in Lieu",
+    "Leave & Course & Absence Status",
     "Trainee",
     "Overtime Justification",
 ]
@@ -86,6 +85,14 @@ def finalize_manpower_sections(
     r: dict[str, list[str]] = {}
     for t in ALL_MANPOWER_TITLES:
         r[t] = list(roster.get(t) or [])
+
+    # Backward compatibility: merge legacy leave/absence buckets into the new unified title.
+    merged_leave_absence = [
+        *(roster.get("Sick Leave / No Show / Others") or []),
+        *(roster.get("Annual Leave / Course / Off in Lieu") or []),
+    ]
+    if merged_leave_absence:
+        r["Leave & Course & Absence Status"] = merged_leave_absence
     for title, items in roster.items():
         if title not in r and title != "Flight Dispatch":
             r[title] = list(items)

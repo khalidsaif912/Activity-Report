@@ -198,7 +198,7 @@ window.phraseAutocomplete = {
         const noIndent = raw.replace(/^\s+/, "");
         const strippedLeadBullet = noIndent.replace(/^[\u2022\-*]\s*/, "");
         if (!strippedLeadBullet.trim()) return "";
-        return `\u2022 ${strippedLeadBullet}`;
+        return `    \u2022 ${strippedLeadBullet}`;
       })
       .join("\n");
   },
@@ -211,7 +211,7 @@ window.phraseAutocomplete = {
     if (!this._isPrimaryBulletTextareaKey(key)) return false;
     const raw = String((textarea && textarea.value) || "");
     if (raw.trim()) return false;
-    textarea.value = "\u2022 ";
+    textarea.value = "    \u2022 ";
     try {
       textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
     } catch (_) {}
@@ -725,7 +725,7 @@ window.phraseAutocomplete = {
     this.hideBox();
   },
 
-  attachTextarea(textarea, key, onSave) {
+  attachTextarea(textarea, key, onSave, options = {}) {
     const row = textarea && textarea.dataset ? textarea.dataset.row : "";
     const field = textarea && textarea.dataset ? textarea.dataset.field : "";
     const mark = `phraseTa:${key}:${textarea.id || "noid"}:${row || "norow"}:${field || "nofield"}`;
@@ -788,7 +788,8 @@ window.phraseAutocomplete = {
     };
 
     textarea.addEventListener("input", () => {
-      let value = textarea.value.toUpperCase();
+      const shouldForceUppercase = options && options.preserveCase ? false : true;
+      let value = shouldForceUppercase ? textarea.value.toUpperCase() : textarea.value;
       if (this._isBulletedTextareaKey(key)) {
         value = this._normalizeBulletedTextareaValue(value);
       }
@@ -817,10 +818,10 @@ window.phraseAutocomplete = {
       const end = typeof textarea.selectionEnd === "number" ? textarea.selectionEnd : start;
       const left = value.slice(0, start);
       const right = value.slice(end);
-      const joiner = left.endsWith("\n") || !left.length ? "\u2022 " : "\n\u2022 ";
-      const next = left + joiner + right;
+      const normalizedJoiner = left.endsWith("\n") || !left.length ? "    \u2022 " : "\n    \u2022 ";
+      const next = left + normalizedJoiner + right;
       textarea.value = next;
-      const pos = (left + joiner).length;
+      const pos = (left + normalizedJoiner).length;
       try {
         textarea.selectionStart = textarea.selectionEnd = pos;
       } catch (_) {}
@@ -879,7 +880,7 @@ window.phraseAutocomplete = {
     });
   },
 
-  attachInput(input, key, onSave) {
+  attachInput(input, key, onSave, options = {}) {
     const g = input.dataset.group ?? "x";
     const i = input.dataset.index ?? "x";
     const mark = `phraseInp:${key}:${g}:${i}`;
@@ -895,7 +896,7 @@ window.phraseAutocomplete = {
           return;
         }
         tailQuery = tail;
-        const matches = this.findMatches(key, tailQuery);
+      const matches = this.findMatches(key, tailQuery).map((x) => String(x || "").toUpperCase());
         this.renderBox(input, matches, (picked) => {
           const t = this._normPick(picked);
           const merged = this.mergePhrasePickCsd(input.value, t);
@@ -931,7 +932,8 @@ window.phraseAutocomplete = {
     };
 
     input.addEventListener("input", () => {
-      const value = input.value.toUpperCase();
+      const shouldForceUppercase = options && options.preserveCase ? false : true;
+      const value = shouldForceUppercase ? input.value.toUpperCase() : input.value;
       input.value = value;
       if (onSave) onSave(value);
       showSuggest();

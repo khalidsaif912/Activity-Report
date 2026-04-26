@@ -1,5 +1,12 @@
 window.employeeAutocomplete = {
   employees: [],
+  ctuSuggestions: [],
+
+  _ctuSuggestionsUrlFromEmployeesUrl(url) {
+    const base = String(url || "").trim();
+    if (!base) return "../../data/report/ctu_staff_suggestions.json";
+    return base.replace(/employees\.json(\?.*)?$/i, "ctu_staff_suggestions.json");
+  },
 
   async load(url = "../../data/report/employees.json") {
     try {
@@ -14,6 +21,21 @@ window.employeeAutocomplete = {
     } catch (err) {
       console.error("Failed to load employees.json", url, err);
       this.employees = [];
+    }
+
+    try {
+      const ctuUrl = this._ctuSuggestionsUrlFromEmployeesUrl(url);
+      const res = await fetch(ctuUrl);
+      const text = await res.text();
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (text.trimStart().startsWith("<")) {
+        throw new Error("Expected JSON but got HTML (wrong URL?).");
+      }
+      const raw = JSON.parse(text);
+      this.ctuSuggestions = Array.isArray(raw) ? raw.slice() : [];
+    } catch (err) {
+      console.warn("Failed to load ctu_staff_suggestions.json", err);
+      this.ctuSuggestions = [];
     }
   },
 
@@ -68,10 +90,27 @@ window.employeeAutocomplete = {
     if (!t) return "mixed";
     if (t === "export checker") return "nameWithRole";
     if (t === "export operators") return "nameWithOperatorRoles";
+    if (t === "ctu staff on duty" || t === "stc staff" || t === "stc staff on duty") return "ctuNames";
+    if (t === "overtime justification" || t === "trainee" || t === "leave & course & absence status" || t === "inventory")
+      return "nameOnly";
     if (t === "supervisor" || t === "load control" || t === "flight dispatch") {
       return "nameOnly";
     }
     return "mixed";
+  },
+
+  _ctuMatchesByName(query) {
+    const q = this._normalize(query);
+    let matches = this.ctuSuggestions;
+    if (q) {
+      const qNoSn = q.replace(/^SN/, "");
+      matches = this.ctuSuggestions.filter((item) => {
+        const v = this._normalize(item);
+        const vNoSn = v.replace(/^SN/, "");
+        return v.startsWith(q) || v.includes(q) || vNoSn.startsWith(qNoSn);
+      });
+    }
+    return matches.slice(0, 20);
   },
 
   _exportOperatorRoles() {
@@ -109,7 +148,10 @@ window.employeeAutocomplete = {
       const names = this._employeeMatchesByName(namePart);
       let matches = [];
 
-      if (suggestMode === "nameOnly") {
+      if (suggestMode === "ctuNames") {
+        const ctuNames = this._ctuMatchesByName(namePart);
+        matches = ctuNames;
+      } else if (suggestMode === "nameOnly") {
         matches = names.slice();
       } else if (suggestMode === "nameWithOperatorRoles") {
         const operatorRoles = this._exportOperatorRoles();

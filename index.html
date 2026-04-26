@@ -1247,6 +1247,43 @@
       return { shiftMeta: { key, title, date, time }, manpowerSections: [] };
     }
 
+    function upsertFlightDispatchSection(sections, dispatchItems) {
+      const list = Array.isArray(sections) ? sections : [];
+      const items = Array.isArray(dispatchItems)
+        ? dispatchItems.map((x) => String(x || "").trim()).filter(Boolean)
+        : [];
+      const idx = list.findIndex((sec) => String((sec && sec.title) || "").trim().toLowerCase() === "flight dispatch");
+      if (idx >= 0) {
+        list[idx] = { ...(list[idx] || {}), title: "Flight Dispatch", items };
+      } else {
+        list.push({ title: "Flight Dispatch", items });
+      }
+      return list;
+    }
+
+    function mergeFlightDispatchIntoPayload(payload, dispatchData) {
+      if (!payload || typeof payload !== "object" || !dispatchData || typeof dispatchData !== "object") return payload;
+      const byShift = dispatchData.byShift && typeof dispatchData.byShift === "object" ? dispatchData.byShift : {};
+      const singleItems = (dispatchData.flightDispatch && dispatchData.flightDispatch.items) || [];
+
+      if (payload.shifts && typeof payload.shifts === "object") {
+        Object.keys(payload.shifts).forEach((key) => {
+          const sh = payload.shifts[key];
+          if (!sh || typeof sh !== "object") return;
+          const shiftItems = (byShift[key] && byShift[key].items) || singleItems;
+          sh.manpowerSections = upsertFlightDispatchSection(sh.manpowerSections, shiftItems);
+        });
+      }
+
+      if (Array.isArray(payload.manpowerSections)) {
+        const activeKey =
+          String((payload.shiftMeta && payload.shiftMeta.key) || payload.defaultShift || "").trim().toLowerCase() || "morning";
+        const activeItems = (byShift[activeKey] && byShift[activeKey].items) || singleItems;
+        payload.manpowerSections = upsertFlightDispatchSection(payload.manpowerSections, activeItems);
+      }
+      return payload;
+    }
+
     function deptLabel(raw) {
       const d = String(raw || "").trim();
       if (!d) return "Other";
@@ -1267,8 +1304,9 @@
         "ctu staff on duty": 7,
         "inventory": 8,
         "support team": 9,
+        "leave & course & absence status": 10,
         "sick leave / no show / others": 10,
-        "annual leave / course / off in lieu": 11,
+        "annual leave / course / off in lieu": 10,
         "trainee": 12,
         "overtime justification": 13
       };
@@ -1363,15 +1401,17 @@
       const key = String(isoDate || "").trim();
       if (!key) return {};
       if (manpowerDataByDate.has(key)) return manpowerDataByDate.get(key);
-      let loaded = await buildRemoteRosterForDate(key);
-      // Fallback to local file only when remote source is unreachable.
-      if (!loaded || typeof loaded !== "object") {
-        const byDatePath = `./data/roster/by-date/${encodeURIComponent(key)}/latest.json`;
-        loaded = await fetchJsonAny([byDatePath]);
-      }
+      const dateKey = encodeURIComponent(key);
+      let loaded = await fetchJsonAny([
+        `./data/report/by-date/${dateKey}/latest.json`,
+        `./data/roster/by-date/${dateKey}/latest.json`
+      ]);
+      // Fallback to remote schedules only when local by-date files are missing.
+      if (!loaded || typeof loaded !== "object") loaded = await buildRemoteRosterForDate(key);
+      const dispatchByDate = await fetchJsonAny([`./data/flight_dispatch/by-date/${dateKey}/latest.json`]);
 
       const payload = loaded && typeof loaded === "object"
-        ? JSON.parse(JSON.stringify(loaded))
+        ? mergeFlightDispatchIntoPayload(JSON.parse(JSON.stringify(loaded)), dispatchByDate)
         : {
             _missingRosterForDate: true,
             shiftMeta: { date: key },
@@ -1498,7 +1538,7 @@
           ...sec,
           items: (sec.items || []).map((x) => String(x || "").trim()).filter(Boolean)
         }))
-        .filter((sec) => sec.items.length > 0);
+        .filter((sec) => sec.items.length > 0 || String(sec.title || "").trim().toLowerCase() === "flight dispatch");
       const byTitle = new Map(
         namedSections.map((sec) => [String(sec.title || "").trim().toLowerCase(), sec])
       );
