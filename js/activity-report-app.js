@@ -192,16 +192,88 @@
   function displayNameFromRosterEntry(entry) {
     const s = String(entry || "").trim();
     if (!s) return "";
-    return s.replace(/^SN\d+\s+/i, "").trim() || s;
+    const noBullet = s.replace(/^[\s\u2022\-*]+/, "");
+    const noSn = noBullet.replace(/^SN\d+\s+/i, "").trim() || noBullet;
+    const noRoleTail = noSn.replace(/\s*-\s*(supervisor|duty supervisor)\b.*$/i, "").trim();
+    return noRoleTail || noSn;
   }
 
   /** First non-empty Supervisor section line. */
   function getDutySupervisorDisplayName() {
-    const sections = state.manpowerSections || [];
-    const sup = sections.find((sec) => /supervisor/i.test(String(sec.title || "").trim()));
-    if (!sup || !Array.isArray(sup.items)) return "";
-    const line = sup.items.map((x) => String(x || "").trim()).find((x) => x);
-    return line ? displayNameFromRosterEntry(line) : "";
+    const pickFromSections = (sections) => {
+      const list = Array.isArray(sections) ? sections : [];
+      const sup = list.find((sec) => /supervisor/i.test(String((sec && sec.title) || "").trim()));
+      if (!sup || !Array.isArray(sup.items)) return "";
+      const line = sup.items.map((x) => String(x || "").trim()).find((x) => x);
+      return line ? displayNameFromRosterEntry(line) : "";
+    };
+
+    const pickFromShiftMap = (shiftMap, preferredKey) => {
+      if (!shiftMap || typeof shiftMap !== "object") return "";
+      const order = [];
+      if (preferredKey && shiftMap[preferredKey]) order.push(preferredKey);
+      ["morning", "afternoon", "night"].forEach((k) => {
+        if (shiftMap[k] && !order.includes(k)) order.push(k);
+      });
+      for (const k of order) {
+        const pack = shiftMap[k];
+        const v = pickFromSections(pack && pack.manpowerSections);
+        if (v) return v;
+      }
+      return "";
+    };
+
+    // 1) Current editable manpower list.
+    const direct = pickFromSections(state.manpowerSections);
+    if (direct) return direct;
+
+    // 2) Active shift from server payload.
+    const activePack =
+      state.shiftsFromServer && state.activeShift ? state.shiftsFromServer[state.activeShift] : null;
+    const fromActiveShift = pickFromSections(activePack && activePack.manpowerSections);
+    if (fromActiveShift) return fromActiveShift;
+
+    // 3) Any available shift as last fallback.
+    const fromShiftMap = pickFromShiftMap(state.shiftsFromServer, state.activeShift);
+    if (fromShiftMap) return fromShiftMap;
+
+    // 4) Raw fetched payload (before any draft overrides).
+    const raw = state._fetchedReportJson && typeof state._fetchedReportJson === "object" ? state._fetchedReportJson : null;
+    if (raw) {
+      const fromTop = pickFromSections(raw.manpowerSections);
+      if (fromTop) return fromTop;
+      const fromRawShifts = pickFromShiftMap(raw.shifts, state.activeShift || raw.defaultShift);
+      if (fromRawShifts) return fromRawShifts;
+    }
+
+    // 5) Reset baseline snapshot (captured right after server data apply).
+    if (state._resetBaseline && typeof state._resetBaseline === "object") {
+      const b = state._resetBaseline;
+      const fromBaselineTop = pickFromSections(b.manpowerSections);
+      if (fromBaselineTop) return fromBaselineTop;
+      const fromBaselineShifts = pickFromShiftMap(b.shiftsFromServer, b.activeShift);
+      if (fromBaselineShifts) return fromBaselineShifts;
+    }
+
+    // 6) Live DOM fallback (when UI has loaded rows but state is stale).
+    try {
+      const sectionNodes = Array.from(document.querySelectorAll(".manpower-section"));
+      for (const sec of sectionNodes) {
+        const titleEl = sec.querySelector(".manpower-section-title");
+        const title = String((titleEl && (titleEl.value || titleEl.textContent)) || "").trim();
+        if (!/supervisor/i.test(title)) continue;
+        const lineEls = Array.from(sec.querySelectorAll(".manpower-line"));
+        for (const inp of lineEls) {
+          const v = String((inp && inp.value) || "").trim();
+          if (!v) continue;
+          const name = displayNameFromRosterEntry(v);
+          if (name) return name;
+        }
+      }
+    } catch (_) {
+      /* ignore DOM fallback errors */
+    }
+    return "";
   }
 
   const state = {
@@ -2741,14 +2813,12 @@
     const nameRaw = getDutySupervisorDisplayName();
     const nameE = escapeHtml(nameRaw);
     const nameBlock = nameRaw
-      ? `<div style="margin:4px 0 2px 0;"><span style="font-family:'Segoe Script','Brush Script MT','Lucida Handwriting',cursive;font-size:24px;font-weight:normal;color:#111111;">${nameE}</span></div>`
-      : `<div style="font-family:Calibri,Arial,sans-serif;mso-ansi-font-size:9.0pt;font-size:9.0pt;color:#000000;margin:4px 0;">(Add name under Manpower → Supervisor)</div>`;
+      ? `<span style="font-family:'Segoe Script','Brush Script MT','Lucida Handwriting',cursive;font-size:18px;font-weight:bold;color:#111111;line-height:1.1;">${nameE}</span>`
+      : `<span style="font-family:Arial,Helvetica,sans-serif;font-size:9.0pt;color:#000000;">(Add name under Manpower → Supervisor)</span>`;
     const rawSrc = badgeSrcResolved || reportSignatureBadgesImageUrl();
-    const badgeSrc =
-      typeof rawSrc === "string" && rawSrc.startsWith("data:") ? rawSrc : escapeHtml(rawSrc);
-    const badgesImg = `<div style="margin:16px 0 0 0;max-width:100%;"><img src="${badgeSrc}" alt="IATA CEIV PHARMA, IATA CEIV FRESH, ISO 9001:2015, ISO 45001:2018, HACCP, GDP, RA3" width="640" style="max-width:100%;height:auto;border:0;display:block;-ms-interpolation-mode:bicubic;" /></div>`;
-    const signatureText = `<div style="margin-bottom:10px;color:#000000;mso-ansi-font-size:10.0pt;font-size:10.0pt;font-family:'Arial',sans-serif;">Best Regards,</div>${nameBlock}<div style="mso-ansi-font-size:10.0pt;font-size:10.0pt;color:#000000;margin-bottom:14px;font-family:'Arial',sans-serif;">Duty Supervisor – Export Operation</div><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;border-top:1px solid #cbd5e1;padding-top:12px;table-layout:fixed;"><tr><td style="vertical-align:top;width:172px;padding-right:10px;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;background:#f5ecec;"><tr><td width="4" style="width:4px;background:#b10f0f;font-size:0;line-height:0;">&nbsp;</td><td style="padding:7px 10px 8px 10px;"><div style="mso-ansi-font-size:19.0pt;font-size:19.0pt;font-weight:800;color:#cc2312;line-height:1;letter-spacing:0.4px;font-family:'Arial Black','Arial',sans-serif;">TRANSOM</div><div style="mso-ansi-font-size:10.5pt;font-size:10.5pt;font-weight:700;color:#d06a00;line-height:1.2;letter-spacing:0.3px;font-family:'Arial',sans-serif;margin-top:3px;">CARGO</div></td></tr></table></td><td style="border-left:4px solid #dc2626;padding-left:14px;vertical-align:top;mso-ansi-font-size:9.0pt;font-size:9.0pt;color:#000000;line-height:115%;font-family:'Arial',sans-serif;mso-line-height-rule:exactly;"><strong style="color:#000000;">Transom Cargo LLC.</strong><br/>P.O. Box: 618, P.C: 111<br/>Sultanate of Oman<br/>Phone No. 97297474<br/><span style="color:#000000;">www.transomcargo.com</span></td></tr></table>`;
-    return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;margin-top:38px;max-width:100%;"><tr><td style="font-family:'Arial',sans-serif;mso-ansi-font-size:10.0pt;font-size:10.0pt;color:#000000;line-height:115%;padding-top:36px;border-top:1px solid #cbd5e1;mso-line-height-rule:exactly;">${signatureText}${badgesImg}</td></tr></table>`;
+    const badgeSrc = typeof rawSrc === "string" && rawSrc.startsWith("data:") ? rawSrc : escapeHtml(rawSrc);
+    const badgesRow = `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;margin-top:7px;"><tr><td style="padding:0;"><img src="${badgeSrc}" alt="IATA CEIV PHARMA, IATA CEIV FRESH, ISO 9001:2015, ISO 45001:2018, HACCP, GDP, RA3" width="470" style="width:470px;max-width:470px;height:auto;border:0;display:block;-ms-interpolation-mode:bicubic;" /></td></tr></table>`;
+    return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;margin-top:22px;max-width:100%;font-family:Arial,Helvetica,sans-serif;background:#ffffff;"><tr><td style="padding:0;"><div style="font-size:11px;color:#6b7280;line-height:1.3;margin:0 0 4px 0;">Best Regards,</div><div style="margin:0 0 4px 0;">${nameBlock}</div><div style="font-size:11.5px;color:#1f2937;line-height:1.3;margin:0 0 7px 0;">Duty Supervisor – Export Operation</div><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;table-layout:fixed;"><tr><td valign="top" style="width:3px;min-width:3px;background:#c1121f;font-size:0;line-height:0;">&nbsp;</td><td valign="top" style="width:150px;padding:3px 7px 3px 6px;background:#fff4e6;"><div style="line-height:1;margin:0;"><span style="display:block;font-size:24px;font-weight:700;color:#c1121f;letter-spacing:0.2px;">TRANSOM</span><span style="display:block;font-size:11px;font-weight:700;color:#4b5563;letter-spacing:1.3px;text-transform:uppercase;margin-top:3px;">CARGO</span></div></td><td valign="top" style="width:1px;min-width:1px;background:#c1121f;font-size:0;line-height:0;">&nbsp;</td><td valign="top" style="padding:0 0 0 7px;"><div style="font-size:13px;line-height:1.38;color:#111111;"><strong style="font-weight:700;">Transom Cargo LLC.</strong><br/>P.O. Box: 618, P.C: 111<br/>Sultanate of Oman<br/>Phone: 97297474<br/><a href="http://www.transomcargo.com" style="color:#c1121f;text-decoration:none;">www.transomcargo.com</a></div></td></tr></table>${badgesRow}</td></tr></table>`;
   }
 
   /** Plain text for mailto / fallback: sections 1–10 only (no page title, no header meta, no toolbar). */
