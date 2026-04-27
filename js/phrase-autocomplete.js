@@ -655,7 +655,7 @@ window.phraseAutocomplete = {
 
     this.activeInput = input;
     this.activeItems = rows;
-    this.activeIndex = 0;
+    this.activeIndex = -1;
     this.activeOnPick = onPick;
     this._activePhraseKey = phraseKey || "";
 
@@ -667,7 +667,7 @@ window.phraseAutocomplete = {
       item.style.padding = "6px 8px";
       item.style.cursor = "pointer";
       item.style.borderBottom = "1px solid #e2e8f0";
-      item.style.background = index === 0 ? "#eff6ff" : "#fff";
+      item.style.background = "#fff";
       item.style.display = "flex";
       item.style.alignItems = "center";
       item.style.gap = "6px";
@@ -720,7 +720,7 @@ window.phraseAutocomplete = {
   },
 
   pickActive() {
-    if (!this.activeItems.length || !this.activeOnPick) return;
+    if (!this.activeItems.length || !this.activeOnPick || this.activeIndex < 0) return;
     this.activeOnPick(this.activeItems[this.activeIndex]);
     this.hideBox();
   },
@@ -811,7 +811,8 @@ window.phraseAutocomplete = {
 
     textarea.addEventListener("keydown", (e) => {
       if (!this._isBulletedTextareaKey(key) || e.key !== "Enter") return;
-      if (this.activeInput === textarea && this.activeItems.length) return;
+      const canPickOnEnter = !(options && options.pickOnEnter === false);
+      if (this.activeInput === textarea && this.activeItems.length && canPickOnEnter) return;
       e.preventDefault();
       const value = String(textarea.value || "");
       const start = typeof textarea.selectionStart === "number" ? textarea.selectionStart : value.length;
@@ -833,6 +834,7 @@ window.phraseAutocomplete = {
       "keydown",
       (e) => {
         if (this.activeInput !== textarea || !this.activeItems.length) return;
+        const canPickOnEnter = !(options && options.pickOnEnter === false);
 
         if (e.key === "ArrowDown") {
           e.preventDefault();
@@ -849,6 +851,7 @@ window.phraseAutocomplete = {
         }
 
         if (e.key === "Enter") {
+          if (!canPickOnEnter) return;
           e.preventDefault();
           e.stopImmediatePropagation();
           this.pickActive();

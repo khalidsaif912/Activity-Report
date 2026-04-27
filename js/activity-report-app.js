@@ -3469,14 +3469,17 @@
     window.phraseAutocomplete.attachTextarea(el("handoverDetails"), "handoverDetails", (value) => {
       state.handoverDetails = normalizeIndentedBullets(toSentenceCaseText(value));
       saveDraft();
-    }, { preserveCase: true });
+    }, { preserveCase: true, pickOnEnter: false });
 
     window.phraseAutocomplete.attachTextarea(el("otherText"), "other", (value) => {
       state.otherText = normalizeIndentedBullets(toSentenceCaseText(value));
       saveDraft();
     }, { preserveCase: true });
 
-    // specialHO uses manual bullet handling via wireSpecialHoTextarea().
+    window.phraseAutocomplete.attachTextarea(el("specialHO"), "specialHO", (value) => {
+      state.specialHO = normalizeIndentedBullets(toSentenceCaseText(value));
+      saveDraft();
+    }, { preserveCase: true, pickOnEnter: false });
   }
 
   function bindStaticEvents() {
@@ -3500,7 +3503,9 @@
       e.target.value = state.equipmentStatus;
       saveDraft();
     });
-    wireSpecialHoTextarea();
+    if (!window.phraseAutocomplete) {
+      wireSpecialHoTextarea();
+    }
     /* handoverDetails, otherText, specialHO: uppercase + save via phrase attachTextarea (see attachPhraseHelpers). */
 
     const recipientInputs = [
