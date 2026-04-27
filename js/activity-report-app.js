@@ -658,7 +658,16 @@
       renderAll();
     } catch (err) {
       const msg = err && err.message ? String(err.message) : "Failed to load selected date";
-      state.activeDate = dateStr || prevDate;
+      state.activeDate = prevDate || state.activeDate;
+      if (state.activeDate) {
+        try {
+          await loadReportPayload();
+          renderAll();
+          return;
+        } catch (_) {
+          /* fallback to missing view below */
+        }
+      }
       applyMissingDateView(msg);
     }
   }
@@ -926,6 +935,21 @@
       }
       if (launch.shift) state.activeShift = launch.shift;
 
+      // If today's date has no generated report yet, fallback to the latest available date
+      // so manpower names remain visible instead of entering empty no-data mode.
+      if (
+        !launch.date &&
+        state.activeDate &&
+        Array.isArray(state.availableDates) &&
+        state.availableDates.length &&
+        !state.availableDates.includes(state.activeDate)
+      ) {
+        const fallbackDate =
+          (idx && idx.default && state.availableDates.includes(idx.default) && idx.default) ||
+          state.availableDates[state.availableDates.length - 1];
+        if (fallbackDate) state.activeDate = fallbackDate;
+      }
+
       await loadReportPayload();
       renderAll();
       ensureSignatureBadgesDataUriForClipboard().catch(() => {});
@@ -975,10 +999,20 @@
     const dateText = state.activeDate || getReportDateIsoLocal();
     state.loadErrorMessage = String(message || "No report data found for selected date.");
     state.noDataMode = true;
-    state.shiftsFromServer = buildEmptyShiftsForDate(dateText);
-    state.activeShift = state.shiftsFromServer[getCurrentShiftKey()] ? getCurrentShiftKey() : "morning";
-    applyShiftFromServer(state.activeShift);
-    state.manpowerSections = [];
+    const hasExistingShiftData =
+      !!state.shiftsFromServer &&
+      Object.values(state.shiftsFromServer).some((pack) => {
+        const sections = Array.isArray(pack && pack.manpowerSections) ? pack.manpowerSections : [];
+        return sections.some((sec) => Array.isArray(sec && sec.items) && sec.items.some((x) => String(x || "").trim()));
+      });
+
+    // Keep last valid manpower visible when selected date has no generated files yet.
+    if (!hasExistingShiftData) {
+      state.shiftsFromServer = buildEmptyShiftsForDate(dateText);
+      state.activeShift = state.shiftsFromServer[getCurrentShiftKey()] ? getCurrentShiftKey() : "morning";
+      applyShiftFromServer(state.activeShift);
+      state.manpowerSections = [];
+    }
     state.offloads = [blankOffloadRow(1, dateText)];
     renderAll();
   }
@@ -1765,9 +1799,103 @@
     return { name: String(m[1] || "").trim(), role: String(m[2] || "").trim() };
   }
 
+  function normalizeManpowerEmployeeName(line) {
+    const parsed = splitManpowerNameRole(line);
+    return String(parsed.name || "")
+      .trim()
+      .replace(/\s+/g, " ")
+      .toUpperCase();
+  }
+
+  function dedupeManpowerEmployeeNames() {
+    const seen = new Set();
+    let changed = false;
+    (state.manpowerSections || []).forEach((section) => {
+      if (!section || !Array.isArray(section.items)) return;
+      section.items = section.items.map((raw) => {
+        const txt = String(raw || "");
+        const key = normalizeManpowerEmployeeName(txt);
+        if (!key) return txt;
+        if (seen.has(key)) {
+          changed = true;
+          return "";
+        }
+        seen.add(key);
+        return txt;
+      });
+      ensureManpowerRowForEditing(section);
+    });
+    return changed;
+  }
+
   function sectionAllowsAutoRoleHint(sectionTitle) {
     const t = String(sectionTitle || "").trim();
     return /^(export checker|export operators|flight dispatch)$/i.test(t);
+  }
+
+  function isExportCheckerSection(sectionTitle) {
+    return String(sectionTitle || "").trim().toLowerCase() === "export checker";
+  }
+
+  function sortExportCheckerSectionByRole(sectionIndex) {
+    const section = state.manpowerSections[sectionIndex];
+    if (!section || !Array.isArray(section.items) || !isExportCheckerSection(section.title)) return false;
+
+    const rows = section.items.map((raw, idx) => {
+      const text = String(raw || "").trim();
+      const parsed = splitManpowerNameRole(text);
+      return {
+        idx,
+        raw: raw == null ? "" : String(raw),
+        text,
+        name: parsed.name,
+        role: parsed.role
+      };
+    });
+    const filled = rows.filter((r) => r.text);
+    if (!filled.length) return false;
+    const roleCounts = new Map();
+    filled.forEach((r) => {
+      const key = String(r.role || "").trim().toLowerCase();
+      if (!key) return;
+      roleCounts.set(key, (roleCounts.get(key) || 0) + 1);
+    });
+
+    const sortedFilled = filled.slice().sort((a, b) => {
+      const aRole = String(a.role || "").trim();
+      const bRole = String(b.role || "").trim();
+      const aHasRole = Boolean(aRole);
+      const bHasRole = Boolean(bRole);
+      if (aHasRole !== bHasRole) return aHasRole ? -1 : 1;
+      if (aHasRole && bHasRole) {
+        const aCount = roleCounts.get(aRole.toLowerCase()) || 0;
+        const bCount = roleCounts.get(bRole.toLowerCase()) || 0;
+        if (aCount !== bCount) return bCount - aCount;
+        const roleCmp = aRole.localeCompare(bRole, undefined, { sensitivity: "base" });
+        if (roleCmp !== 0) return roleCmp;
+      }
+      const nameCmp = String(a.name || a.text).localeCompare(String(b.name || b.text), undefined, { sensitivity: "base" });
+      if (nameCmp !== 0) return nameCmp;
+      return a.idx - b.idx;
+    });
+
+    const emptyCount = rows.length - filled.length;
+    const nextItems = sortedFilled.map((r) => r.raw);
+    const padCount = Math.max(1, emptyCount);
+    for (let i = 0; i < padCount; i += 1) nextItems.push("");
+
+    const changed =
+      nextItems.length !== section.items.length ||
+      nextItems.some((v, i) => v !== section.items[i]);
+    if (!changed) return false;
+    section.items = nextItems;
+    return true;
+  }
+
+  function syncManpowerSectionFromDom(sectionIndex) {
+    const nodes = Array.from(document.querySelectorAll(`input.manpower-line[data-section="${sectionIndex}"]`));
+    if (!nodes.length || !state.manpowerSections[sectionIndex]) return;
+    state.manpowerSections[sectionIndex].items = nodes.map((n) => String((n && n.value) || ""));
   }
 
   /**
@@ -1795,6 +1923,9 @@
   function renderManpower() {
     const wrap = el("manpowerWrap");
     wrap.innerHTML = "";
+    if (dedupeManpowerEmployeeNames()) {
+      saveDraft();
+    }
     if (applyLearnedRolesToManpowerSections()) {
       saveDraft();
     }
@@ -1839,6 +1970,18 @@
           saveDraft();
           renderWebSignaturePreview();
         };
+        const maybeSortExportChecker = () => {
+          syncManpowerSectionFromDom(sectionIndex);
+          if (dedupeManpowerEmployeeNames()) {
+            saveDraft();
+            renderManpower();
+            return;
+          }
+          if (!sortExportCheckerSectionByRole(sectionIndex)) return;
+          saveDraft();
+          renderManpower();
+        };
+        input.onchange = maybeSortExportChecker;
         input.onkeydown = (e) => handleManpowerKeydown(e, sectionIndex, itemIndex);
         if (window.employeeAutocomplete) {
           window.employeeAutocomplete.attach(input, `${sectionIndex}-${itemIndex}`, {
@@ -1879,6 +2022,13 @@
     const list = state.manpowerSections[sectionIndex].items;
     if (e.key === "Enter") {
       e.preventDefault();
+      const inputEl = e.target;
+      const typedValue = String((inputEl && inputEl.value) || "");
+      // Prevent browser datalist from auto-committing first suggestion on blur.
+      if (inputEl && typeof inputEl.removeAttribute === "function" && inputEl.hasAttribute("list")) {
+        inputEl.removeAttribute("list");
+      }
+      list[itemIndex] = typedValue;
       list.splice(itemIndex + 1, 0, "");
       saveDraft();
       renderManpower();
@@ -1902,6 +2052,39 @@
       const input = document.querySelector(`input[data-section="${sectionIndex}"][data-index="${itemIndex}"]`);
       if (input) input.focus();
     }, 0);
+  }
+
+  function wireSpecialHoTextarea() {
+    const area = el("specialHO");
+    if (!area) return;
+    if (area.dataset.wiredSpecialHo === "1") return;
+    area.dataset.wiredSpecialHo = "1";
+
+    const syncStateFromSpecialHo = () => {
+      state.specialHO = normalizeIndentedBullets(toSentenceCaseText(area.value));
+      saveDraft();
+    };
+
+    area.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter") return;
+      e.preventDefault();
+      const start = area.selectionStart;
+      const end = area.selectionEnd;
+      const value = String(area.value || "");
+      const insert = "\n    \u2022 ";
+      area.value = value.slice(0, start) + insert + value.slice(end);
+      const pos = start + insert.length;
+      area.selectionStart = pos;
+      area.selectionEnd = pos;
+      syncStateFromSpecialHo();
+    });
+
+    area.addEventListener("input", syncStateFromSpecialHo);
+    area.addEventListener("blur", () => {
+      const normalized = normalizeIndentedBullets(toSentenceCaseText(area.value));
+      if (area.value !== normalized) area.value = normalized;
+      syncStateFromSpecialHo();
+    });
   }
 
   function normalizeRecipientsShape(payload) {
@@ -3119,12 +3302,64 @@
    * same shift. Legacy drafts without _reportShift must not overwrite morning/afternoon/night names.
    */
   function shouldApplyDraftManpower(draft) {
+    const countNonEmptyNames = (sections) =>
+      (Array.isArray(sections) ? sections : []).reduce((sum, sec) => {
+        const items = Array.isArray(sec && sec.items) ? sec.items : [];
+        return sum + items.filter((x) => String(x || "").trim()).length;
+      }, 0);
+
     if (!draft || typeof draft !== "object") return false;
     if (!Array.isArray(draft.manpowerSections) || !draft.manpowerSections.length) return false;
+    // Safety: ignore broken local drafts that accidentally saved empty manpower lists.
+    const draftNameCount = countNonEmptyNames(draft.manpowerSections);
+    if (draftNameCount === 0) return false;
     if (!state.shiftsFromServer || !state.activeShift) return true;
+    const serverPack = state.shiftsFromServer[state.activeShift];
+    const serverNameCount = countNonEmptyNames(serverPack && serverPack.manpowerSections);
+    if (serverNameCount > 0 && draftNameCount === 0) return false;
     const w = String(draft._reportShift || "").trim();
     if (!w) return false;
     return w === state.activeShift;
+  }
+
+  function restoreMissingManpowerSectionsFromServer() {
+    if (!state.shiftsFromServer || !state.activeShift || !Array.isArray(state.manpowerSections)) return false;
+    const pack = state.shiftsFromServer[state.activeShift];
+    const serverSections = Array.isArray(pack && pack.manpowerSections) ? pack.manpowerSections : [];
+    if (!serverSections.length) return false;
+
+    const countNonEmpty = (items) => (Array.isArray(items) ? items.filter((x) => String(x || "").trim()).length : 0);
+    const byTitle = new Map();
+    serverSections.forEach((sec) => {
+      const t = String((sec && sec.title) || "").trim().toLowerCase();
+      if (!t) return;
+      byTitle.set(t, sec);
+    });
+
+    let changed = false;
+    let currentTotal = 0;
+    state.manpowerSections.forEach((sec) => {
+      currentTotal += countNonEmpty(sec && sec.items);
+    });
+
+    // If draft wiped all names, fully recover from server roster for the active shift.
+    if (currentTotal === 0) {
+      state.manpowerSections = deepClone(serverSections);
+      state.manpowerSections.forEach((sec) => ensureManpowerRowForEditing(sec));
+      return true;
+    }
+
+    // If only some sections are empty, recover those sections by title.
+    state.manpowerSections.forEach((sec) => {
+      const key = String((sec && sec.title) || "").trim().toLowerCase();
+      if (!key || countNonEmpty(sec && sec.items) > 0) return;
+      const serverSec = byTitle.get(key);
+      if (!serverSec || countNonEmpty(serverSec.items) === 0) return;
+      sec.items = deepClone(serverSec.items);
+      ensureManpowerRowForEditing(sec);
+      changed = true;
+    });
+    return changed;
   }
 
   /** @returns {boolean} true if draft contained manpower lists (so server roster should not overwrite). */
@@ -3156,6 +3391,9 @@
           state.manpowerSections = draft.manpowerSections;
           appliedManpower = true;
         }
+      }
+      if (restoreMissingManpowerSectionsFromServer()) {
+        appliedManpower = true;
       }
 
       state.equipmentStatus = draft.equipmentStatus || state.equipmentStatus;
@@ -3238,10 +3476,7 @@
       saveDraft();
     }, { preserveCase: true });
 
-    window.phraseAutocomplete.attachTextarea(el("specialHO"), "specialHO", (value) => {
-      state.specialHO = normalizeIndentedBullets(toSentenceCaseText(value));
-      saveDraft();
-    }, { preserveCase: true });
+    // specialHO uses manual bullet handling via wireSpecialHoTextarea().
   }
 
   function bindStaticEvents() {
@@ -3265,6 +3500,7 @@
       e.target.value = state.equipmentStatus;
       saveDraft();
     });
+    wireSpecialHoTextarea();
     /* handoverDetails, otherText, specialHO: uppercase + save via phrase attachTextarea (see attachPhraseHelpers). */
 
     const recipientInputs = [
