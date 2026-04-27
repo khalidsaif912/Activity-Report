@@ -1,56 +1,56 @@
 {
   "shiftMeta": {
-    "key": "morning",
-    "title": "Morning Shift",
+    "key": "afternoon",
+    "title": "Afternoon Shift",
     "date": "2026-04-27",
-    "time": "06:00 - 15:00"
+    "time": "13:00 - 22:00"
   },
   "manpowerSections": [
     {
       "title": "Supervisor",
       "items": [
-        "SN81300 Talal Al Balushi"
+        "SN81404 Mohamed Al Amri"
       ]
     },
     {
       "title": "Load Control",
       "items": [
-        "SN82600 Habib Al Balushi",
-        "SN82548 Ahmed Al Muqaini",
-        "SN82575 Ahmed Al Kharusi"
+        "SN81258 Jaafar Al Balushi",
+        "SN81402 Mohamed Al Siyabi"
       ]
     },
     {
       "title": "Export Checker",
       "items": [
-        "SN82587 Yousuf Al Balushi",
-        "SN80270 Marlon Esmilla",
-        "SN82578 Raad Al Farsi",
-        "SN8584 Adil Al Zadjali",
-        "SN82555 Riyadh Al Jabri"
+        "SN82658 Mohamed Al Mazroie",
+        "SN990752 Ali Yousuf Al Balushi",
+        "SN82674 Mohamed Al Mamari",
+        "SN81832 Ahmed Al Bakari",
+        "SN82424 Riyadh Al Sulti",
+        "SN82616 Ahmed Al Hashmi"
       ]
     },
     {
       "title": "Export Operators",
       "items": [
-        "SN82588 Ghassan Al Tarsi",
-        "SN8762 Mohamed Al Falahi",
-        "SN8744 Said Al Fahkri"
+        "SN8714 Mohana Al Subhi",
+        "SN81224 Mohamed Al Amri",
+        "SN82415 Ahmed Al Balushi",
+        "SN8647 Issa Al Douyani"
       ]
     },
     {
       "title": "Flight Dispatch",
       "items": [
-        "SN82654 AHMED AL HADI",
-        "SN82410 SAID AL SADI",
-        "SN82417 TALAL AL HUSEINI",
-        "SN82423 BADAR AL BURTAMANI"
+        "SN82537 KHALIFA AL SAADI",
+        "SN82428 ABDULLAH AL MAHARBI",
+        "SN82571 YAARAB AL RAQADI"
       ]
     },
     {
-      "title": "Inventory",
+      "title": "Support Team",
       "items": [
-        "SN990737 Said Al Amri"
+        "SN82653 Ahmed Al Sabii"
       ]
     },
     {
@@ -58,7 +58,7 @@
       "items": []
     },
     {
-      "title": "Support Team",
+      "title": "Inventory",
       "items": []
     },
     {
@@ -305,5 +305,5 @@
       ]
     }
   },
-  "defaultShift": "morning"
+  "defaultShift": "afternoon"
 }
