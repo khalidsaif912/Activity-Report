@@ -2538,11 +2538,11 @@
 
   const WORD_CLIPBOARD = {
     body:
-      "mso-ansi-font-size:11.0pt;mso-bidi-font-size:11.0pt;font-size:11.0pt;font-family:Calibri,Arial,sans-serif;color:#000000;line-height:190%;mso-line-height-rule:at-least;",
+      "mso-ansi-font-size:12.0pt;mso-bidi-font-size:12.0pt;font-size:12.0pt;font-family:Calibri,Arial,sans-serif;color:#000000;line-height:190%;mso-line-height-rule:at-least;",
     bullet:
-      "mso-ansi-font-size:11.0pt;font-size:11.0pt;font-family:Calibri,Arial,sans-serif;mso-ascii-font-family:Calibri;mso-hansi-font-family:Calibri;font-weight:bold;color:#000000;",
+      "mso-ansi-font-size:12.0pt;font-size:12.0pt;font-family:Calibri,Arial,sans-serif;mso-ascii-font-family:Calibri;mso-hansi-font-family:Calibri;font-weight:bold;color:#000000;",
     sectionTitle:
-      "mso-ansi-font-size:12.0pt;mso-bidi-font-size:12.0pt;font-size:12.0pt;font-family:Calibri,Arial,sans-serif;mso-ascii-font-family:Calibri;mso-hansi-font-family:Calibri;font-weight:bold;letter-spacing:0.02em;color:#000000;",
+      "mso-ansi-font-size:14.0pt;mso-bidi-font-size:14.0pt;font-size:14.0pt;font-family:Calibri,Arial,sans-serif;mso-ascii-font-family:Calibri;mso-hansi-font-family:Calibri;font-weight:bold;letter-spacing:0.02em;color:#000000;",
     bannerMajor:
       "mso-ansi-font-size:14.0pt;mso-bidi-font-size:14.0pt;font-size:14.0pt;font-family:Calibri,Arial,sans-serif;mso-ascii-font-family:Calibri;mso-hansi-font-family:Calibri;font-weight:bold;letter-spacing:0.02em;color:#000000;line-height:1.9;",
     bannerDefault:
@@ -2554,7 +2554,7 @@
     root.querySelectorAll(".section-title").forEach((el) => {
       // Don't replace with table — just apply inline styles to match web CSS exactly.
       const isMajor = el.classList && el.classList.contains("manpower-block-heading");
-      const fontSize = isMajor ? "12.5px" : "12.5px";
+      const fontSize = isMajor ? "14px" : "14px";
       const inlineStyle =
         "display:block;width:100%;box-sizing:border-box;" +
         "margin-top:14px;margin-bottom:0;" +
@@ -2566,7 +2566,7 @@
         "border-left:4px solid #0b3a78 !important;" +
         "border-radius:0 !important;" +
         "line-height:1.3;" +
-        "color:#0b3a78 !important;" +
+        "color:#111827 !important;" +
         "text-transform:uppercase;" +
         "letter-spacing:0.06em;" +
         "font-size:" + fontSize + ";" +
@@ -2671,7 +2671,7 @@
   /** Outlook uses Word HTML; it often strips &lt;style&gt; — inline CSS + bgcolor where needed. */
   function applyOutlookInlineClipboardStyles(root) {
     const baseFont =
-      "font-family:Calibri,Arial,sans-serif;font-size:11.0pt;mso-ansi-font-size:11.0pt;color:#000000;line-height:190%;";
+      "font-family:Calibri,Arial,sans-serif;font-size:12.0pt;mso-ansi-font-size:12.0pt;color:#000000;line-height:190%;";
     root.setAttribute(
       "style",
       "width:1000px;max-width:1000px;min-width:1000px;box-sizing:border-box;margin:0;padding:0;" +
@@ -2688,7 +2688,7 @@
     root.querySelectorAll(".line-group-title").forEach((el) => {
       el.setAttribute(
         "style",
-        "font-weight:700;color:#000000;margin-bottom:6px;mso-ansi-font-size:11.0pt;font-size:11.0pt;font-family:'Arial',sans-serif;" +
+        "font-weight:700;color:#000000;margin-bottom:6px;mso-ansi-font-size:12.0pt;font-size:12.0pt;font-family:'Arial',sans-serif;" +
           (el.getAttribute("style") || "")
       );
     });
@@ -2696,7 +2696,7 @@
     root.querySelectorAll(".line-item").forEach((el) => {
       el.setAttribute(
         "style",
-          "display:block;margin-bottom:6px;padding:2px 0;font-size:11.0pt;mso-ansi-font-size:11.0pt;font-family:'Arial',sans-serif;" +
+          "display:block;margin-bottom:6px;padding:2px 0;font-size:12.0pt;mso-ansi-font-size:12.0pt;font-family:'Arial',sans-serif;" +
           (el.getAttribute("style") || "")
       );
     });
@@ -2740,7 +2740,7 @@
       if (el.classList.contains("manpower-line")) return;
       const prev = el.getAttribute("style") || "";
       const wordBody =
-        "font-size:11.0pt;mso-ansi-font-size:11.0pt;font-family:'Arial',sans-serif;color:#000000;text-decoration:none;border:none;outline:none;background:transparent;";
+        "font-size:12.0pt;mso-ansi-font-size:12.0pt;font-family:'Arial',sans-serif;color:#000000;text-decoration:none;border:none;outline:none;background:transparent;";
       if (!/min-height/i.test(prev)) {
         el.setAttribute("style", "display:block;min-height:1.2em;" + wordBody + prev);
       } else {
@@ -2795,7 +2795,7 @@
       t.setAttribute("cellpadding", "9");
       t.setAttribute(
         "style",
-          "width:100%;max-width:100%;min-width:0;border-collapse:collapse;table-layout:fixed;font-size:11.0pt;mso-ansi-font-size:11.0pt;font-family:Calibri,Arial,sans-serif;mso-table-lspace:0pt;mso-table-rspace:0pt;box-sizing:border-box;line-height:190%;mso-line-height-rule:at-least;" +
+          "width:100%;max-width:100%;min-width:0;border-collapse:collapse;table-layout:fixed;font-size:12.0pt;mso-ansi-font-size:12.0pt;font-family:Calibri,Arial,sans-serif;mso-table-lspace:0pt;mso-table-rspace:0pt;box-sizing:border-box;line-height:190%;mso-line-height-rule:at-least;" +
           (t.getAttribute("style") || "")
       );
     });
@@ -2911,7 +2911,7 @@
       '<meta name="Generator" content="Microsoft Word 15">',
       '<meta name="Originator" content="Microsoft Word 15">',
       "<style>",
-      "body,table,td,th,div,p,span,li{font-family:Calibri,Arial,sans-serif;mso-ansi-font-family:Calibri;mso-hansi-font-family:Calibri;font-size:11.0pt;mso-ansi-font-size:11.0pt;color:#000000;line-height:190%;mso-line-height-rule:at-least;}",
+      "body,table,td,th,div,p,span,li{font-family:Calibri,Arial,sans-serif;mso-ansi-font-family:Calibri;mso-hansi-font-family:Calibri;font-size:12.0pt;mso-ansi-font-size:12.0pt;color:#000000;line-height:190%;mso-line-height-rule:at-least;}",
       "table{border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;}",
       "p{margin:0 0 8px 0;}",
       "</style>",
@@ -2921,7 +2921,7 @@
   function wrapWordClipboardDocument(innerHtml) {
     const head = buildWordClipboardHeadHtml();
     const bodyStyle =
-      "margin:0;padding:0;font-family:Calibri,Arial,sans-serif;mso-ansi-font-family:Calibri;mso-hansi-font-family:Calibri;font-size:11.0pt;mso-ansi-font-size:11.0pt;color:#000000;line-height:190%;mso-line-height-rule:at-least;";
+      "margin:0;padding:0;font-family:Calibri,Arial,sans-serif;mso-ansi-font-family:Calibri;mso-hansi-font-family:Calibri;font-size:12.0pt;mso-ansi-font-size:12.0pt;color:#000000;line-height:190%;mso-line-height-rule:at-least;";
     return `<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head>${head}</head><body style="${bodyStyle}">${innerHtml}</body></html>`;
   }
 
@@ -2938,9 +2938,9 @@
       s = ensureStyleToken(s, "mso-ansi-font-family:Calibri;", /\bmso-ansi-font-family\s*:/i);
       s = ensureStyleToken(s, "mso-hansi-font-family:Calibri;", /\bmso-hansi-font-family\s*:/i);
       s = ensureStyleToken(s, "mso-bidi-font-family:Calibri;", /\bmso-bidi-font-family\s*:/i);
-      s = ensureStyleToken(s, "font-size:11.0pt;", /\bfont-size\s*:/i);
-      s = ensureStyleToken(s, "mso-ansi-font-size:11.0pt;", /\bmso-ansi-font-size\s*:/i);
-      s = ensureStyleToken(s, "mso-bidi-font-size:11.0pt;", /\bmso-bidi-font-size\s*:/i);
+      s = ensureStyleToken(s, "font-size:12.0pt;", /\bfont-size\s*:/i);
+      s = ensureStyleToken(s, "mso-ansi-font-size:12.0pt;", /\bmso-ansi-font-size\s*:/i);
+      s = ensureStyleToken(s, "mso-bidi-font-size:12.0pt;", /\bmso-bidi-font-size\s*:/i);
       s = ensureStyleToken(s, "line-height:190%;", /\bline-height\s*:/i);
       s = ensureStyleToken(s, "mso-line-height-rule:at-least;", /\bmso-line-height-rule\s*:/i);
       el.setAttribute("style", s);
