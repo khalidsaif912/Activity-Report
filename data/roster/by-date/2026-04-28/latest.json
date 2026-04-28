@@ -1,42 +1,43 @@
 {
   "shiftMeta": {
-    "key": "morning",
-    "title": "Morning Shift",
+    "key": "afternoon",
+    "title": "Afternoon Shift",
     "date": "2026-04-28",
-    "time": "06:00 - 15:00"
+    "time": "13:00 - 22:00"
   },
   "manpowerSections": [
     {
       "title": "Supervisor",
       "items": [
-        "SN80250 Jay Macalino"
+        "SN81300 Talal Al Balushi"
       ]
     },
     {
       "title": "Load Control",
       "items": [
-        "SN82600 Habib Al Balushi",
-        "SN82445 Al Muthana Al Shamfari",
-        "SN81409 Qasim Al Maqbali"
+        "SN82548 Ahmed Al Muqaini",
+        "SN82575 Ahmed Al Kharusi",
+        "SN81258 Jaafar Al Balushi"
       ]
     },
     {
       "title": "Export Checker",
       "items": [
-        "SN82649 Saif Al Mahrizi",
-        "SN82283 Ahmed Al Mawali",
-        "SN82587 Yousuf Al Balushi",
-        "SN82574 Ali Al Mamari",
-        "SN80695 Hosni Al Sulti",
-        "SN8584 Adil Al Zadjali"
+        "SN990465 Abdulfatah Al Shukeili",
+        "SN80270 Marlon Esmilla",
+        "SN990752 Ali Yousuf Al Balushi",
+        "SN82578 Raad Al Farsi",
+        "SN82555 Riyadh Al Jabri",
+        "SN82424 Riyadh Al Sulti"
       ]
     },
     {
       "title": "Export Operators",
       "items": [
-        "SN81307 Badar Al Hamadani",
-        "SN82588 Ghassan Al Tarsi",
-        "SN82534 Muadh Al Qasimi"
+        "SN8714 Mohana Al Subhi",
+        "SN81224 Mohamed Al Amri",
+        "SN8762 Mohamed Al Falahi",
+        "SN8744 Said Al Fahkri"
       ]
     },
     {
@@ -44,19 +45,15 @@
       "items": []
     },
     {
+      "title": "CTU Staff On Duty",
+      "items": []
+    },
+    {
       "title": "Inventory",
-      "items": [
-        "SN990737 Said Al Amri"
-      ]
+      "items": []
     },
     {
       "title": "Support Team",
-      "items": [
-        "SN82653 Ahmed Al Sabii"
-      ]
-    },
-    {
-      "title": "CTU Staff On Duty",
       "items": []
     },
     {
@@ -292,5 +289,5 @@
       ]
     }
   },
-  "defaultShift": "morning"
+  "defaultShift": "afternoon"
 }
