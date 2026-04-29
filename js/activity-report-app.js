@@ -3469,17 +3469,17 @@
     window.phraseAutocomplete.attachTextarea(el("handoverDetails"), "handoverDetails", (value) => {
       state.handoverDetails = normalizeIndentedBullets(toSentenceCaseText(value));
       saveDraft();
-    }, { preserveCase: true, pickOnEnter: false });
+    }, { preserveCase: true });
 
     window.phraseAutocomplete.attachTextarea(el("otherText"), "other", (value) => {
       state.otherText = normalizeIndentedBullets(toSentenceCaseText(value));
       saveDraft();
-    }, { preserveCase: true, pickOnEnter: false });
+    }, { preserveCase: true });
 
     window.phraseAutocomplete.attachTextarea(el("specialHO"), "specialHO", (value) => {
       state.specialHO = normalizeIndentedBullets(toSentenceCaseText(value));
       saveDraft();
-    }, { preserveCase: true, pickOnEnter: false });
+    }, { preserveCase: true });
   }
 
   function bindStaticEvents() {
