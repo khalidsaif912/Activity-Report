@@ -167,12 +167,17 @@ window.offloadLoader = {
 
     const reportIso = (state.activeDate || state.shiftMeta.date || "").trim();
     const flightCode = (data.flight || "").trim();
-    if (!flightCode) return false;
+    // Do not block the table when the source flight code is missing.
+    // The row can still be useful for manual completion.
+    if (!flightCode) return true;
 
     const flight = this.findFlightForReport(flightCode, reportIso);
-    if (!flight) return false;
+    // Fail-open: if flights cache is missing/outdated, keep offload rows visible.
+    if (!flight) return true;
 
     const mins = this.parseStdMinutes(flight.stdEtd || "");
+    // If STD is unavailable, do not hide rows.
+    if (mins == null) return true;
     return this.flightStdMatchesShift(mins, shift);
   },
 
@@ -233,16 +238,20 @@ window.offloadLoader = {
      * 2) active shift period match
      */
     if (reportIso && !this.offloadDateMatchesReport(data.date || "", reportIso)) {
-      this.resetOffloadsBlank(state);
-      return;
+      // Keep loading rows even when source date does not match selected report date.
+      // This avoids hard-empty table states when ShareFolder latest file is stale.
+      console.warn("[offload] Source date mismatch; using source rows with selected report context.", {
+        sourceDate: data.date || "",
+        reportDate: reportIso
+      });
     }
 
     if (!this.offloadFlightMatchesActiveShift(data, state)) {
-      this.resetOffloadsBlank(state);
-      return;
+      // Soft-fail: do not blank the table; keep imported rows visible.
+      console.warn("[offload] Flight did not match active shift; keeping imported rows.");
     }
 
-    const headerDate = this.normalizeOffloadDate(data.date || state.shiftMeta.date || "");
+    const headerDate = this.normalizeOffloadDate(state.shiftMeta.date || state.activeDate || data.date || "");
     const flightRow = this.findFlightForReport(data.flight || "", reportIso);
     const stdStr =
       flightRow && flightRow.stdEtd

@@ -3474,7 +3474,7 @@
     window.phraseAutocomplete.attachTextarea(el("otherText"), "other", (value) => {
       state.otherText = normalizeIndentedBullets(toSentenceCaseText(value));
       saveDraft();
-    }, { preserveCase: true });
+    }, { preserveCase: true, pickOnEnter: false });
 
     window.phraseAutocomplete.attachTextarea(el("specialHO"), "specialHO", (value) => {
       state.specialHO = normalizeIndentedBullets(toSentenceCaseText(value));
@@ -3503,6 +3503,39 @@
       e.target.value = state.equipmentStatus;
       saveDraft();
     });
+    el("equipmentStatus").addEventListener("keydown", (e) => {
+      if (e.key !== "Enter") return;
+      e.preventDefault();
+      const area = e.target;
+      const value = String(area.value || "");
+      const start = typeof area.selectionStart === "number" ? area.selectionStart : value.length;
+      const end = typeof area.selectionEnd === "number" ? area.selectionEnd : start;
+      const left = value.slice(0, start);
+      const right = value.slice(end);
+      const joiner = left.endsWith("\n") || !left.length ? "    \u2022 " : "\n    \u2022 ";
+      const next = left + joiner + right;
+      area.value = next;
+      try {
+        const pos = (left + joiner).length;
+        area.selectionStart = area.selectionEnd = pos;
+      } catch (_) {}
+      state.equipmentStatus = normalizeIndentedBullets(toSentenceCaseText(area.value));
+      area.value = state.equipmentStatus;
+      saveDraft();
+    });
+    const forceBulletedTextarea = (id, stateKey) => {
+      const node = el(id);
+      if (!node) return;
+      node.addEventListener("input", (e) => {
+        const normalized = normalizeIndentedBullets(toSentenceCaseText(e.target.value));
+        state[stateKey] = normalized;
+        e.target.value = normalized;
+        saveDraft();
+      });
+    };
+    forceBulletedTextarea("handoverDetails", "handoverDetails");
+    forceBulletedTextarea("specialHO", "specialHO");
+    forceBulletedTextarea("otherText", "otherText");
     if (!window.phraseAutocomplete) {
       wireSpecialHoTextarea();
     }
