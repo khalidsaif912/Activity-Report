@@ -413,6 +413,14 @@ window.flightAutocomplete = {
       this.renderBox(input, matches, (picked) => {
         onPick(picked);
       }, "replace");
+      const picked = this.findExactMatch(input.value, { reportIso: window.__flightSuggestIsoDate });
+      if (picked) {
+        const formatted = this.formatFlight(picked);
+        if (String(input.value || "").trim().toUpperCase() !== formatted.toUpperCase()) {
+          onPick(picked);
+          this.hideBox();
+        }
+      }
     });
 
     input.addEventListener(

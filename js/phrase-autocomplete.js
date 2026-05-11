@@ -829,7 +829,9 @@ window.phraseAutocomplete = {
         value = this._normalizeBulletedTextareaValue(value);
       }
       textarea.value = value;
-      if (onSave) onSave(value);
+      const expanded =
+        this._isFlightAwarePhraseKey(key) && this._autoExpandExactFlightBeforeCaret(textarea, onSave, false);
+      if (!expanded && onSave) onSave(value);
       showSuggest();
     });
 
@@ -981,7 +983,9 @@ window.phraseAutocomplete = {
       const shouldForceUppercase = options && options.preserveCase ? false : true;
       const value = shouldForceUppercase ? input.value.toUpperCase() : input.value;
       input.value = value;
-      if (onSave) onSave(value);
+      const expanded =
+        this._isFlightAwarePhraseKey(key) && this._autoExpandExactFlightBeforeCaret(input, onSave, false);
+      if (!expanded && onSave) onSave(value);
       showSuggest();
     });
 
