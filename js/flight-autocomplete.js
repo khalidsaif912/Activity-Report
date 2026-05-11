@@ -23,7 +23,7 @@ window.flightAutocomplete = {
   _monthAbbrevs: ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"],
 
   async load(url = "../../data/report/flights.json", options = {}) {
-    const { silent = false } = options || {};
+    const { silent = false, merge = false } = options || {};
     try {
       const res = await fetch(url);
       const text = await res.text();
@@ -32,7 +32,7 @@ window.flightAutocomplete = {
         throw new Error(`Expected JSON but got HTML (wrong URL?). ${url}`);
       }
       const parsed = JSON.parse(text);
-      this.flights = Array.isArray(parsed)
+      const nextFlights = Array.isArray(parsed)
         ? parsed
             .map((flight) => ({
               ...flight,
@@ -43,12 +43,56 @@ window.flightAutocomplete = {
             }))
             .filter((flight) => flight.code)
         : [];
+      this.flights = merge ? this._mergeFlightLists(this.flights, nextFlights) : nextFlights;
     } catch (err) {
       if (!silent) {
         console.error("Failed to load flights.json", url, err);
       }
-      this.flights = [];
+      if (!merge) {
+        this.flights = [];
+      }
     }
+  },
+
+  _flightIdentityKey(flight) {
+    const code = this.normalizeCode(flight && flight.code);
+    const date = this.normalizeDateKey((flight && flight.date) || "");
+    return `${code}|${date}`;
+  },
+
+  _mergeFlightLists(primary, secondary) {
+    const out = [];
+    const indexByKey = new Map();
+
+    const add = (list) => {
+      (Array.isArray(list) ? list : []).forEach((flight) => {
+        const normalized = {
+          ...flight,
+          code: this.normalizeCode(flight && flight.code),
+          date: this.normalizeDateKey((flight && flight.date) || ""),
+          destination: this.normalizeDestination(flight && flight.destination),
+          stdEtd: String((flight && flight.stdEtd) || "").trim().toUpperCase()
+        };
+        if (!normalized.code) return;
+
+        const key = this._flightIdentityKey(normalized);
+        const existingIndex = indexByKey.get(key);
+        if (existingIndex == null) {
+          indexByKey.set(key, out.length);
+          out.push(normalized);
+          return;
+        }
+
+        const existing = out[existingIndex];
+        if (!existing.destination && normalized.destination) existing.destination = normalized.destination;
+        if (!existing.stdEtd && normalized.stdEtd) existing.stdEtd = normalized.stdEtd;
+        if (!existing.date && normalized.date) existing.date = normalized.date;
+      });
+    };
+
+    add(primary);
+    add(secondary);
+    return out;
   },
 
   normalizeCode(value) {

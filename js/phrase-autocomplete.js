@@ -474,13 +474,13 @@ window.phraseAutocomplete = {
           : this._flightSuggestionStrings("", true)
         : [];
 
-      /* Priority: learned → fixed → flights, with guaranteed flight slots for flight-aware keys. */
+      /* Priority: repository phrases → flight suggestions → learned phrases. */
       const merged = [];
       const seen = new Set();
       const cap = this._isFlightAwarePhraseKey(key) ? 32 : 12;
       const flightAware = this._isFlightAwarePhraseKey(key);
       const minFlightSlots = flightAware ? 10 : 0;
-      const phraseCap = flightAware ? Math.max(0, cap - minFlightSlots) : cap;
+      const nonFlightCap = flightAware ? Math.max(0, cap - minFlightSlots) : cap;
 
       const pushKind = (text, kind) => {
         const t = String(text || "").trim();
@@ -492,16 +492,15 @@ window.phraseAutocomplete = {
         return merged.length >= cap;
       };
 
-      for (const x of learnedFiltered) {
-        if (merged.length >= phraseCap) break;
-        pushKind(x, "learned");
-      }
       for (const x of fixedFiltered) {
-        if (merged.length >= phraseCap) break;
+        if (merged.length >= nonFlightCap) break;
         pushKind(x, "fixed");
       }
       for (const x of flightsRaw) {
         if (pushKind(x, "flight")) break;
+      }
+      for (const x of learnedFiltered) {
+        if (pushKind(x, "learned")) break;
       }
 
       return merged;

@@ -114,7 +114,7 @@ window.employeeAutocomplete = {
   },
 
   _exportOperatorRoles() {
-    const fixed = ["ULD ATT", "MHS"];
+    const fixed = ["ULD ATT", "MHS", "Transporter Driver"];
     const out = [];
     const seen = new Set();
     fixed.forEach((role) => {
@@ -157,12 +157,16 @@ window.employeeAutocomplete = {
         const operatorRoles = this._exportOperatorRoles();
         if (hasDash) {
           const roleQ = this._normalize(rolePart);
+          operatorRoles
+            .filter((role) => !roleQ || this._normalize(role).startsWith(roleQ))
+            .forEach((role) => matches.push(role));
           names.forEach((name) => {
             operatorRoles
               .filter((role) => !roleQ || this._normalize(role).startsWith(roleQ))
               .forEach((role) => matches.push(`${name} - ${role}`));
           });
         } else {
+          operatorRoles.forEach((role) => matches.push(role));
           names.forEach((name) => {
             matches.push(name);
             operatorRoles.forEach((role) => matches.push(`${name} - ${role}`));

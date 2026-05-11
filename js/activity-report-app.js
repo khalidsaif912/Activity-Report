@@ -879,11 +879,9 @@
       }
 
       if (window.flightAutocomplete) {
+        await window.flightAutocomplete.load(assetBase + "flights.json");
         if (canUseSameOriginApi()) {
-          await window.flightAutocomplete.load("/api/live-flights", { silent: true });
-        }
-        if (!Array.isArray(window.flightAutocomplete.flights) || !window.flightAutocomplete.flights.length) {
-          await window.flightAutocomplete.load(assetBase + "flights.json");
+          await window.flightAutocomplete.load("/api/live-flights", { silent: true, merge: true });
         }
       }
       if (window.phraseAutocomplete) {

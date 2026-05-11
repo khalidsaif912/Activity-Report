@@ -56,10 +56,29 @@ window.employeeAutocomplete = {
     return out.slice(0, max);
   },
 
-  attach(input, key) {
+  _normSectionTitle(value) {
+    return String(value || "")
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, " ");
+  },
+
+  _sectionSuggestMode(sectionTitle) {
+    const t = this._normSectionTitle(sectionTitle);
+    if (!t) return "mixed";
+    if (t === "export operators") return "nameWithOperatorRoles";
+    return "mixed";
+  },
+
+  _exportOperatorRoles() {
+    return ["ULD ATT", "MHS", "Transporter Driver"];
+  },
+
+  attach(input, key, options = {}) {
     const mark = `emp:${key}`;
     if (input.dataset.empAttachMark === mark) return;
     input.dataset.empAttachMark = mark;
+    const suggestMode = this._sectionSuggestMode(options.sectionTitle);
 
     const listId = `employee-list-${key}`;
     input.setAttribute("list", listId);
@@ -76,7 +95,26 @@ window.employeeAutocomplete = {
       const names = this._employeeMatchesByName(namePart);
       let matches = [];
 
-      if (hasDash) {
+      if (suggestMode === "nameWithOperatorRoles") {
+        const operatorRoles = this._exportOperatorRoles();
+        if (hasDash) {
+          const roleQ = this._normalize(rolePart);
+          operatorRoles
+            .filter((role) => !roleQ || this._normalize(role).startsWith(roleQ))
+            .forEach((role) => matches.push(role));
+          names.forEach((name) => {
+            operatorRoles
+              .filter((role) => !roleQ || this._normalize(role).startsWith(roleQ))
+              .forEach((role) => matches.push(`${name} - ${role}`));
+          });
+        } else {
+          operatorRoles.forEach((role) => matches.push(role));
+          names.forEach((name) => {
+            matches.push(name);
+            operatorRoles.forEach((role) => matches.push(`${name} - ${role}`));
+          });
+        }
+      } else if (hasDash) {
         names.forEach((name) => {
           const roles =
             window.manpowerRoleHintCache && typeof window.manpowerRoleHintCache.getRolesForName === "function"
