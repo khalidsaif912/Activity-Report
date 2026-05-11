@@ -25,6 +25,17 @@
     return "../../data/report/";
   }
 
+  function liveFlightsSourceUrl() {
+    const meta = document.querySelector('meta[name="activity-report-live-flights-url"]');
+    if (meta && String(meta.content || "").trim()) {
+      return String(meta.content).trim();
+    }
+    if (typeof window.ACTIVITY_REPORT_LIVE_FLIGHTS_URL === "string" && window.ACTIVITY_REPORT_LIVE_FLIGHTS_URL.trim()) {
+      return window.ACTIVITY_REPORT_LIVE_FLIGHTS_URL.trim();
+    }
+    return "https://raw.githubusercontent.com/khalidsaif912/live-flights/main/flight_data/live_flights.json";
+  }
+
   /** Ordered URL bases to try for employees.json / flights.json / … (IDE preview, Flask, Live Server). */
   function buildReportAssetBaseCandidates() {
     const out = [];
@@ -879,7 +890,8 @@
       }
 
       if (window.flightAutocomplete) {
-        await window.flightAutocomplete.load(assetBase + "flights.json");
+        await window.flightAutocomplete.load(liveFlightsSourceUrl(), { silent: true });
+        await window.flightAutocomplete.load(assetBase + "flights.json", { silent: true, merge: true });
         if (canUseSameOriginApi() || configuredApiBase()) {
           await window.flightAutocomplete.load(apiUrl("/api/live-flights"), { silent: true, merge: true });
         }

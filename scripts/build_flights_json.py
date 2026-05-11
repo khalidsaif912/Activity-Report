@@ -2,6 +2,9 @@
 Build / refresh data/report/flights.json from live sources.
 
 Primary source:
+  - khalidsaif912/live-flights repository (flight_data/live_flights.json)
+
+Secondary source:
   - Muscat Airport departures page (official MCT departures list)
 
 Fallback source:
@@ -26,6 +29,8 @@ from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup
+
+LIVE_FLIGHTS_REPO_URL = "https://raw.githubusercontent.com/khalidsaif912/live-flights/main/flight_data/live_flights.json"
 
 DESTINATION_NAME_TO_IATA = {
     "ABHA": "AHB",
@@ -233,6 +238,43 @@ def fetch_muscat_departures(timeout_sec: int) -> list[dict]:
     return out
 
 
+def fetch_live_flights_repo(timeout_sec: int) -> list[dict]:
+    try:
+        r = requests.get(LIVE_FLIGHTS_REPO_URL, timeout=timeout_sec)
+        if not r.ok:
+            return []
+        rows = r.json() if r.text else []
+    except (requests.RequestException, ValueError):
+        return []
+
+    if not isinstance(rows, list):
+        return []
+
+    out_by_key: dict[str, dict] = {}
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        code = _norm_flight_code(row.get("code"))
+        date = str(row.get("date") or "").strip().upper()
+        dest = _norm_iata3(row.get("destination")) or _dest_fallback_code(
+            row.get("destination") or row.get("sourceDestination") or ""
+        )
+        std_etd = str(row.get("stdEtd") or "").strip().upper()
+        if not code or not date or not dest:
+            continue
+        key = f"{code}|{date}"
+        out_by_key[key] = {
+            "code": code,
+            "date": date,
+            "destination": dest,
+            "stdEtd": std_etd,
+        }
+
+    out = list(out_by_key.values())
+    out.sort(key=lambda x: (x.get("code", ""), x.get("date", "")))
+    return out
+
+
 def fetch_aviationstack(access_key: str, airlines: list[str], dep_iata: str, timeout_sec: int) -> list[dict]:
     out_by_key: dict[str, dict] = {}
     scopes = airlines[:] if airlines else [""]
@@ -313,6 +355,12 @@ def main() -> None:
             if date:
                 by_code_date[f"{code}|{date}"] = dest
             by_code[code] = dest
+
+    repo_rows = fetch_live_flights_repo(timeout_sec)
+    if repo_rows:
+        out_path.write_text(json.dumps(repo_rows, ensure_ascii=False, indent=2), encoding="utf-8")
+        print(f"Done [OK] {out_path} ({len(repo_rows)} flights) source=LIVE-FLIGHTS-REPO")
+        return
 
     muscat_rows = fetch_muscat_departures(timeout_sec)
     if muscat_rows:

@@ -6,6 +6,56 @@ window.flightAutocomplete = {
   activeIndex: -1,
   activeOnPick: null,
   activeMode: "replace",
+  _destinationAliases: {
+    ABHA: "AHB",
+    "ABU DHABI": "AUH",
+    "ADDIS ABABA": "ADD",
+    AMMAN: "AMM",
+    AMSTERDAM: "AMS",
+    BAHRAIN: "BAH",
+    BANGKOK: "BKK",
+    BENGALURU: "BLR",
+    BOMBAY: "BOM",
+    CAIRO: "CAI",
+    CALICUT: "CCJ",
+    CHENNAI: "MAA",
+    CHITTAGONG: "CGP",
+    COCHIN: "COK",
+    COLOMBO: "CMB",
+    DAMMAM: "DMM",
+    DELHI: "DEL",
+    DHAKA: "DAC",
+    DOHA: "DOH",
+    DUQM: "DQM",
+    DUBAI: "DXB",
+    FUJAIRAH: "FJR",
+    HYDERABAD: "HYD",
+    ISLAMABAD: "ISB",
+    ISTANBUL: "IST",
+    JEDDAH: "JED",
+    KARACHI: "KHI",
+    "KUALA LUMPUR": "KUL",
+    KUWAIT: "KWI",
+    LAHORE: "LHE",
+    LONDON: "LHR",
+    MEDINA: "MED",
+    MILANO: "MXP",
+    MUMBAI: "BOM",
+    MULTAN: "MUX",
+    MUSCAT: "MCT",
+    MUKHAIZNA: "UKH",
+    MUNICH: "MUC",
+    PHUKET: "HKT",
+    "PORT SUDAN": "PZU",
+    RIYADH: "RUH",
+    SALALAH: "SLL",
+    SHARJAH: "SHJ",
+    SIALKOT: "SKT",
+    "THIRUVANANTHAPURAM": "TRV",
+    TRIVANDRUM: "TRV",
+    TEHRAN: "IKA",
+    ZURICH: "ZRH"
+  },
   _monthIndex: {
     JAN: 1,
     FEB: 2,
@@ -103,6 +153,9 @@ window.flightAutocomplete = {
     const src = String(value || "").trim().toUpperCase();
     if (!src) return "";
     if (/^[A-Z]{3}$/.test(src)) return src;
+
+    const normalizedName = src.replace(/[^A-Z0-9 ]+/g, " ").replace(/\s+/g, " ").trim();
+    if (this._destinationAliases[normalizedName]) return this._destinationAliases[normalizedName];
 
     const fromParens = [...src.matchAll(/\(([A-Z]{3})\)/g)].map((m) => m[1]);
     if (fromParens.length) return fromParens[fromParens.length - 1];
