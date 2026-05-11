@@ -323,6 +323,42 @@ window.phraseAutocomplete = {
     return v.slice(0, i) + p + v.slice(i + fq.length);
   },
 
+  _autoExpandExactFlightBeforeCaret(control, onSave, requireTrailingSpace = false) {
+    const fa = window.flightAutocomplete;
+    if (
+      !control ||
+      !fa ||
+      typeof fa.findExactMatch !== "function" ||
+      typeof fa.formatFlight !== "function"
+    ) {
+      return false;
+    }
+
+    const value = String(control.value || "");
+    const caret = typeof control.selectionStart === "number" ? control.selectionStart : value.length;
+    const before = value.slice(0, caret);
+    const pattern = requireTrailingSpace ? /([A-Z]{2}\d{1,4})\s$/i : /([A-Z]{2}\d{1,4})$/i;
+    const match = before.match(pattern);
+    if (!match) return false;
+
+    const code = String(match[1] || "").trim().toUpperCase();
+    const picked = fa.findExactMatch(code, { reportIso: window.__flightSuggestIsoDate });
+    if (!picked) return false;
+
+    const formatted = fa.formatFlight(picked);
+    const suffix = requireTrailingSpace ? " " : "";
+    const expandedBefore = before.slice(0, before.length - match[0].length) + formatted + suffix;
+    const next = expandedBefore + value.slice(caret);
+    if (next === value) return false;
+
+    control.value = next;
+    try {
+      control.selectionStart = control.selectionEnd = expandedBefore.length;
+    } catch (_) {}
+    if (onSave) onSave(next);
+    return true;
+  },
+
   _getTextareaActiveLine(textarea) {
     const value = String(textarea && textarea.value ? textarea.value : "");
     const caret = typeof textarea.selectionStart === "number" ? textarea.selectionStart : value.length;
@@ -804,7 +840,12 @@ window.phraseAutocomplete = {
 
     textarea.addEventListener("keydown", (e) => {
       if (e.key === " " || e.code === "Space") {
-        requestAnimationFrame(() => showSuggest());
+        requestAnimationFrame(() => {
+          if (this._isFlightAwarePhraseKey(key)) {
+            this._autoExpandExactFlightBeforeCaret(textarea, onSave, true);
+          }
+          showSuggest();
+        });
       }
     });
 
@@ -866,6 +907,9 @@ window.phraseAutocomplete = {
     );
 
     textarea.addEventListener("blur", () => {
+      if (this._isFlightAwarePhraseKey(key)) {
+        this._autoExpandExactFlightBeforeCaret(textarea, onSave, false);
+      }
       if (this._isBulletedTextareaKey(key)) {
         const raw = String(textarea.value || "");
         if (/^[\s\u2022\-*]*$/.test(raw)) {
@@ -945,7 +989,12 @@ window.phraseAutocomplete = {
 
     input.addEventListener("keydown", (e) => {
       if (e.key === " " || e.code === "Space") {
-        requestAnimationFrame(() => showSuggest());
+        requestAnimationFrame(() => {
+          if (this._isFlightAwarePhraseKey(key)) {
+            this._autoExpandExactFlightBeforeCaret(input, onSave, true);
+          }
+          showSuggest();
+        });
       }
     });
 
@@ -984,6 +1033,9 @@ window.phraseAutocomplete = {
     );
 
     input.addEventListener("blur", () => {
+      if (this._isFlightAwarePhraseKey(key)) {
+        this._autoExpandExactFlightBeforeCaret(input, onSave, false);
+      }
       if (this._isLearnedPhraseKey(key) && window.phraseUsageCache && typeof window.phraseUsageCache.recordPhrase === "function") {
         window.phraseUsageCache.recordPhrase(key, input.value);
       }

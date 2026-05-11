@@ -1565,6 +1565,10 @@
 
     if (fromCatalog) {
       row.flight = code;
+      if (!row.date) {
+        const rawDate = (fromCatalog.date || iso || "").toUpperCase();
+        row.date = window.offloadLoader ? window.offloadLoader.normalizeOffloadDate(rawDate) : rawDate;
+      }
       row.std = (fromCatalog.stdEtd || "").toUpperCase().trim();
       row.destination = (fromCatalog.destination || "").toUpperCase().trim();
       saveDraft();
@@ -1577,6 +1581,10 @@
     if (!hint) return;
 
     let changed = false;
+    if (!row.date && iso) {
+      row.date = window.offloadLoader ? window.offloadLoader.normalizeOffloadDate(iso) : iso;
+      changed = true;
+    }
     if (!row.std && hint.std) {
       row.std = String(hint.std).toUpperCase().trim();
       changed = true;
@@ -3417,6 +3425,21 @@
       const ii = +inp.dataset.index;
       window.flightAutocomplete.attach(inp, `opact-flight-${g}-${ii}`, (picked) => {
         const pickedText = window.flightAutocomplete.formatFlight(picked);
+        inp.value = pickedText;
+        if (state.operationalActivities[g] && state.operationalActivities[g].items[ii] !== undefined) {
+          const current = splitOperationalTwoFieldLine(state.operationalActivities[g].items[ii]);
+          state.operationalActivities[g].items[ii] = composeOperationalTwoFieldLine(pickedText, current.phrase);
+          saveDraft();
+        }
+      });
+      inp.addEventListener("blur", () => {
+        const picked =
+          typeof window.flightAutocomplete.findExactMatch === "function"
+            ? window.flightAutocomplete.findExactMatch(inp.value, { reportIso: window.__flightSuggestIsoDate })
+            : null;
+        if (!picked) return;
+        const pickedText = window.flightAutocomplete.formatFlight(picked);
+        if ((inp.value || "").trim().toUpperCase() === pickedText.toUpperCase()) return;
         inp.value = pickedText;
         if (state.operationalActivities[g] && state.operationalActivities[g].items[ii] !== undefined) {
           const current = splitOperationalTwoFieldLine(state.operationalActivities[g].items[ii]);

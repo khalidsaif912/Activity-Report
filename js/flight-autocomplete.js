@@ -236,6 +236,19 @@ window.flightAutocomplete = {
     return this.flights.find(f => this.normalizeCode(f.code) === q) || null;
   },
 
+  findExactMatch(query, options = {}) {
+    const raw = String(query || "").trim().toUpperCase();
+    const q = this.normalizeCode(raw.split("/")[0]);
+    const reportIso = options && options.reportIso ? String(options.reportIso) : "";
+    const pool = this._poolForReportDate(reportIso);
+    if (/^\d{1,4}$/.test(q)) {
+      const matches = pool.filter((f) => this.normalizeCode(f.code).replace(/^[A-Z]{2}/, "") === q);
+      return matches.length === 1 ? matches[0] : null;
+    }
+    if (!/^[A-Z]{2}\d{1,4}$/.test(q)) return null;
+    return pool.find((f) => this.normalizeCode(f.code) === q) || null;
+  },
+
   findMatches(query, options = {}) {
     const q = this.normalizeCode(query);
     const reportIso = options && options.reportIso ? String(options.reportIso) : "";
@@ -374,6 +387,20 @@ window.flightAutocomplete = {
     return `${trimmed} ${replacement}`;
   },
 
+  replaceLastTokenPreserveCase(text, replacement) {
+    const src = String(text || "");
+    const upper = src.toUpperCase();
+    const m = this.lastFlightChunkRe.exec(upper);
+    if (m) {
+      const token = m[1];
+      const keepLen = m[0].length - token.length;
+      return src.slice(0, m.index + keepLen) + replacement;
+    }
+    const trimmed = src.trimEnd();
+    if (!trimmed) return replacement;
+    return `${trimmed} ${replacement}`;
+  },
+
   extractLastToken(text) {
     const m = this.lastFlightChunkRe.exec((text || "").toUpperCase());
     return m ? m[1].toUpperCase() : "";
@@ -417,6 +444,10 @@ window.flightAutocomplete = {
     );
 
     input.addEventListener("blur", () => {
+      const picked = this.findExactMatch(input.value, { reportIso: window.__flightSuggestIsoDate });
+      if (picked) {
+        onPick(picked);
+      }
       setTimeout(() => {
         if (this.activeInput === input) this.hideBox();
       }, 150);
