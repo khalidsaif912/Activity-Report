@@ -8,8 +8,8 @@
   <!-- Optional overrides; leave empty to auto-detect (http(s) → /data/report/ …). -->
   <meta name="activity-report-assets-root" content="" />
   <meta name="activity-report-offload-json" content="" />
-  <!-- Empty = same origin as this page. Set to http://127.0.0.1:5050 if the API runs on another host. -->
-  <meta name="flight-hints-api-base" content="" />
+  <!-- Live flights / hints API server. Default local Flask server runs on http://127.0.0.1:5050 -->
+  <meta name="flight-hints-api-base" content="http://127.0.0.1:5050" />
   <!-- Optional: must match server FLIGHT_HINTS_TOKEN if set -->
   <meta name="flight-hints-token" content="" />
   <title>Export Warehouse Activity Report</title>
@@ -405,6 +405,6 @@
   <script src="../../js/csd-route-hint-cache.js?v=1"></script>
   <script src="../../js/phrase-usage-cache.js?v=5"></script>
   <script src="../../js/phrase-autocomplete.js?v=36"></script>
-  <script src="../../js/activity-report-app.js?v=143"></script>
+  <script src="../../js/activity-report-app.js?v=144"></script>
 </body>
 </html>

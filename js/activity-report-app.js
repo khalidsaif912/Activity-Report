@@ -880,8 +880,8 @@
 
       if (window.flightAutocomplete) {
         await window.flightAutocomplete.load(assetBase + "flights.json");
-        if (canUseSameOriginApi()) {
-          await window.flightAutocomplete.load("/api/live-flights", { silent: true, merge: true });
+        if (canUseSameOriginApi() || configuredApiBase()) {
+          await window.flightAutocomplete.load(apiUrl("/api/live-flights"), { silent: true, merge: true });
         }
       }
       if (window.phraseAutocomplete) {
