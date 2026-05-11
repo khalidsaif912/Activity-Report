@@ -1,8 +1,10 @@
 """
 Build / refresh data/report/flights.json from live sources.
 
-Primary source:
-  - khalidsaif912/live-flights repository (flight_data/live_flights.json)
+Primary sources:
+  - khalidsaif912/live-flights site/repo:
+      * flight_data/live_flights.json
+      * flight_data/archive_flights.json
 
 Secondary source:
   - Muscat Airport departures page (official MCT departures list)
@@ -30,7 +32,14 @@ from pathlib import Path
 import requests
 from bs4 import BeautifulSoup
 
-LIVE_FLIGHTS_REPO_URL = "https://raw.githubusercontent.com/khalidsaif912/live-flights/main/flight_data/live_flights.json"
+LIVE_FLIGHTS_TODAY_URLS = [
+    "https://khalidsaif912.github.io/live-flights/flight_data/live_flights.json",
+    "https://raw.githubusercontent.com/khalidsaif912/live-flights/main/flight_data/live_flights.json",
+]
+LIVE_FLIGHTS_ARCHIVE_URLS = [
+    "https://khalidsaif912.github.io/live-flights/flight_data/archive_flights.json",
+    "https://raw.githubusercontent.com/khalidsaif912/live-flights/main/flight_data/archive_flights.json",
+]
 
 DESTINATION_NAME_TO_IATA = {
     "ABHA": "AHB",
@@ -197,6 +206,81 @@ def load_existing_dest_maps(report_dir: Path) -> tuple[dict[str, str], dict[str,
     return by_code_date, by_code
 
 
+def _flight_row_key(row: dict) -> str:
+    code = _norm_flight_code(row.get("code"))
+    date = str(row.get("date") or "").strip().upper()
+    if not code or not date:
+        return ""
+    return f"{code}|{date}"
+
+
+def _normalize_remote_flight_rows(rows: list[dict]) -> list[dict]:
+    out = []
+    seen: set[str] = set()
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        code = _norm_flight_code(row.get("code"))
+        date = str(row.get("date") or "").strip().upper()
+        dest = _norm_iata3(row.get("destination")) or _dest_fallback_code(
+            row.get("destination") or row.get("sourceDestination") or ""
+        )
+        std_etd = str(row.get("stdEtd") or "").strip().upper()
+        if not code or not date or not dest:
+            continue
+        normalized = {
+            "code": code,
+            "date": date,
+            "destination": dest,
+            "stdEtd": std_etd,
+        }
+        key = _flight_row_key(normalized)
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        out.append(normalized)
+    return out
+
+
+def _fetch_json_list_from_candidates(urls: list[str], timeout_sec: int) -> list[dict]:
+    for url in urls:
+        try:
+            r = requests.get(url, timeout=timeout_sec)
+            if not r.ok:
+                continue
+            rows = r.json() if r.text else []
+        except (requests.RequestException, ValueError):
+            continue
+        if isinstance(rows, list):
+            return rows
+    return []
+
+
+def _merge_flight_rows(primary: list[dict], secondary: list[dict]) -> list[dict]:
+    out = []
+    index_by_key: dict[str, int] = {}
+
+    def add_many(rows: list[dict]) -> None:
+        for row in rows:
+            key = _flight_row_key(row)
+            if not key:
+                continue
+            idx = index_by_key.get(key)
+            if idx is None:
+                index_by_key[key] = len(out)
+                out.append(dict(row))
+                continue
+            existing = out[idx]
+            if not existing.get("destination") and row.get("destination"):
+                existing["destination"] = row["destination"]
+            if not existing.get("stdEtd") and row.get("stdEtd"):
+                existing["stdEtd"] = row["stdEtd"]
+
+    add_many(primary)
+    add_many(secondary)
+    return out
+
+
 def fetch_muscat_departures(timeout_sec: int) -> list[dict]:
     url = (
         "https://www.muscatairport.co.om/flightstatusframe"
@@ -238,41 +322,13 @@ def fetch_muscat_departures(timeout_sec: int) -> list[dict]:
     return out
 
 
-def fetch_live_flights_repo(timeout_sec: int) -> list[dict]:
-    try:
-        r = requests.get(LIVE_FLIGHTS_REPO_URL, timeout=timeout_sec)
-        if not r.ok:
-            return []
-        rows = r.json() if r.text else []
-    except (requests.RequestException, ValueError):
-        return []
-
-    if not isinstance(rows, list):
-        return []
-
-    out_by_key: dict[str, dict] = {}
-    for row in rows:
-        if not isinstance(row, dict):
-            continue
-        code = _norm_flight_code(row.get("code"))
-        date = str(row.get("date") or "").strip().upper()
-        dest = _norm_iata3(row.get("destination")) or _dest_fallback_code(
-            row.get("destination") or row.get("sourceDestination") or ""
-        )
-        std_etd = str(row.get("stdEtd") or "").strip().upper()
-        if not code or not date or not dest:
-            continue
-        key = f"{code}|{date}"
-        out_by_key[key] = {
-            "code": code,
-            "date": date,
-            "destination": dest,
-            "stdEtd": std_etd,
-        }
-
-    out = list(out_by_key.values())
-    out.sort(key=lambda x: (x.get("code", ""), x.get("date", "")))
-    return out
+def fetch_live_flights_repo(timeout_sec: int) -> tuple[list[dict], list[dict], list[dict]]:
+    live_rows_raw = _fetch_json_list_from_candidates(LIVE_FLIGHTS_TODAY_URLS, timeout_sec)
+    archive_rows_raw = _fetch_json_list_from_candidates(LIVE_FLIGHTS_ARCHIVE_URLS, timeout_sec)
+    live_rows = _normalize_remote_flight_rows(live_rows_raw)
+    archive_rows = _normalize_remote_flight_rows(archive_rows_raw)
+    merged_rows = _merge_flight_rows(live_rows, archive_rows)
+    return live_rows, archive_rows, merged_rows
 
 
 def fetch_aviationstack(access_key: str, airlines: list[str], dep_iata: str, timeout_sec: int) -> list[dict]:
@@ -356,10 +412,13 @@ def main() -> None:
                 by_code_date[f"{code}|{date}"] = dest
             by_code[code] = dest
 
-    repo_rows = fetch_live_flights_repo(timeout_sec)
+    live_rows, archive_rows, repo_rows = fetch_live_flights_repo(timeout_sec)
     if repo_rows:
         out_path.write_text(json.dumps(repo_rows, ensure_ascii=False, indent=2), encoding="utf-8")
-        print(f"Done [OK] {out_path} ({len(repo_rows)} flights) source=LIVE-FLIGHTS-REPO")
+        print(
+            f"Done [OK] {out_path} ({len(repo_rows)} flights) "
+            f"source=LIVE-FLIGHTS live={len(live_rows)} archive={len(archive_rows)}"
+        )
         return
 
     muscat_rows = fetch_muscat_departures(timeout_sec)

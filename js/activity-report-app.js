@@ -25,7 +25,7 @@
     return "../../data/report/";
   }
 
-  function liveFlightsSourceUrl() {
+  function liveFlightsTodaySourceUrl() {
     const meta = document.querySelector('meta[name="activity-report-live-flights-url"]');
     if (meta && String(meta.content || "").trim()) {
       return String(meta.content).trim();
@@ -33,7 +33,21 @@
     if (typeof window.ACTIVITY_REPORT_LIVE_FLIGHTS_URL === "string" && window.ACTIVITY_REPORT_LIVE_FLIGHTS_URL.trim()) {
       return window.ACTIVITY_REPORT_LIVE_FLIGHTS_URL.trim();
     }
-    return "https://raw.githubusercontent.com/khalidsaif912/live-flights/main/flight_data/live_flights.json";
+    return "https://khalidsaif912.github.io/live-flights/flight_data/live_flights.json";
+  }
+
+  function liveFlightsArchiveSourceUrl() {
+    const meta = document.querySelector('meta[name="activity-report-archive-flights-url"]');
+    if (meta && String(meta.content || "").trim()) {
+      return String(meta.content).trim();
+    }
+    if (
+      typeof window.ACTIVITY_REPORT_ARCHIVE_FLIGHTS_URL === "string" &&
+      window.ACTIVITY_REPORT_ARCHIVE_FLIGHTS_URL.trim()
+    ) {
+      return window.ACTIVITY_REPORT_ARCHIVE_FLIGHTS_URL.trim();
+    }
+    return "https://khalidsaif912.github.io/live-flights/flight_data/archive_flights.json";
   }
 
   /** Ordered URL bases to try for employees.json / flights.json / … (IDE preview, Flask, Live Server). */
@@ -890,7 +904,8 @@
       }
 
       if (window.flightAutocomplete) {
-        await window.flightAutocomplete.load(liveFlightsSourceUrl(), { silent: true });
+        await window.flightAutocomplete.load(liveFlightsTodaySourceUrl(), { silent: true });
+        await window.flightAutocomplete.load(liveFlightsArchiveSourceUrl(), { silent: true, merge: true });
         await window.flightAutocomplete.load(assetBase + "flights.json", { silent: true, merge: true });
         if (canUseSameOriginApi() || configuredApiBase()) {
           await window.flightAutocomplete.load(apiUrl("/api/live-flights"), { silent: true, merge: true });
