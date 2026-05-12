@@ -186,6 +186,7 @@ window.offloadLoader = {
     state.offloads = [
       {
         item: 1,
+        awb: "",
         date: dateStr,
         flight: "",
         std: "",
@@ -199,6 +200,131 @@ window.offloadLoader = {
         remarks: ""
       }
     ];
+  },
+
+  isMeaningfulOffloadRow(row) {
+    if (!row || typeof row !== "object") return false;
+    return [
+      row.awb,
+      row.flight,
+      row.std,
+      row.destination,
+      row.emailTime,
+      row.rampReceived,
+      row.trolley,
+      row.cmsCompleted,
+      row.piecesVerification,
+      row.reason,
+      row.remarks
+    ].some((value) => String(value || "").trim());
+  },
+
+  normalizeOffloadRow(row, defaultDate) {
+    const out = {
+      item: 0,
+      awb: String((row && row.awb) || "").trim(),
+      date: this.normalizeOffloadDate((row && row.date) || defaultDate || ""),
+      flight: String((row && row.flight) || "").trim().toUpperCase(),
+      std: String((row && row.std) || "").trim().toUpperCase(),
+      destination: String((row && row.destination) || "").trim().toUpperCase(),
+      emailTime: String((row && row.emailTime) || "").trim(),
+      rampReceived: String((row && row.rampReceived) || "").trim(),
+      trolley: String((row && row.trolley) || "").trim(),
+      cmsCompleted: String((row && row.cmsCompleted) || "").trim(),
+      piecesVerification: String((row && row.piecesVerification) || "").trim(),
+      reason: String((row && row.reason) || "").trim(),
+      remarks: String((row && row.remarks) || "").trim()
+    };
+    return out;
+  },
+
+  offloadRowKey(row, defaultDate) {
+    const normalized = this.normalizeOffloadRow(row, defaultDate);
+    const flight = normalized.flight;
+    const date = normalized.date;
+    const destination = normalized.destination;
+    const awb = normalized.awb.toUpperCase();
+    const reason = normalized.reason.toUpperCase();
+    if (flight && date && awb) return `${flight}|${date}|${awb}`;
+    if (flight && date) return `${flight}|${date}|${destination}|${reason}`;
+    return "";
+  },
+
+  resequenceRows(rows) {
+    return (Array.isArray(rows) ? rows : []).map((row, index) => ({
+      ...row,
+      item: index + 1
+    }));
+  },
+
+  mergedOffloadRows(existingRows, incomingRows, defaultDate) {
+    const out = [];
+    const indexByKey = new Map();
+
+    const addExisting = (rows) => {
+      (Array.isArray(rows) ? rows : []).forEach((row) => {
+        if (!this.isMeaningfulOffloadRow(row)) return;
+        const normalized = this.normalizeOffloadRow(row, defaultDate);
+        const key = this.offloadRowKey(normalized, defaultDate);
+        if (key && !indexByKey.has(key)) {
+          indexByKey.set(key, out.length);
+        }
+        out.push(normalized);
+      });
+    };
+
+    const mergeIncoming = (rows) => {
+      (Array.isArray(rows) ? rows : []).forEach((row) => {
+        if (!this.isMeaningfulOffloadRow(row)) return;
+        const normalized = this.normalizeOffloadRow(row, defaultDate);
+        const key = this.offloadRowKey(normalized, defaultDate);
+        const idx = key ? indexByKey.get(key) : undefined;
+        if (idx == null) {
+          if (key) indexByKey.set(key, out.length);
+          out.push(normalized);
+          return;
+        }
+
+        const existing = out[idx];
+        existing.awb = normalized.awb || existing.awb;
+        existing.date = normalized.date || existing.date;
+        existing.flight = normalized.flight || existing.flight;
+        existing.std = normalized.std || existing.std;
+        existing.destination = normalized.destination || existing.destination;
+        existing.piecesVerification = normalized.piecesVerification || existing.piecesVerification;
+        existing.reason = normalized.reason || existing.reason;
+        if (!existing.emailTime && normalized.emailTime) existing.emailTime = normalized.emailTime;
+        if (!existing.rampReceived && normalized.rampReceived) existing.rampReceived = normalized.rampReceived;
+        if (!existing.trolley && normalized.trolley) existing.trolley = normalized.trolley;
+        if (!existing.cmsCompleted && normalized.cmsCompleted) existing.cmsCompleted = normalized.cmsCompleted;
+        if (!existing.remarks && normalized.remarks) existing.remarks = normalized.remarks;
+      });
+    };
+
+    addExisting(existingRows);
+    mergeIncoming(incomingRows);
+
+    if (!out.length) {
+      return this.resequenceRows([
+        {
+          item: 1,
+          awb: "",
+          date: this.normalizeOffloadDate(defaultDate || ""),
+          flight: "",
+          std: "",
+          destination: "",
+          emailTime: "",
+          rampReceived: "",
+          trolley: "",
+          cmsCompleted: "",
+          piecesVerification: "",
+          reason: "",
+          remarks: ""
+        }
+      ]);
+    }
+
+    return this.resequenceRows(out);
   },
 
   normalizeOffloadRows(state) {
@@ -247,8 +373,8 @@ window.offloadLoader = {
     }
 
     if (!this.offloadFlightMatchesActiveShift(data, state)) {
-      // Soft-fail: do not blank the table; keep imported rows visible.
-      console.warn("[offload] Flight did not match active shift; keeping imported rows.");
+      console.warn("[offload] Flight did not match active shift; skipping source import for this shift.");
+      return;
     }
 
     const headerDate = this.normalizeOffloadDate(state.shiftMeta.date || state.activeDate || data.date || "");
@@ -260,8 +386,9 @@ window.offloadLoader = {
             .trim()
         : "";
 
-    state.offloads = cleanItems.map((item, index) => ({
+    const importedRows = cleanItems.map((item, index) => ({
       item: index + 1,
+      awb: String(item.awb || "").trim(),
       date: headerDate,
       flight: data.flight || "",
       std: stdStr,
@@ -274,5 +401,7 @@ window.offloadLoader = {
       reason: item.reason || "",
       remarks: ""
     }));
+
+    state.offloads = this.mergedOffloadRows(state.offloads, importedRows, headerDate);
   }
 };

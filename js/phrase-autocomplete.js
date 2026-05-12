@@ -387,6 +387,39 @@ window.phraseAutocomplete = {
     return next;
   },
 
+  _deleteEmptyBulletLine(textarea, key, onSave) {
+    if (!this._isBulletedTextareaKey(key) || !textarea) return false;
+    const value = String(textarea.value || "");
+    const start = typeof textarea.selectionStart === "number" ? textarea.selectionStart : value.length;
+    const end = typeof textarea.selectionEnd === "number" ? textarea.selectionEnd : start;
+    if (start !== end) return false;
+
+    const ctx = this._getTextareaActiveLine(textarea);
+    const lineText = String(ctx.line || "");
+    const content = lineText.replace(/^\s*[\u2022\-*]?\s*/, "");
+    if (content.trim()) return false;
+
+    let removeStart = ctx.start;
+    let removeEnd = ctx.end;
+    if (removeEnd < value.length && value.slice(removeEnd, removeEnd + 1) === "\n") {
+      removeEnd += 1;
+    } else if (removeStart > 0 && value.slice(removeStart - 1, removeStart) === "\n") {
+      removeStart -= 1;
+    }
+
+    let next = value.slice(0, removeStart) + value.slice(removeEnd);
+    if (!next.trim() && this._isPrimaryBulletTextareaKey(key)) {
+      next = "    \u2022 ";
+    }
+    textarea.value = next;
+    const pos = Math.max(0, Math.min(removeStart, next.length));
+    try {
+      textarea.selectionStart = textarea.selectionEnd = pos;
+    } catch (_) {}
+    if (onSave) onSave(next);
+    return true;
+  },
+
   _tailTokenForFlightAwareLine(line) {
     const u = String(line || "")
       .toUpperCase()
@@ -872,6 +905,14 @@ window.phraseAutocomplete = {
       requestAnimationFrame(() => showSuggest());
     });
 
+    textarea.addEventListener("keydown", (e) => {
+      if (!this._isBulletedTextareaKey(key) || e.key !== "Backspace") return;
+      if (this._deleteEmptyBulletLine(textarea, key, onSave)) {
+        e.preventDefault();
+        requestAnimationFrame(() => showSuggest());
+      }
+    });
+
     textarea.addEventListener(
       "keydown",
       (e) => {
@@ -894,6 +935,7 @@ window.phraseAutocomplete = {
 
         if (e.key === "Enter") {
           if (!canPickOnEnter) return;
+          if (this.activeIndex < 0) return;
           e.preventDefault();
           e.stopImmediatePropagation();
           this.pickActive();
@@ -1022,6 +1064,7 @@ window.phraseAutocomplete = {
         }
 
         if (e.key === "Enter") {
+          if (this.activeIndex < 0) return;
           e.preventDefault();
           e.stopImmediatePropagation();
           this.pickActive();

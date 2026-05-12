@@ -408,6 +408,19 @@
     );
   }
 
+  function phraseSuggestConsumesEnterFor(target) {
+    return (
+      isPhraseSuggestOpenFor(target) &&
+      window.phraseAutocomplete &&
+      typeof window.phraseAutocomplete.activeIndex === "number" &&
+      window.phraseAutocomplete.activeIndex >= 0
+    );
+  }
+
+  function suggestConsumesEnterFor(target) {
+    return isFlightSuggestOpenFor(target) || phraseSuggestConsumesEnterFor(target);
+  }
+
   function isAnySuggestOpenFor(target) {
     return isFlightSuggestOpenFor(target) || isPhraseSuggestOpenFor(target);
   }
@@ -791,12 +804,8 @@
   }
 
   async function applyOffloadFromServer() {
-    if (state.offloads[0]) {
-      state.offloads[0].date = window.offloadLoader
-        ? window.offloadLoader.normalizeOffloadDate(state.shiftMeta.date || "")
-        : state.shiftMeta.date || "";
-    }
     if (window.offloadLoader) {
+      window.offloadLoader.resetOffloadsBlank(state);
       const offloadUrl = await resolveOffloadReportJsonUrl();
       const offloadData = await window.offloadLoader.load(offloadUrl);
       window.offloadLoader.applyToState(offloadData, state);
@@ -988,6 +997,7 @@
   function blankOffloadRow(item, dateText) {
     return {
       item,
+      awb: "",
       date: window.offloadLoader ? window.offloadLoader.normalizeOffloadDate(dateText || "") : dateText || "",
       flight: "",
       std: "",
@@ -1059,9 +1069,9 @@
     state.flightPerformance = normalizeIndentedBullets(toSentenceCaseText(state.flightPerformance));
     state.checksCompliance = normalizeIndentedBullets(toSentenceCaseText(state.checksCompliance));
     state.equipmentStatus = normalizeIndentedBullets(toSentenceCaseText(state.equipmentStatus));
-    state.handoverDetails = normalizeIndentedBullets(toSentenceCaseText(state.handoverDetails));
-    state.specialHO = normalizeIndentedBullets(toSentenceCaseText(state.specialHO));
-    state.otherText = normalizeIndentedBullets(toSentenceCaseText(state.otherText));
+    state.handoverDetails = normalizeFlightAwareBullets(state.handoverDetails);
+    state.specialHO = normalizeFlightAwareBullets(state.specialHO);
+    state.otherText = normalizeFlightAwareBullets(state.otherText);
     renderMeta();
     renderOperationalActivities();
     renderBriefings();
@@ -1192,6 +1202,16 @@
     return out;
   }
 
+  function preserveFlightFormatting(value) {
+    return String(value || "")
+      .replace(/\b([A-Za-z]{2}\d{1,4}\/\d{1,2}[A-Za-z]{3}\/[A-Za-z0-9]{2,5})\b/g, (m) => m.toUpperCase())
+      .replace(/\b([A-Za-z]{2}\d{1,4})\b/g, (m) => m.toUpperCase());
+  }
+
+  function normalizeFlightAwareBullets(raw) {
+    return normalizeIndentedBullets(preserveFlightFormatting(toSentenceCaseText(raw)));
+  }
+
   function makeDualEditableRow(parts, onInput, onKeyDown, onDelete) {
     const row = document.createElement("div");
     row.className = "line-item";
@@ -1237,7 +1257,7 @@
   function handleEnterBackspace(list, index, onInsert, onDelete) {
     return function (e) {
       if (e.key === "Enter") {
-        if (isAnySuggestOpenFor(e.target)) return;
+        if (suggestConsumesEnterFor(e.target)) return;
         e.preventDefault();
         onInsert(index + 1);
       }
@@ -1278,7 +1298,7 @@
             },
             function (e) {
               if (e.key === "Enter") {
-                if (isAnySuggestOpenFor(e.target)) return;
+                if (suggestConsumesEnterFor(e.target)) return;
                 e.preventDefault();
                 state.operationalActivities[groupIndex].items.splice(itemIndex + 1, 0, "");
                 saveDraft();
@@ -1755,7 +1775,7 @@
     const isLastRow = rowIndex === state.offloads.length - 1;
 
     if (e.key === "Enter") {
-      if (isAnySuggestOpenFor(e.target)) return;
+      if (suggestConsumesEnterFor(e.target)) return;
       /* Enter inserts a new line inside the cell (textarea); flight autocomplete handles Enter when the list is open. */
       return;
     }
@@ -1791,6 +1811,7 @@
       : state.shiftMeta.date || "";
     const blank = {
       item: index + 1,
+      awb: "",
       date: defaultDate,
       flight: "",
       std: "",
@@ -2094,7 +2115,7 @@
     area.dataset.wiredSpecialHo = "1";
 
     const syncStateFromSpecialHo = () => {
-      state.specialHO = normalizeIndentedBullets(toSentenceCaseText(area.value));
+      state.specialHO = normalizeFlightAwareBullets(area.value);
       saveDraft();
     };
 
@@ -2114,7 +2135,7 @@
 
     area.addEventListener("input", syncStateFromSpecialHo);
     area.addEventListener("blur", () => {
-      const normalized = normalizeIndentedBullets(toSentenceCaseText(area.value));
+      const normalized = normalizeFlightAwareBullets(area.value);
       if (area.value !== normalized) area.value = normalized;
       syncStateFromSpecialHo();
     });
@@ -3413,7 +3434,17 @@
       state.flightPerformance = draft.flightPerformance || state.flightPerformance;
       state.operationalNotes = draft.operationalNotes || state.operationalNotes;
       state.checksCompliance = draft.checksCompliance || state.checksCompliance;
-      state.offloads = draft.offloads || state.offloads;
+      if (Array.isArray(draft.offloads) && draft.offloads.length) {
+        const offloadDefaultDate =
+          window.offloadLoader && typeof window.offloadLoader.normalizeOffloadDate === "function"
+            ? window.offloadLoader.normalizeOffloadDate(state.shiftMeta.date || state.activeDate || "")
+            : state.shiftMeta.date || state.activeDate || "";
+        if (window.offloadLoader && typeof window.offloadLoader.mergedOffloadRows === "function") {
+          state.offloads = window.offloadLoader.mergedOffloadRows(draft.offloads, state.offloads, offloadDefaultDate);
+        } else {
+          state.offloads = draft.offloads;
+        }
+      }
       state.safety = draft.safety || state.safety;
 
       if (shouldApplyDraftManpower(draft)) {
@@ -3515,17 +3546,17 @@
     });
 
     window.phraseAutocomplete.attachTextarea(el("handoverDetails"), "handoverDetails", (value) => {
-      state.handoverDetails = normalizeIndentedBullets(toSentenceCaseText(value));
+      state.handoverDetails = normalizeFlightAwareBullets(value);
       saveDraft();
     }, { preserveCase: true });
 
     window.phraseAutocomplete.attachTextarea(el("otherText"), "other", (value) => {
-      state.otherText = normalizeIndentedBullets(toSentenceCaseText(value));
+      state.otherText = normalizeFlightAwareBullets(value);
       saveDraft();
     }, { preserveCase: true });
 
     window.phraseAutocomplete.attachTextarea(el("specialHO"), "specialHO", (value) => {
-      state.specialHO = normalizeIndentedBullets(toSentenceCaseText(value));
+      state.specialHO = normalizeFlightAwareBullets(value);
       saveDraft();
     }, { preserveCase: true });
   }
@@ -3575,16 +3606,16 @@
       const node = el(id);
       if (!node) return;
       node.addEventListener("input", (e) => {
-        const normalized = normalizeIndentedBullets(toSentenceCaseText(e.target.value));
+        const normalized = normalizeFlightAwareBullets(e.target.value);
         state[stateKey] = normalized;
         e.target.value = normalized;
         saveDraft();
       });
     };
-    forceBulletedTextarea("handoverDetails", "handoverDetails");
-    forceBulletedTextarea("specialHO", "specialHO");
-    forceBulletedTextarea("otherText", "otherText");
     if (!window.phraseAutocomplete) {
+      forceBulletedTextarea("handoverDetails", "handoverDetails");
+      forceBulletedTextarea("specialHO", "specialHO");
+      forceBulletedTextarea("otherText", "otherText");
       wireSpecialHoTextarea();
     }
     /* handoverDetails, otherText, specialHO: uppercase + save via phrase attachTextarea (see attachPhraseHelpers). */
