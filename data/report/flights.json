@@ -1,11 +1,5 @@
 [
   {
-    "code": "QR1149",
-    "date": "12MAY",
-    "destination": "DOH",
-    "stdEtd": "0620"
-  },
-  {
     "code": "OV391",
     "date": "12MAY",
     "destination": "PZU",
@@ -96,16 +90,16 @@
     "stdEtd": "0935"
   },
   {
-    "code": "QB2117",
-    "date": "12MAY",
-    "destination": "SHI",
-    "stdEtd": "1005"
-  },
-  {
     "code": "WY231",
     "date": "12MAY",
     "destination": "HYD",
     "stdEtd": "1010"
+  },
+  {
+    "code": "QB2117",
+    "date": "12MAY",
+    "destination": "SHI",
+    "stdEtd": "1005"
   },
   {
     "code": "WY245",
@@ -502,6 +496,12 @@
     "date": "12MAY",
     "destination": "DXB",
     "stdEtd": "0440"
+  },
+  {
+    "code": "QR1149",
+    "date": "12MAY",
+    "destination": "DOH",
+    "stdEtd": "0620"
   },
   {
     "code": "OV505",
