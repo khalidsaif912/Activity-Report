@@ -1,50 +1,58 @@
 {
   "shiftMeta": {
-    "key": "morning",
-    "title": "Morning Shift",
+    "key": "afternoon",
+    "title": "Afternoon Shift",
     "date": "2026-05-13",
-    "time": "06:00 - 15:00"
+    "time": "13:00 - 22:00"
   },
   "manpowerSections": [
     {
       "title": "Supervisor",
       "items": [
-        "SN82546 Saleh Al Rashdi",
-        "SN81300 Talal Al Balushi"
+        "SN80250 Jay Macalino"
       ]
     },
     {
       "title": "Load Control",
       "items": [
-        "SN82441 Mudathir Al Hajri",
-        "SN82550 Saleh Al Aufi"
+        "SN82551 Omar Al Obaidi",
+        "SN82548 Ahmed Al Muqaini",
+        "SN82657 Bushra Al Wahiebi"
       ]
     },
     {
       "title": "Export Checker",
       "items": [
-        "SN82659 Ammar Al Hashmi",
-        "SN82283 Ahmed Al Mawali",
-        "SN82587 Yousuf Al Balushi",
-        "SN82439 Ghaith al Habsi",
-        "SN80695 Hosni Al Sulti",
-        "SN82666 Mohamed Al Maskari"
+        "SN82658 Mohamed Al Mazroie",
+        "SN8715 Khalid Al Raqadi",
+        "SN82674 Mohamed Al Mamari",
+        "SN82555 Riyahd Al Jabri",
+        "SN8584 Adil Al Zadjali",
+        "SN81832 Ahmed Al Bakari"
       ]
     },
     {
       "title": "Export Operators",
       "items": [
-        "SN81223 Mazin Al Siyabi",
-        "SN8941 Adil Al Oraimi",
-        "SN82429 Zakariya Al Balushi"
+        "SN81307 Badar Al Hamadani",
+        "SN8744 Said Al Fahkri",
+        "SN82468 Badar Al Fulaiti",
+        "SN8714 Mohana Al Subhi"
       ]
     },
     {
       "title": "Flight Dispatch",
       "items": [
-        "SN82425 ALI AL SHAMSI",
-        "SN82566 ANWAR AL AMRI",
-        "SN82416 NASSER AL OMAIRI"
+        "SN82431 MAHMOOD AL BALUSHI",
+        "SN82331 ISMAIL AL MAHARBI",
+        "SN82654 AHMED AL HADI",
+        "SN82410 SAID AL SADI"
+      ]
+    },
+    {
+      "title": "Support Team",
+      "items": [
+        "SN82565 Jamal Al Hadi"
       ]
     },
     {
@@ -53,10 +61,6 @@
     },
     {
       "title": "Inventory",
-      "items": []
-    },
-    {
-      "title": "Support Team",
       "items": []
     },
     {
@@ -99,8 +103,8 @@
           "title": "Export Checker",
           "items": [
             "SN82659 Ammar Al Hashmi",
-            "SN82283 Ahmed Al Mawali",
             "SN82587 Yousuf Al Balushi",
+            "SN82574 Ali Al Mamari",
             "SN82439 Ghaith al Habsi",
             "SN80695 Hosni Al Sulti",
             "SN82666 Mohamed Al Maskari"
@@ -305,5 +309,5 @@
       ]
     }
   },
-  "defaultShift": "morning"
+  "defaultShift": "afternoon"
 }
