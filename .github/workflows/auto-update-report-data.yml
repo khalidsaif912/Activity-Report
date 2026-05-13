@@ -7,7 +7,8 @@ on:
       - main
       - master
   schedule:
-    # Every hour (minute 5)
+    # GitHub `cron` is UTC. `*/10` = every 10 minutes, 24/7 (includes all Muscat UTC+4 times before 05:00).
+    # GitHub may delay scheduled runs; this is best-effort, not a hard real-time guarantee.
     - cron: "*/10 * * * *"
 
 permissions:
