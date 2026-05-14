@@ -238,16 +238,84 @@ window.offloadLoader = {
     return out;
   },
 
+  /**
+   * Parses "13 PCS / 271 KGS" style strings (spacing/case tolerant).
+   */
+  parsePiecesVerification(value) {
+    const s = String(value ?? "").trim();
+    if (!s) return null;
+    const m = s.match(/(\d+)\s*PCS\s*\/\s*(\d+)\s*KGS/i);
+    if (!m) return null;
+    const pcs = parseInt(m[1], 10);
+    const kgs = parseInt(m[2], 10);
+    if (Number.isNaN(pcs) || Number.isNaN(kgs)) return null;
+    return { pcs, kgs };
+  },
+
+  formatPiecesVerification(pcs, kgs) {
+    return `${pcs} PCS / ${kgs} KGS`;
+  },
+
+  mergePiecesVerification(a, b) {
+    const pa = this.parsePiecesVerification(a);
+    const pb = this.parsePiecesVerification(b);
+    if (pa && pb) return this.formatPiecesVerification(pa.pcs + pb.pcs, pa.kgs + pb.kgs);
+    if (pa && !String(b ?? "").trim()) return a;
+    if (pb && !String(a ?? "").trim()) return b;
+    const ta = String(a ?? "").trim();
+    const tb = String(b ?? "").trim();
+    if (!ta) return tb;
+    if (!tb) return ta;
+    if (ta === tb) return ta;
+    return `${ta} + ${tb}`;
+  },
+
+  /**
+   * Dedupe key: same flight leg (date + flight + destination). AWB/reason can differ
+   * across SharePoint rows for one flight; those rows should merge into one table row.
+   */
   offloadRowKey(row, defaultDate) {
     const normalized = this.normalizeOffloadRow(row, defaultDate);
     const flight = normalized.flight;
     const date = normalized.date;
     const destination = normalized.destination;
-    const awb = normalized.awb.toUpperCase();
-    const reason = normalized.reason.toUpperCase();
-    if (flight && date && awb) return `${flight}|${date}|${awb}`;
-    if (flight && date) return `${flight}|${date}|${destination}|${reason}`;
-    return "";
+    if (!flight || !date) return "";
+    if (destination) return `${flight}|${date}|${destination}`;
+    return `${flight}|${date}`;
+  },
+
+  _mergeOffloadInto(existing, incoming) {
+    existing.awb = (() => {
+      const a = String(existing.awb || "").trim();
+      const b = String(incoming.awb || "").trim();
+      if (!b) return a;
+      if (!a) return b;
+      if (a.toUpperCase() === b.toUpperCase()) return a;
+      return `${a}, ${b}`;
+    })();
+    existing.date = incoming.date || existing.date;
+    existing.flight = incoming.flight || existing.flight;
+    existing.std = existing.std || incoming.std;
+    existing.destination = incoming.destination || existing.destination;
+    existing.piecesVerification = this.mergePiecesVerification(existing.piecesVerification, incoming.piecesVerification);
+    existing.reason = (() => {
+      const a = String(existing.reason || "").trim();
+      const b = String(incoming.reason || "").trim();
+      if (!b) return a;
+      if (!a) return b;
+      if (a.toUpperCase() === b.toUpperCase()) return a;
+      return `${a} / ${b}`;
+    })();
+    if (!existing.emailTime && incoming.emailTime) existing.emailTime = incoming.emailTime;
+    if (!existing.rampReceived && incoming.rampReceived) existing.rampReceived = incoming.rampReceived;
+    if (!existing.trolley && incoming.trolley) existing.trolley = incoming.trolley;
+    if (!existing.cmsCompleted && incoming.cmsCompleted) existing.cmsCompleted = incoming.cmsCompleted;
+    if (incoming.remarks) {
+      const er = String(existing.remarks || "").trim();
+      const ir = String(incoming.remarks || "").trim();
+      if (!er) existing.remarks = ir;
+      else if (ir && er.toUpperCase() !== ir.toUpperCase()) existing.remarks = `${er} | ${ir}`;
+    }
   },
 
   resequenceRows(rows) {
@@ -261,43 +329,32 @@ window.offloadLoader = {
     const out = [];
     const indexByKey = new Map();
 
+    const upsertRow = (normalized) => {
+      const key = this.offloadRowKey(normalized, defaultDate);
+      if (!key) {
+        out.push({ ...normalized });
+        return;
+      }
+      const idx = indexByKey.get(key);
+      if (idx == null) {
+        indexByKey.set(key, out.length);
+        out.push({ ...normalized });
+        return;
+      }
+      this._mergeOffloadInto(out[idx], normalized);
+    };
+
     const addExisting = (rows) => {
       (Array.isArray(rows) ? rows : []).forEach((row) => {
         if (!this.isMeaningfulOffloadRow(row)) return;
-        const normalized = this.normalizeOffloadRow(row, defaultDate);
-        const key = this.offloadRowKey(normalized, defaultDate);
-        if (key && !indexByKey.has(key)) {
-          indexByKey.set(key, out.length);
-        }
-        out.push(normalized);
+        upsertRow(this.normalizeOffloadRow(row, defaultDate));
       });
     };
 
     const mergeIncoming = (rows) => {
       (Array.isArray(rows) ? rows : []).forEach((row) => {
         if (!this.isMeaningfulOffloadRow(row)) return;
-        const normalized = this.normalizeOffloadRow(row, defaultDate);
-        const key = this.offloadRowKey(normalized, defaultDate);
-        const idx = key ? indexByKey.get(key) : undefined;
-        if (idx == null) {
-          if (key) indexByKey.set(key, out.length);
-          out.push(normalized);
-          return;
-        }
-
-        const existing = out[idx];
-        existing.awb = normalized.awb || existing.awb;
-        existing.date = normalized.date || existing.date;
-        existing.flight = normalized.flight || existing.flight;
-        existing.std = normalized.std || existing.std;
-        existing.destination = normalized.destination || existing.destination;
-        existing.piecesVerification = normalized.piecesVerification || existing.piecesVerification;
-        existing.reason = normalized.reason || existing.reason;
-        if (!existing.emailTime && normalized.emailTime) existing.emailTime = normalized.emailTime;
-        if (!existing.rampReceived && normalized.rampReceived) existing.rampReceived = normalized.rampReceived;
-        if (!existing.trolley && normalized.trolley) existing.trolley = normalized.trolley;
-        if (!existing.cmsCompleted && normalized.cmsCompleted) existing.cmsCompleted = normalized.cmsCompleted;
-        if (!existing.remarks && normalized.remarks) existing.remarks = normalized.remarks;
+        upsertRow(this.normalizeOffloadRow(row, defaultDate));
       });
     };
 
