@@ -1,57 +1,49 @@
 {
   "shiftMeta": {
-    "key": "afternoon",
-    "title": "Afternoon Shift",
+    "key": "night",
+    "title": "Night Shift",
     "date": "2026-05-14",
-    "time": "13:00 - 22:00"
+    "time": "21:00 - 06:00"
   },
   "manpowerSections": [
     {
       "title": "Supervisor",
       "items": [
-        "SN80250 Jay Macalino"
+        "SN81300 Talal Al Balushi"
       ]
     },
     {
       "title": "Load Control",
       "items": [
-        "SN82441 Mudathir Al Hajri",
-        "SN82551 Omar Al Obaidi",
-        "SN82657 Bushra Al Wahiebi"
+        "SN82600 Habib Al Balushi",
+        "SN82548 Ahmed Al Muqaini"
       ]
     },
     {
       "title": "Export Checker",
       "items": [
-        "SN990465 Abdulfatah Al Shukeili",
-        "SN82659 Ammar Al Hashmi",
-        "SN82587 Yousuf Al Balushi",
-        "SN82439 Ghaith al Habsi",
-        "SN80695 Hosni Al Sulti",
-        "SN81832 Ahmed Al Bakari"
+        "SN82658 Mohamed Al Mazroie",
+        "SN8715 Khalid Al Raqadi",
+        "SN82671 Khalil Al Hinai",
+        "SN990752 Ali Yousuf Al Balushi",
+        "SN82674 Mohamed Al Mamari",
+        "SN82555 Riyahd Al Jabri"
       ]
     },
     {
       "title": "Export Operators",
       "items": [
-        "SN8941 Adil Al Oraimi",
-        "SN82429 Zakariya Al Balushi",
-        "SN8744 Said Al Fahkri",
-        "SN8714 Mohana Al Subhi"
+        "SN82534 Muadh Al Qasim",
+        "SN81307 Badar Al Hamadani",
+        "SN82468 Badar Al Fulaiti"
       ]
     },
     {
       "title": "Flight Dispatch",
       "items": [
-        "SN82431 MAHMOOD AL BALUSHI",
-        "SN82331 ISMAIL AL MAHARBI",
-        "SN82416 NASSER AL OMAIRI"
-      ]
-    },
-    {
-      "title": "Support Team",
-      "items": [
-        "SN82565 Jamal Al Hadi"
+        "SN82654 AHMED AL HADI",
+        "SN82410 SAID AL SADI",
+        "SN82417 TALAL AL HUSEINI"
       ]
     },
     {
@@ -60,6 +52,10 @@
     },
     {
       "title": "Inventory",
+      "items": []
+    },
+    {
+      "title": "Support Team",
       "items": []
     },
     {
@@ -306,5 +302,5 @@
       ]
     }
   },
-  "defaultShift": "afternoon"
+  "defaultShift": "night"
 }
