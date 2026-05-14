@@ -1,43 +1,43 @@
 {
   "shiftMeta": {
-    "key": "morning",
-    "title": "Morning Shift",
+    "key": "afternoon",
+    "title": "Afternoon Shift",
     "date": "2026-05-14",
-    "time": "06:00 - 15:00"
+    "time": "13:00 - 22:00"
   },
   "manpowerSections": [
     {
       "title": "Supervisor",
       "items": [
-        "SN82546 Saleh Al Rashdi"
+        "SN80250 Jay Macalino"
       ]
     },
     {
       "title": "Load Control",
       "items": [
-        "SN82114 Mubarak Al Nofli",
-        "SN81402 Mohamed Al Siyabi",
-        "SN82550 Saleh Al Aufi"
+        "SN82441 Mudathir Al Hajri",
+        "SN82551 Omar Al Obaidi",
+        "SN82657 Bushra Al Wahiebi"
       ]
     },
     {
       "title": "Export Checker",
       "items": [
-        "SN82649 Saif Al Mahrizi",
-        "SN8930 Fahim Al Hashni",
-        "SN82645 Abdullah Al Shukeili",
-        "SN82574 Ali Al Mamari",
-        "SN82577 Ali Al Marjubi",
-        "SN82666 Mohamed Al Maskari"
+        "SN990465 Abdulfatah Al Shukeili",
+        "SN82659 Ammar Al Hashmi",
+        "SN82587 Yousuf Al Balushi",
+        "SN82439 Ghaith al Habsi",
+        "SN80695 Hosni Al Sulti",
+        "SN81832 Ahmed Al Bakari"
       ]
     },
     {
       "title": "Export Operators",
       "items": [
-        "SN82467 Khamis Al Hinai",
-        "SN81223 Mazin Al Siyabi",
-        "SN82656 Faisal Al Balushi",
-        "SN8542 Salim Harrasi"
+        "SN8941 Adil Al Oraimi",
+        "SN82429 Zakariya Al Balushi",
+        "SN8744 Said Al Fahkri",
+        "SN8714 Mohana Al Subhi"
       ]
     },
     {
@@ -45,9 +45,9 @@
       "items": []
     },
     {
-      "title": "Inventory",
+      "title": "Support Team",
       "items": [
-        "SN82592 (Inventory) Mohamed Al Subhi"
+        "SN82565 Jamal Al Hadi"
       ]
     },
     {
@@ -55,7 +55,7 @@
       "items": []
     },
     {
-      "title": "Support Team",
+      "title": "Inventory",
       "items": []
     },
     {
@@ -291,5 +291,5 @@
       ]
     }
   },
-  "defaultShift": "morning"
+  "defaultShift": "afternoon"
 }
