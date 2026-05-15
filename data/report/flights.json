@@ -1,23 +1,5 @@
 [
   {
-    "code": "QB2117",
-    "date": "15MAY",
-    "destination": "SHI",
-    "stdEtd": "0950/1031"
-  },
-  {
-    "code": "WY831",
-    "date": "15MAY",
-    "destination": "HKT",
-    "stdEtd": "1030"
-  },
-  {
-    "code": "WY245",
-    "date": "15MAY",
-    "destination": "DEL",
-    "stdEtd": "1105"
-  },
-  {
     "code": "OV205",
     "date": "15MAY",
     "destination": "RUH",
@@ -54,22 +36,10 @@
     "stdEtd": "1320"
   },
   {
-    "code": "WY101",
-    "date": "15MAY",
-    "destination": "LHR",
-    "stdEtd": "1330"
-  },
-  {
     "code": "OV285",
     "date": "15MAY",
     "destination": "JED",
     "stdEtd": "1330"
-  },
-  {
-    "code": "WY131",
-    "date": "15MAY",
-    "destination": "PAR",
-    "stdEtd": "1335"
   },
   {
     "code": "WY683",
@@ -82,6 +52,18 @@
     "date": "15MAY",
     "destination": "MAN",
     "stdEtd": "0915"
+  },
+  {
+    "code": "WY101",
+    "date": "15MAY",
+    "destination": "LHR",
+    "stdEtd": "1330"
+  },
+  {
+    "code": "WY131",
+    "date": "15MAY",
+    "destination": "PAR",
+    "stdEtd": "1335"
   },
   {
     "code": "WY143",
@@ -126,16 +108,16 @@
     "stdEtd": "1510"
   },
   {
-    "code": "QB2113",
-    "date": "15MAY",
-    "destination": "IKA",
-    "stdEtd": "1510"
-  },
-  {
     "code": "PF737",
     "date": "15MAY",
     "destination": "SKT",
-    "stdEtd": "1515"
+    "stdEtd": "1515/1531"
+  },
+  {
+    "code": "QB2113",
+    "date": "15MAY",
+    "destination": "IKA",
+    "stdEtd": "1510/1646"
   },
   {
     "code": "OV213",
@@ -156,15 +138,15 @@
     "stdEtd": "1720"
   },
   {
-    "code": "OV107",
-    "date": "15MAY",
-    "destination": "SLL",
-    "stdEtd": "1830"
-  },
-  {
     "code": "OV367",
     "date": "15MAY",
     "destination": "NAI",
+    "stdEtd": "1830"
+  },
+  {
+    "code": "OV107",
+    "date": "15MAY",
+    "destination": "SLL",
     "stdEtd": "1830"
   },
   {
@@ -538,6 +520,24 @@
     "date": "15MAY",
     "destination": "MED",
     "stdEtd": "0940"
+  },
+  {
+    "code": "QB2117",
+    "date": "15MAY",
+    "destination": "SHI",
+    "stdEtd": "0950/1031"
+  },
+  {
+    "code": "WY831",
+    "date": "15MAY",
+    "destination": "HKT",
+    "stdEtd": "1030"
+  },
+  {
+    "code": "WY245",
+    "date": "15MAY",
+    "destination": "DEL",
+    "stdEtd": "1105"
   },
   {
     "code": "OV537",
