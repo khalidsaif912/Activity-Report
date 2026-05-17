@@ -11,6 +11,7 @@ echo Starting local server in:
 echo %cd%
 echo.
 echo Open in browser: http://localhost:%PORT%
+echo Install as app (PWA): Chrome/Edge menu -^> Install app, or use the install icon in the address bar.
 echo Press Ctrl+C in this window to stop the server.
 echo.
 start "" "http://localhost:%PORT%/data/report/offload_report.html"
