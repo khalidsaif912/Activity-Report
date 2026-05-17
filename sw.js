@@ -1,26 +1,28 @@
 /* Activity Report PWA — cache static assets; always fetch JSON fresh. */
-const CACHE_VERSION = "activity-report-pwa-v1";
+const CACHE_VERSION = "activity-report-pwa-v2";
+
+const APP_BASE = new URL("./", self.location).href;
 
 const PRECACHE_URLS = [
-  "/data/report/offload_report.html",
-  "/index.html",
-  "/manifest.webmanifest",
-  "/assets/icons/icon-192.png",
-  "/assets/icons/icon-512.png",
-  "/js/offload-loader.js",
-  "/js/flight-hint-cache.js",
-  "/js/recipients-cache.js",
-  "/js/manpower-role-hint-cache.js",
-  "/js/manpower-autocomplete.js",
-  "/js/flight-autocomplete.js",
-  "/js/csd-route-hint-cache.js",
-  "/js/phrase-usage-cache.js",
-  "/js/phrase-autocomplete.js",
-  "/js/activity-report-app.js",
-  "/js/pwa-register.js",
-  "/assets/export-roster-plane.png",
-  "/assets/transom-logo.png"
-];
+  "data/report/offload_report.html",
+  "index.html",
+  "manifest.webmanifest",
+  "assets/icons/icon-192.png",
+  "assets/icons/icon-512.png",
+  "js/offload-loader.js",
+  "js/flight-hint-cache.js",
+  "js/recipients-cache.js",
+  "js/manpower-role-hint-cache.js",
+  "js/manpower-autocomplete.js",
+  "js/flight-autocomplete.js",
+  "js/csd-route-hint-cache.js",
+  "js/phrase-usage-cache.js",
+  "js/phrase-autocomplete.js",
+  "js/activity-report-app.js",
+  "js/pwa-register.js",
+  "assets/export-roster-plane.png",
+  "assets/transom-logo.png"
+].map((path) => new URL(path, APP_BASE).href);
 
 function isJsonRequest(url) {
   return url.pathname.endsWith(".json");
@@ -98,9 +100,9 @@ self.addEventListener("fetch", (event) => {
   if (isNavigation(request)) {
     event.respondWith(
       fetch(request).catch(async () => {
-        const cached =
-          (await caches.match("/data/report/offload_report.html")) ||
-          (await caches.match("/index.html"));
+        const reportUrl = new URL("data/report/offload_report.html", APP_BASE).href;
+        const indexUrl = new URL("index.html", APP_BASE).href;
+        const cached = (await caches.match(reportUrl)) || (await caches.match(indexUrl));
         return cached || Response.error();
       })
     );

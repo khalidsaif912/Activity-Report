@@ -2,8 +2,8 @@
   "name": "Export Warehouse Activity Report",
   "short_name": "Activity Report",
   "description": "Export warehouse shift activity report, roster, and offload cargo.",
-  "start_url": "/data/report/offload_report.html",
-  "scope": "/",
+  "start_url": "./data/report/offload_report.html",
+  "scope": "./",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#0b3a78",
@@ -12,19 +12,19 @@
   "dir": "ltr",
   "icons": [
     {
-      "src": "/assets/icons/icon-192.png",
+      "src": "./assets/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/assets/icons/icon-512.png",
+      "src": "./assets/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/assets/icons/icon-512.png",
+      "src": "./assets/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"

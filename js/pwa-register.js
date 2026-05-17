@@ -1,11 +1,21 @@
 (function registerActivityReportPwa() {
   if (!("serviceWorker" in navigator)) return;
 
-  const swUrl = new URL("/sw.js", window.location.origin).href;
+  function appBaseUrl() {
+    const manifestLink = document.querySelector('link[rel="manifest"]');
+    if (manifestLink && manifestLink.href) {
+      return new URL("./", manifestLink.href);
+    }
+    return new URL("./", window.location.href);
+  }
 
   window.addEventListener("load", () => {
+    const base = appBaseUrl();
+    const swUrl = new URL("sw.js", base).href;
+    const scope = new URL("./", base).href;
+
     navigator.serviceWorker
-      .register(swUrl, { scope: "/" })
+      .register(swUrl, { scope })
       .then((reg) => {
         reg.update();
       })
