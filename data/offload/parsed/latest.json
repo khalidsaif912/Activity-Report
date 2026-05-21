@@ -3,40 +3,82 @@
     {
       "rows": [
         [
-          "",
-          "",
-          "",
-          "CARGO OFFLOADED DETAILS",
-          "",
-          "",
-          ""
-        ],
-        [
-          "FLIGHT #",
-          "W51128",
-          "DATE",
-          "21-May",
+          "S NO",
+          "AWB NO.",
+          "NO. OF PIECES",
+          "WEIGHT",
+          "ORIGIN",
           "DESTINATION",
-          "IKA"
+          "COMMODITY",
+          "REMARKS"
         ],
         [
-          "AWB",
-          "PCS",
-          "KGS",
-          "DESCRIPTION",
-          "REASON"
+          "1",
+          "714-40311073",
+          "01",
+          "52.0K",
+          "MCT",
+          "IKA",
+          "CONSOLIDATE",
+          "PRIORITY 1"
         ],
         [
-          "PAG2403W5",
-          "1299",
+          "2",
+          "714-40311250",
+          "01",
+          "34.0K",
+          "MCT",
+          "IKA",
+          "PAIR OF SAS CABLES",
+          "PRIORITY 2"
+        ],
+        [
+          "3",
+          "714-40311386",
+          "06",
+          "80.0K",
+          "MCT",
+          "IKA",
+          "TOOLS",
+          "PRIORITY 3"
+        ],
+        [
           "4",
-          "MOBILE PHONES",
-          "SPACE"
+          "714-40311390",
+          "04",
+          "142.0K",
+          "MCT",
+          "IKA",
+          "RACK AMOUNT",
+          "PRIORITY 4"
         ],
         [
-          "TOTAL",
-          "1299",
-          "4",
+          "5",
+          "714-40311401",
+          "03",
+          "69.0K",
+          "MCT",
+          "IKA",
+          "RACK AMOUNT",
+          "PRIORITY 5"
+        ],
+        [
+          "6",
+          "714-40311412",
+          "02",
+          "33.0K",
+          "MCT",
+          "IKA",
+          "GENSET CONTROLLER",
+          "PRIORITY 6"
+        ],
+        [
+          "",
+          "",
+          "17",
+          "410",
+          "",
+          "",
           "",
           ""
         ]
