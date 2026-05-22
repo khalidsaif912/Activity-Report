@@ -1,3 +1,60 @@
 {
-  "tables": []
+  "tables": [
+    {
+      "rows": [
+        [
+          "",
+          "",
+          "",
+          "CARGO OFFLOADED DETAILS",
+          "",
+          "",
+          ""
+        ],
+        [
+          "FLIGHT #",
+          "TK775",
+          "DATE",
+          "23-May",
+          "DESTINATION",
+          "IST"
+        ],
+        [
+          "AWB",
+          "PCS",
+          "KGS",
+          "DESCRIPTION",
+          "REASON"
+        ],
+        [
+          "23544934735",
+          "6",
+          "73",
+          "CONSOL",
+          "SPACE"
+        ],
+        [
+          "23545821860",
+          "5",
+          "650",
+          "FRNKINCENSE OIL",
+          "SPACE"
+        ],
+        [
+          "235 45821952",
+          "10",
+          "180",
+          "SAFFRON",
+          "SPACE"
+        ],
+        [
+          "TOTAL",
+          "21",
+          "903",
+          "",
+          ""
+        ]
+      ]
+    }
+  ]
 }
