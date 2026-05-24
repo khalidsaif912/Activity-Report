@@ -1,35 +1,5 @@
 [
   {
-    "code": "EK867",
-    "date": "24MAY",
-    "destination": "DXB",
-    "stdEtd": "0440/0543"
-  },
-  {
-    "code": "QR1149",
-    "date": "24MAY",
-    "destination": "DOH",
-    "stdEtd": "0620"
-  },
-  {
-    "code": "OV761",
-    "date": "24MAY",
-    "destination": "BOM",
-    "stdEtd": "0700"
-  },
-  {
-    "code": "OV133",
-    "date": "24MAY",
-    "destination": "DQM",
-    "stdEtd": "0735"
-  },
-  {
-    "code": "OV5011",
-    "date": "24MAY",
-    "destination": "FAU",
-    "stdEtd": "0800"
-  },
-  {
     "code": "OV5013",
     "date": "24MAY",
     "destination": "MAR",
@@ -72,12 +42,6 @@
     "stdEtd": "0845"
   },
   {
-    "code": "OV391",
-    "date": "24MAY",
-    "destination": "PZU",
-    "stdEtd": "0700/0948"
-  },
-  {
     "code": "FZ046",
     "date": "24MAY",
     "destination": "DXB",
@@ -100,6 +64,12 @@
     "date": "24MAY",
     "destination": "BOM",
     "stdEtd": "0920"
+  },
+  {
+    "code": "OV391",
+    "date": "24MAY",
+    "destination": "PZU",
+    "stdEtd": "0700/1008"
   },
   {
     "code": "WY245",
@@ -126,6 +96,12 @@
     "stdEtd": "1230"
   },
   {
+    "code": "OV205",
+    "date": "24MAY",
+    "destination": "RUH",
+    "stdEtd": "1300"
+  },
+  {
     "code": "WY413",
     "date": "24MAY",
     "destination": "AMM",
@@ -135,12 +111,6 @@
     "code": "WY165",
     "date": "24MAY",
     "destination": "IST",
-    "stdEtd": "1300"
-  },
-  {
-    "code": "OV205",
-    "date": "24MAY",
-    "destination": "RUH",
     "stdEtd": "1300"
   },
   {
@@ -538,6 +508,36 @@
     "date": "24MAY",
     "destination": "BOM",
     "stdEtd": "0505"
+  },
+  {
+    "code": "EK867",
+    "date": "24MAY",
+    "destination": "DXB",
+    "stdEtd": "0440/0543"
+  },
+  {
+    "code": "QR1149",
+    "date": "24MAY",
+    "destination": "DOH",
+    "stdEtd": "0620"
+  },
+  {
+    "code": "OV761",
+    "date": "24MAY",
+    "destination": "BOM",
+    "stdEtd": "0700"
+  },
+  {
+    "code": "OV133",
+    "date": "24MAY",
+    "destination": "DQM",
+    "stdEtd": "0735"
+  },
+  {
+    "code": "OV5011",
+    "date": "24MAY",
+    "destination": "FAU",
+    "stdEtd": "0800"
   },
   {
     "code": "OV493",
