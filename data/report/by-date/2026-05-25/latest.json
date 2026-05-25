@@ -1,53 +1,34 @@
 {
   "shiftMeta": {
-    "key": "morning",
-    "title": "Morning Shift",
+    "key": "afternoon",
+    "title": "Afternoon Shift",
     "date": "2026-05-25",
-    "time": "06:00 - 15:00"
+    "time": "13:00 - 22:00"
   },
   "manpowerSections": [
     {
       "title": "Supervisor",
-      "items": [
-        "SN81300 Talal Al Balushi"
-      ]
+      "items": []
     },
     {
       "title": "Load Control",
-      "items": [
-        "SN82600 Habib Al Balushi",
-        "SN82657 Bushra Al Wahiebi"
-      ]
+      "items": []
     },
     {
       "title": "Export Checker",
-      "items": [
-        "SN82658 Mohamed Al Mazroie",
-        "SN80270 Marlon Esmilla",
-        "SN82674 Mohamed Al Mamari",
-        "SN82555 Riyahd Al Jabri",
-        "SN8584 Adil Al Zadjali"
-      ]
+      "items": []
     },
     {
       "title": "Export Operators",
-      "items": [
-        "SN81224 Mohamed Al Amri",
-        "SN82588 Ghassan Al Tarsi",
-        "SN8714 Mohana Al Subhi"
-      ]
+      "items": []
     },
     {
       "title": "Flight Dispatch",
       "items": [
-        "SN82417 TALAL AL HUSEINI",
-        "SN82423 BADAR AL BURTAMANI"
-      ]
-    },
-    {
-      "title": "Support Team",
-      "items": [
-        "SN82565 Jamal Al Hadi"
+        "SN82654 AHMED AL HADI",
+        "SN82537 KHALIFA AL SAADI",
+        "SN82571 YAARAB AL RAQADI",
+        "SN80480 YOUNIS AL SIYABI"
       ]
     },
     {
@@ -56,6 +37,10 @@
     },
     {
       "title": "Inventory",
+      "items": []
+    },
+    {
+      "title": "Support Team",
       "items": []
     },
     {
@@ -82,34 +67,19 @@
       "manpowerSections": [
         {
           "title": "Supervisor",
-          "items": [
-            "SN81300 Talal Al Balushi"
-          ]
+          "items": []
         },
         {
           "title": "Load Control",
-          "items": [
-            "SN82600 Habib Al Balushi",
-            "SN82657 Bushra Al Wahiebi"
-          ]
+          "items": []
         },
         {
           "title": "Export Checker",
-          "items": [
-            "SN82658 Mohamed Al Mazroie",
-            "SN80270 Marlon Esmilla",
-            "SN82674 Mohamed Al Mamari",
-            "SN82555 Riyahd Al Jabri",
-            "SN8584 Adil Al Zadjali"
-          ]
+          "items": []
         },
         {
           "title": "Export Operators",
-          "items": [
-            "SN81224 Mohamed Al Amri",
-            "SN82588 Ghassan Al Tarsi",
-            "SN8714 Mohana Al Subhi"
-          ]
+          "items": []
         },
         {
           "title": "Flight Dispatch",
@@ -119,17 +89,15 @@
           ]
         },
         {
-          "title": "Support Team",
-          "items": [
-            "SN82565 Jamal Al Hadi"
-          ]
-        },
-        {
           "title": "CTU Staff On Duty",
           "items": []
         },
         {
           "title": "Inventory",
+          "items": []
+        },
+        {
+          "title": "Support Team",
           "items": []
         },
         {
@@ -156,35 +124,19 @@
       "manpowerSections": [
         {
           "title": "Supervisor",
-          "items": [
-            "SN81404 Mohamed Al Amri"
-          ]
+          "items": []
         },
         {
           "title": "Load Control",
-          "items": [
-            "SN82596 Hamed Al Fulaiti",
-            "SN82548 Ahmed Al Muqaini"
-          ]
+          "items": []
         },
         {
           "title": "Export Checker",
-          "items": [
-            "SN82464 Wissam Al Kharusi",
-            "SN82671 Khalil Al Hinai",
-            "SN82615 Rashid Al Farsi",
-            "SN81393 Ali Al Farsi",
-            "SN82578 Raad Al Farsi",
-            "SN82661 Mohamed Al Maskari"
-          ]
+          "items": []
         },
         {
           "title": "Export Operators",
-          "items": [
-            "SN82415 Ahmed Al Balushi",
-            "SN8762 Mohamed Al Falahi",
-            "SN8647 Issa Al Douyani"
-          ]
+          "items": []
         },
         {
           "title": "Flight Dispatch",
@@ -196,17 +148,15 @@
           ]
         },
         {
-          "title": "Support Team",
-          "items": [
-            "SN82653 Ahmed Al Sabii"
-          ]
-        },
-        {
           "title": "CTU Staff On Duty",
           "items": []
         },
         {
           "title": "Inventory",
+          "items": []
+        },
+        {
+          "title": "Support Team",
           "items": []
         },
         {
@@ -233,35 +183,19 @@
       "manpowerSections": [
         {
           "title": "Supervisor",
-          "items": [
-            "SN82593 Mohamed Al Kalbani"
-          ]
+          "items": []
         },
         {
           "title": "Load Control",
-          "items": [
-            "SN82437 Marwan Al Difai",
-            "SN82114 Mubarak Al Nofli"
-          ]
+          "items": []
         },
         {
           "title": "Export Checker",
-          "items": [
-            "SN82649 Saif Al Mahrizi",
-            "SN8930 Fahim Al Hashni",
-            "SN80482 Waleed Al Hadabi",
-            "SN82645 Abdullah Al Shukeili",
-            "SN82547 Mazin Al Hajri",
-            "SN82577 Ali Al Marjubi"
-          ]
+          "items": []
         },
         {
           "title": "Export Operators",
-          "items": [
-            "SN82467 Khamis Al Hinai",
-            "SN82656 Faisal Al Balushi",
-            "SN8542 Salim Harrasi"
-          ]
+          "items": []
         },
         {
           "title": "Flight Dispatch",
@@ -298,5 +232,5 @@
       ]
     }
   },
-  "defaultShift": "morning"
+  "defaultShift": "afternoon"
 }
