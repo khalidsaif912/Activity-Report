@@ -1,9 +1,9 @@
 {
   "shiftMeta": {
-    "key": "afternoon",
-    "title": "Afternoon Shift",
+    "key": "night",
+    "title": "Night Shift",
     "date": "2026-05-25",
-    "time": "13:00 - 22:00"
+    "time": "21:00 - 06:00"
   },
   "manpowerSections": [
     {
@@ -25,10 +25,9 @@
     {
       "title": "Flight Dispatch",
       "items": [
-        "SN82654 AHMED AL HADI",
-        "SN82537 KHALIFA AL SAADI",
-        "SN82571 YAARAB AL RAQADI",
-        "SN80480 YOUNIS AL SIYABI"
+        "SN82414 BADAR AL BUSAIDI",
+        "SN82420 MOHAMMED AL SAADI",
+        "SN80479 SAMI AL HADABI"
       ]
     },
     {
@@ -232,5 +231,5 @@
       ]
     }
   },
-  "defaultShift": "afternoon"
+  "defaultShift": "night"
 }
