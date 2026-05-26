@@ -1,9 +1,9 @@
 {
   "shiftMeta": {
-    "key": "morning",
-    "title": "Morning Shift",
+    "key": "afternoon",
+    "title": "Afternoon Shift",
     "date": "2026-05-26",
-    "time": "06:00 - 15:00"
+    "time": "13:00 - 22:00"
   },
   "manpowerSections": [
     {
@@ -25,9 +25,11 @@
     {
       "title": "Flight Dispatch",
       "items": [
-        "SN82431 MAHMOOD AL BALUSHI",
-        "SN82331 ISMAIL AL MAHARBI",
-        "SN82416 NASSER AL OMAIRI"
+        "SN82654 AHMED AL HADI",
+        "SN82537 KHALIFA AL SAADI",
+        "SN80480 YOUNIS AL SIYABI",
+        "SN82417 TALAL AL HUSEINI",
+        "SN82423 BADAR AL BURTAMANI"
       ]
     },
     {
@@ -234,5 +236,5 @@
       ]
     }
   },
-  "defaultShift": "morning"
+  "defaultShift": "afternoon"
 }
