@@ -1,3 +1,46 @@
 {
-  "tables": []
+  "tables": [
+    {
+      "rows": [
+        [
+          "",
+          "",
+          "",
+          "CARGO OFFLOADED DETAILS",
+          "",
+          "",
+          ""
+        ],
+        [
+          "FLIGHT #",
+          "WY297",
+          "DATE",
+          "28-May",
+          "DESTINATION",
+          "CCJ"
+        ],
+        [
+          "AWB",
+          "PCS",
+          "KGS",
+          "DESCRIPTION",
+          "REASON"
+        ],
+        [
+          "910 18685181",
+          "24",
+          "579",
+          "PERSONAL EFFEC",
+          "SPACE"
+        ],
+        [
+          "TOTAL",
+          "24",
+          "579",
+          "",
+          ""
+        ]
+      ]
+    }
+  ]
 }
