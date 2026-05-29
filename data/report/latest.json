@@ -1,9 +1,9 @@
 {
   "shiftMeta": {
-    "key": "morning",
-    "title": "Morning Shift",
+    "key": "afternoon",
+    "title": "Afternoon Shift",
     "date": "2026-05-29",
-    "time": "06:00 - 15:00"
+    "time": "13:00 - 22:00"
   },
   "manpowerSections": [
     {
@@ -25,9 +25,9 @@
     {
       "title": "Flight Dispatch",
       "items": [
-        "SN82414 BADAR AL BUSAIDI",
-        "SN82420 MOHAMMED AL SAADI",
-        "SN80479 SAMI AL HADABI"
+        "SN82419 HAITHAM AL BALUSHI",
+        "SN82425 ALI AL SHAMSI",
+        "SN82566 ANWAR AL AMRI"
       ]
     },
     {
@@ -231,5 +231,5 @@
       ]
     }
   },
-  "defaultShift": "morning"
+  "defaultShift": "afternoon"
 }
