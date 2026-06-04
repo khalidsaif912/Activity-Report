@@ -1,16 +1,14 @@
 {
   "shiftMeta": {
-    "key": "night",
-    "title": "Night Shift",
-    "date": "2026-06-03",
-    "time": "21:00 - 06:00"
+    "key": "morning",
+    "title": "Morning Shift",
+    "date": "2026-06-04",
+    "time": "06:00 - 15:00"
   },
   "manpowerSections": [
     {
       "title": "Supervisor",
-      "items": [
-        "SN81404 Mohamed Al Amri"
-      ]
+      "items": []
     },
     {
       "title": "Load Control",
@@ -58,15 +56,13 @@
       "shiftMeta": {
         "key": "morning",
         "title": "Morning Shift",
-        "date": "2026-06-03",
+        "date": "2026-06-04",
         "time": "06:00 - 15:00"
       },
       "manpowerSections": [
         {
           "title": "Supervisor",
-          "items": [
-            "SN81300 Talal Al Balushi"
-          ]
+          "items": []
         },
         {
           "title": "Load Control",
@@ -114,7 +110,7 @@
       "shiftMeta": {
         "key": "afternoon",
         "title": "Afternoon Shift",
-        "date": "2026-06-03",
+        "date": "2026-06-04",
         "time": "13:00 - 22:00"
       },
       "manpowerSections": [
@@ -170,14 +166,14 @@
       "shiftMeta": {
         "key": "night",
         "title": "Night Shift",
-        "date": "2026-06-03",
+        "date": "2026-06-04",
         "time": "21:00 - 06:00"
       },
       "manpowerSections": [
         {
           "title": "Supervisor",
           "items": [
-            "SN81404 Mohamed Al Amri"
+            "SN81300 Talal Al Balushi"
           ]
         },
         {
@@ -223,5 +219,5 @@
       ]
     }
   },
-  "defaultShift": "night"
+  "defaultShift": "morning"
 }
