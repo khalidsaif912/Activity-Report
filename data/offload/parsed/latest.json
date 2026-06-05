@@ -1,3 +1,60 @@
 {
-  "tables": []
+  "tables": [
+    {
+      "rows": [
+        [
+          "",
+          "",
+          "",
+          "CARGO OFFLOADED DETAILS",
+          "",
+          "",
+          ""
+        ],
+        [
+          "FLIGHT #",
+          "OV205",
+          "DATE",
+          "5-Jun",
+          "DESTINATION",
+          "RUH"
+        ],
+        [
+          "AWB",
+          "PCS",
+          "KGS",
+          "DESCRIPTION",
+          "REASON"
+        ],
+        [
+          "70311192580",
+          "2",
+          "70",
+          "SPAR PART",
+          "PAYLOAD"
+        ],
+        [
+          "70313485430",
+          "10",
+          "187",
+          "PLANE COVERS",
+          "PAYLOAD"
+        ],
+        [
+          "70313485533",
+          "16",
+          "200",
+          "CONSOL",
+          "PAYLOAD"
+        ],
+        [
+          "TOTAL",
+          "28",
+          "457",
+          "",
+          ""
+        ]
+      ]
+    }
+  ]
 }
