@@ -1,23 +1,5 @@
 [
   {
-    "code": "OV5093",
-    "date": "7JUN",
-    "destination": "UKH",
-    "stdEtd": "1130"
-  },
-  {
-    "code": "WY905",
-    "date": "7JUN",
-    "destination": "SLL",
-    "stdEtd": "1230"
-  },
-  {
-    "code": "OV205",
-    "date": "7JUN",
-    "destination": "RUH",
-    "stdEtd": "1230"
-  },
-  {
     "code": "WY413",
     "date": "7JUN",
     "destination": "AMM",
@@ -60,12 +42,6 @@
     "stdEtd": "1340"
   },
   {
-    "code": "WY169",
-    "date": "7JUN",
-    "destination": "TRA",
-    "stdEtd": "1350"
-  },
-  {
     "code": "WY683",
     "date": "7JUN",
     "destination": "RUH",
@@ -76,12 +52,6 @@
     "date": "7JUN",
     "destination": "JED",
     "stdEtd": "1330/1410"
-  },
-  {
-    "code": "WY143",
-    "date": "7JUN",
-    "destination": "MXP",
-    "stdEtd": "1410"
   },
   {
     "code": "BG222",
@@ -120,6 +90,12 @@
     "stdEtd": "1450"
   },
   {
+    "code": "WY169",
+    "date": "7JUN",
+    "destination": "TRA",
+    "stdEtd": "1350"
+  },
+  {
     "code": "WY655",
     "date": "7JUN",
     "destination": "BAH",
@@ -142,6 +118,12 @@
     "date": "7JUN",
     "destination": "SLL",
     "stdEtd": "1530"
+  },
+  {
+    "code": "WY143",
+    "date": "7JUN",
+    "destination": "MXP",
+    "stdEtd": "1410"
   },
   {
     "code": "WY183",
@@ -252,15 +234,15 @@
     "stdEtd": "2150"
   },
   {
-    "code": "OV497",
-    "date": "7JUN",
-    "destination": "DAC",
-    "stdEtd": "2215"
-  },
-  {
     "code": "OV437",
     "date": "7JUN",
     "destination": "CMB",
+    "stdEtd": "2215"
+  },
+  {
+    "code": "OV497",
+    "date": "7JUN",
+    "destination": "DAC",
     "stdEtd": "2215"
   },
   {
@@ -544,6 +526,24 @@
     "date": "7JUN",
     "destination": "DEL",
     "stdEtd": "1025"
+  },
+  {
+    "code": "OV5093",
+    "date": "7JUN",
+    "destination": "UKH",
+    "stdEtd": "1130"
+  },
+  {
+    "code": "WY905",
+    "date": "7JUN",
+    "destination": "SLL",
+    "stdEtd": "1230"
+  },
+  {
+    "code": "OV205",
+    "date": "7JUN",
+    "destination": "RUH",
+    "stdEtd": "1230"
   },
   {
     "code": "OV505",
