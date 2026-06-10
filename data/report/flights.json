@@ -1,23 +1,5 @@
 [
   {
-    "code": "WY245",
-    "date": "10JUN",
-    "destination": "DEL",
-    "stdEtd": "1025"
-  },
-  {
-    "code": "OV365",
-    "date": "10JUN",
-    "destination": "NAI",
-    "stdEtd": "1025"
-  },
-  {
-    "code": "OV5095",
-    "date": "10JUN",
-    "destination": "UKH",
-    "stdEtd": "1230"
-  },
-  {
     "code": "WY413",
     "date": "10JUN",
     "destination": "AMM",
@@ -129,7 +111,7 @@
     "code": "OV391",
     "date": "10JUN",
     "destination": "PZU",
-    "stdEtd": "1520"
+    "stdEtd": "1520/1542"
   },
   {
     "code": "WY907",
@@ -526,6 +508,24 @@
     "date": "10JUN",
     "destination": "MED",
     "stdEtd": "0940"
+  },
+  {
+    "code": "WY245",
+    "date": "10JUN",
+    "destination": "DEL",
+    "stdEtd": "1025"
+  },
+  {
+    "code": "OV365",
+    "date": "10JUN",
+    "destination": "NAI",
+    "stdEtd": "1025"
+  },
+  {
+    "code": "OV5095",
+    "date": "10JUN",
+    "destination": "UKH",
+    "stdEtd": "1230"
   },
   {
     "code": "OV537",
