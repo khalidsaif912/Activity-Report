@@ -1,15 +1,15 @@
 {
   "shiftMeta": {
-    "key": "night",
-    "title": "Night Shift",
-    "date": "2026-06-10",
-    "time": "21:00 - 06:00"
+    "key": "morning",
+    "title": "Morning Shift",
+    "date": "2026-06-11",
+    "time": "06:00 - 15:00"
   },
   "manpowerSections": [
     {
       "title": "Supervisor",
       "items": [
-        "SN81404 Mohamed Al Amri"
+        "SN80250 Jay Macalino"
       ]
     },
     {
@@ -58,64 +58,8 @@
       "shiftMeta": {
         "key": "morning",
         "title": "Morning Shift",
-        "date": "2026-06-10",
+        "date": "2026-06-11",
         "time": "06:00 - 15:00"
-      },
-      "manpowerSections": [
-        {
-          "title": "Supervisor",
-          "items": [
-            "SN81300 Talal Al Balushi"
-          ]
-        },
-        {
-          "title": "Load Control",
-          "items": []
-        },
-        {
-          "title": "Export Checker",
-          "items": []
-        },
-        {
-          "title": "Export Operators",
-          "items": []
-        },
-        {
-          "title": "Flight Dispatch",
-          "items": []
-        },
-        {
-          "title": "CTU Staff On Duty",
-          "items": []
-        },
-        {
-          "title": "Inventory",
-          "items": []
-        },
-        {
-          "title": "Support Team",
-          "items": []
-        },
-        {
-          "title": "Leave & Course & Absence Status",
-          "items": []
-        },
-        {
-          "title": "Trainee",
-          "items": []
-        },
-        {
-          "title": "Overtime Justification",
-          "items": []
-        }
-      ]
-    },
-    "afternoon": {
-      "shiftMeta": {
-        "key": "afternoon",
-        "title": "Afternoon Shift",
-        "date": "2026-06-10",
-        "time": "13:00 - 22:00"
       },
       "manpowerSections": [
         {
@@ -166,18 +110,72 @@
         }
       ]
     },
+    "afternoon": {
+      "shiftMeta": {
+        "key": "afternoon",
+        "title": "Afternoon Shift",
+        "date": "2026-06-11",
+        "time": "13:00 - 22:00"
+      },
+      "manpowerSections": [
+        {
+          "title": "Supervisor",
+          "items": []
+        },
+        {
+          "title": "Load Control",
+          "items": []
+        },
+        {
+          "title": "Export Checker",
+          "items": []
+        },
+        {
+          "title": "Export Operators",
+          "items": []
+        },
+        {
+          "title": "Flight Dispatch",
+          "items": []
+        },
+        {
+          "title": "CTU Staff On Duty",
+          "items": []
+        },
+        {
+          "title": "Inventory",
+          "items": []
+        },
+        {
+          "title": "Support Team",
+          "items": []
+        },
+        {
+          "title": "Leave & Course & Absence Status",
+          "items": []
+        },
+        {
+          "title": "Trainee",
+          "items": []
+        },
+        {
+          "title": "Overtime Justification",
+          "items": []
+        }
+      ]
+    },
     "night": {
       "shiftMeta": {
         "key": "night",
         "title": "Night Shift",
-        "date": "2026-06-10",
+        "date": "2026-06-11",
         "time": "21:00 - 06:00"
       },
       "manpowerSections": [
         {
           "title": "Supervisor",
           "items": [
-            "SN81404 Mohamed Al Amri"
+            "SN81300 Talal Al Balushi"
           ]
         },
         {
@@ -223,5 +221,5 @@
       ]
     }
   },
-  "defaultShift": "night"
+  "defaultShift": "morning"
 }
