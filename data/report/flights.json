@@ -1,53 +1,5 @@
 [
   {
-    "code": "FZ046",
-    "date": "12JUN",
-    "destination": "DXB",
-    "stdEtd": "0910"
-  },
-  {
-    "code": "WY705",
-    "date": "12JUN",
-    "destination": "ZAN",
-    "stdEtd": "0915"
-  },
-  {
-    "code": "WY253",
-    "date": "12JUN",
-    "destination": "MAA",
-    "stdEtd": "0920"
-  },
-  {
-    "code": "WY203",
-    "date": "12JUN",
-    "destination": "BOM",
-    "stdEtd": "0920"
-  },
-  {
-    "code": "QB2117",
-    "date": "12JUN",
-    "destination": "SHI",
-    "stdEtd": "0920"
-  },
-  {
-    "code": "OV335",
-    "date": "12JUN",
-    "destination": "BAG",
-    "stdEtd": "0940"
-  },
-  {
-    "code": "OV271",
-    "date": "12JUN",
-    "destination": "MED",
-    "stdEtd": "0940"
-  },
-  {
-    "code": "WY245",
-    "date": "12JUN",
-    "destination": "DEL",
-    "stdEtd": "1025"
-  },
-  {
     "code": "WY843",
     "date": "12JUN",
     "destination": "MAN",
@@ -69,7 +21,7 @@
     "code": "OV103",
     "date": "12JUN",
     "destination": "SLL",
-    "stdEtd": "1315"
+    "stdEtd": "1315/1342"
   },
   {
     "code": "WY117",
@@ -532,6 +484,54 @@
     "date": "12JUN",
     "destination": "SHJ",
     "stdEtd": "0850"
+  },
+  {
+    "code": "FZ046",
+    "date": "12JUN",
+    "destination": "DXB",
+    "stdEtd": "0910"
+  },
+  {
+    "code": "WY705",
+    "date": "12JUN",
+    "destination": "ZAN",
+    "stdEtd": "0915"
+  },
+  {
+    "code": "WY253",
+    "date": "12JUN",
+    "destination": "MAA",
+    "stdEtd": "0920"
+  },
+  {
+    "code": "WY203",
+    "date": "12JUN",
+    "destination": "BOM",
+    "stdEtd": "0920"
+  },
+  {
+    "code": "QB2117",
+    "date": "12JUN",
+    "destination": "SHI",
+    "stdEtd": "0920"
+  },
+  {
+    "code": "OV335",
+    "date": "12JUN",
+    "destination": "BAG",
+    "stdEtd": "0940"
+  },
+  {
+    "code": "OV271",
+    "date": "12JUN",
+    "destination": "MED",
+    "stdEtd": "0940"
+  },
+  {
+    "code": "WY245",
+    "date": "12JUN",
+    "destination": "DEL",
+    "stdEtd": "1025"
   },
   {
     "code": "OV537",
