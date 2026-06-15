@@ -1,14 +1,16 @@
 {
   "shiftMeta": {
-    "key": "afternoon",
-    "title": "Afternoon Shift",
+    "key": "night",
+    "title": "Night Shift",
     "date": "2026-06-15",
-    "time": "13:00 - 22:00"
+    "time": "21:00 - 06:00"
   },
   "manpowerSections": [
     {
       "title": "Supervisor",
-      "items": []
+      "items": [
+        "SN82593 Mohamed Al Kalbani"
+      ]
     },
     {
       "title": "Load Control",
@@ -219,5 +221,5 @@
       ]
     }
   },
-  "defaultShift": "afternoon"
+  "defaultShift": "night"
 }
