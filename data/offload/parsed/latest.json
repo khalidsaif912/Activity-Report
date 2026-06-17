@@ -1,3 +1,53 @@
 {
-  "tables": []
+  "tables": [
+    {
+      "rows": [
+        [
+          "",
+          "",
+          "",
+          "CARGO OFFLOADED DETAILS",
+          "",
+          "",
+          ""
+        ],
+        [
+          "FLIGHT #",
+          "6X7317",
+          "DATE",
+          "17-Jun",
+          "DESTINATION",
+          "IKA"
+        ],
+        [
+          "AWB",
+          "PCS",
+          "KGS",
+          "DESCRIPTION",
+          "REASON"
+        ],
+        [
+          "714 40310874",
+          "04",
+          "100",
+          "GLUE",
+          "SPACE"
+        ],
+        [
+          "714 40311574P",
+          "01",
+          "26",
+          "AUTO SPARE PART",
+          "SPACE"
+        ],
+        [
+          "TOTAL",
+          "05",
+          "126",
+          "",
+          ""
+        ]
+      ]
+    }
+  ]
 }
