@@ -1,29 +1,5 @@
 [
   {
-    "code": "OV245",
-    "date": "18JUN",
-    "destination": "SHJ",
-    "stdEtd": "1720"
-  },
-  {
-    "code": "OV507",
-    "date": "18JUN",
-    "destination": "SKT",
-    "stdEtd": "1735/1844"
-  },
-  {
-    "code": "WY669",
-    "date": "18JUN",
-    "destination": "DOH",
-    "stdEtd": "1805"
-  },
-  {
-    "code": "WY681",
-    "date": "18JUN",
-    "destination": "RUH",
-    "stdEtd": "1850"
-  },
-  {
     "code": "OV107",
     "date": "18JUN",
     "destination": "SLL",
@@ -75,7 +51,7 @@
     "code": "MS931",
     "date": "18JUN",
     "destination": "CAI",
-    "stdEtd": "2125"
+    "stdEtd": "2125/2200"
   },
   {
     "code": "WY407",
@@ -102,15 +78,15 @@
     "stdEtd": "2150"
   },
   {
-    "code": "OV497",
-    "date": "18JUN",
-    "destination": "DAC",
-    "stdEtd": "2215"
-  },
-  {
     "code": "OV437",
     "date": "18JUN",
     "destination": "CMB",
+    "stdEtd": "2215"
+  },
+  {
+    "code": "OV497",
+    "date": "18JUN",
+    "destination": "DAC",
     "stdEtd": "2215"
   },
   {
@@ -144,6 +120,12 @@
     "stdEtd": "2250"
   },
   {
+    "code": "OV521",
+    "date": "18JUN",
+    "destination": "LHE",
+    "stdEtd": "2300"
+  },
+  {
     "code": "QR1125",
     "date": "18JUN",
     "destination": "DOH",
@@ -153,12 +135,6 @@
     "code": "OV563",
     "date": "18JUN",
     "destination": "ISB",
-    "stdEtd": "2300"
-  },
-  {
-    "code": "OV521",
-    "date": "18JUN",
-    "destination": "LHE",
     "stdEtd": "2300"
   },
   {
@@ -580,6 +556,30 @@
     "date": "18JUN",
     "destination": "SLL",
     "stdEtd": "1700"
+  },
+  {
+    "code": "OV245",
+    "date": "18JUN",
+    "destination": "SHJ",
+    "stdEtd": "1720"
+  },
+  {
+    "code": "OV507",
+    "date": "18JUN",
+    "destination": "SKT",
+    "stdEtd": "1735/1844"
+  },
+  {
+    "code": "WY669",
+    "date": "18JUN",
+    "destination": "DOH",
+    "stdEtd": "1805"
+  },
+  {
+    "code": "WY681",
+    "date": "18JUN",
+    "destination": "RUH",
+    "stdEtd": "1850"
   },
   {
     "code": "GF567",
