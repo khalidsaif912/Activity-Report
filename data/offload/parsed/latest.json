@@ -1,3 +1,53 @@
 {
-  "tables": []
+  "tables": [
+    {
+      "rows": [
+        [
+          "",
+          "",
+          "",
+          "CARGO OFFLOADED DETAILS",
+          "",
+          "",
+          ""
+        ],
+        [
+          "FLIGHT #",
+          "G9113",
+          "DATE",
+          "18-Jun",
+          "DESTINATION",
+          "SHJ"
+        ],
+        [
+          "AWB",
+          "PCS",
+          "KGS",
+          "DESCRIPTION",
+          "REASON"
+        ],
+        [
+          "514 11853796",
+          "122",
+          "1303",
+          "THREAD",
+          "SPACE"
+        ],
+        [
+          "514 11853800",
+          "18",
+          "182",
+          "THREAD",
+          "SPACE"
+        ],
+        [
+          "TOTAL",
+          "140",
+          "1485",
+          "",
+          ""
+        ]
+      ]
+    }
+  ]
 }
