@@ -1,15 +1,15 @@
 {
   "shiftMeta": {
-    "key": "morning",
-    "title": "Morning Shift",
+    "key": "afternoon",
+    "title": "Afternoon Shift",
     "date": "2026-06-19",
-    "time": "06:00 - 15:00"
+    "time": "13:00 - 22:00"
   },
   "manpowerSections": [
     {
       "title": "Supervisor",
       "items": [
-        "SN82546 Saleh Al Rashdi"
+        "SN82593 Mohamed Al Kalbani"
       ]
     },
     {
@@ -26,11 +26,7 @@
     },
     {
       "title": "Flight Dispatch",
-      "items": [
-        "SN82419 HAITHAM AL BALUSHI",
-        "SN82425 ALI AL SHAMSI",
-        "SN82431 MAHMOOD AL BALUSHI"
-      ]
+      "items": []
     },
     {
       "title": "CTU Staff On Duty",
@@ -231,5 +227,5 @@
       ]
     }
   },
-  "defaultShift": "morning"
+  "defaultShift": "afternoon"
 }
