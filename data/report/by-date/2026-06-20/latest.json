@@ -1,15 +1,16 @@
 {
   "shiftMeta": {
-    "key": "morning",
-    "title": "Morning Shift",
+    "key": "afternoon",
+    "title": "Afternoon Shift",
     "date": "2026-06-20",
-    "time": "06:00 - 15:00"
+    "time": "13:00 - 22:00"
   },
   "manpowerSections": [
     {
       "title": "Supervisor",
       "items": [
-        "SN82546 Saleh Al Rashdi"
+        "SN81404 Mohamed Al Amri",
+        "SN82593 Mohamed Al Kalbani"
       ]
     },
     {
@@ -224,5 +225,5 @@
       ]
     }
   },
-  "defaultShift": "morning"
+  "defaultShift": "afternoon"
 }
