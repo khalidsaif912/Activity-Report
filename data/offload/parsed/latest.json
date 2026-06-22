@@ -1,3 +1,60 @@
 {
-  "tables": []
+  "tables": [
+    {
+      "rows": [
+        [
+          "",
+          "",
+          "",
+          "CARGO OFFLOADED DETAILS",
+          "",
+          "",
+          ""
+        ],
+        [
+          "FLIGHT",
+          "PC831",
+          "DATE",
+          "21-Jun",
+          "DESTINATION",
+          "SAW"
+        ],
+        [
+          "AWB",
+          "PCS",
+          "KGS",
+          "DESCRIPTION",
+          "REASON"
+        ],
+        [
+          "703-13538302",
+          "9",
+          "140",
+          "SPORTS GOODS",
+          "DUE TRIM"
+        ],
+        [
+          "703-13538346",
+          "6",
+          "86",
+          "MANICURE INSTR",
+          "DUE TRIM"
+        ],
+        [
+          "703-13538361",
+          "12",
+          "224",
+          "HORSE RIDING G",
+          "DUE TRIM"
+        ],
+        [
+          "TOTAL",
+          "27",
+          "450",
+          "",
+          ""
+        ]
+      ]
+    }
+  ]
 }
