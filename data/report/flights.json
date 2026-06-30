@@ -6,58 +6,40 @@
     "stdEtd": "2045"
   },
   {
-    "code": "OV106",
+    "code": "OV108",
     "date": "30JUN",
     "destination": "SLL",
-    "stdEtd": "2045/2105"
+    "stdEtd": "2215/2235"
+  },
+  {
+    "code": "IX235",
+    "date": "30JUN",
+    "destination": "BOM",
+    "stdEtd": "2315/2334"
+  },
+  {
+    "code": "WY654",
+    "date": "30JUN",
+    "destination": "BAH",
+    "stdEtd": "2325"
+  },
+  {
+    "code": "WY612",
+    "date": "30JUN",
+    "destination": "DXB",
+    "stdEtd": "2335"
+  },
+  {
+    "code": "WY406",
+    "date": "30JUN",
+    "destination": "CAI",
+    "stdEtd": "2345"
   },
   {
     "code": "WY678",
     "date": "30JUN",
     "destination": "MED",
     "stdEtd": "0510/0705"
-  },
-  {
-    "code": "OV105",
-    "date": "30JUN",
-    "destination": "SLL",
-    "stdEtd": "1700"
-  },
-  {
-    "code": "OV245",
-    "date": "30JUN",
-    "destination": "SHJ",
-    "stdEtd": "1720"
-  },
-  {
-    "code": "WY909",
-    "date": "30JUN",
-    "destination": "SLL",
-    "stdEtd": "1740"
-  },
-  {
-    "code": "WY669",
-    "date": "30JUN",
-    "destination": "DOH",
-    "stdEtd": "1805"
-  },
-  {
-    "code": "OV107",
-    "date": "30JUN",
-    "destination": "SLL",
-    "stdEtd": "1830"
-  },
-  {
-    "code": "WY681",
-    "date": "30JUN",
-    "destination": "RUH",
-    "stdEtd": "1850"
-  },
-  {
-    "code": "WY647",
-    "date": "30JUN",
-    "destination": "KWI",
-    "stdEtd": "1855"
   },
   {
     "code": "WY653",
@@ -94,6 +76,84 @@
     "date": "30JUN",
     "destination": "IKA",
     "stdEtd": "2110"
+  },
+  {
+    "code": "IX164",
+    "date": "30JUN",
+    "destination": "DEL",
+    "stdEtd": "2115/2134"
+  },
+  {
+    "code": "WY821",
+    "date": "30JUN",
+    "destination": "KUL",
+    "stdEtd": "2125"
+  },
+  {
+    "code": "MS931",
+    "date": "30JUN",
+    "destination": "CAI",
+    "stdEtd": "2125/2144"
+  },
+  {
+    "code": "WY407",
+    "date": "30JUN",
+    "destination": "CAI",
+    "stdEtd": "2135"
+  },
+  {
+    "code": "WY673",
+    "date": "30JUN",
+    "destination": "JED",
+    "stdEtd": "2145"
+  },
+  {
+    "code": "WY817",
+    "date": "30JUN",
+    "destination": "BKK",
+    "stdEtd": "2150"
+  },
+  {
+    "code": "OV437",
+    "date": "30JUN",
+    "destination": "CMB",
+    "stdEtd": "2215/2234"
+  },
+  {
+    "code": "WY833",
+    "date": "30JUN",
+    "destination": "HKT",
+    "stdEtd": "2235"
+  },
+  {
+    "code": "QR1125",
+    "date": "30JUN",
+    "destination": "DOH",
+    "stdEtd": "2300"
+  },
+  {
+    "code": "OV705",
+    "date": "30JUN",
+    "destination": "LKO",
+    "stdEtd": "2320"
+  },
+  {
+    "code": "EY697",
+    "date": "30JUN",
+    "destination": "AUH",
+    "stdEtd": "2350"
+  },
+  {
+    "code": "OV537",
+    "date": "30JUN",
+    "destination": "MUX",
+    "stdEtd": "2355"
+  },
+  {
+    "code": "GF567",
+    "date": "30JUN",
+    "destination": "BAH",
+    "stdEtd": "2355"
   },
   {
     "code": "IX236",
@@ -534,64 +594,58 @@
     "stdEtd": "1650/1914"
   },
   {
+    "code": "OV105",
+    "date": "30JUN",
+    "destination": "SLL",
+    "stdEtd": "1700"
+  },
+  {
+    "code": "OV245",
+    "date": "30JUN",
+    "destination": "SHJ",
+    "stdEtd": "1720"
+  },
+  {
+    "code": "WY909",
+    "date": "30JUN",
+    "destination": "SLL",
+    "stdEtd": "1740"
+  },
+  {
+    "code": "WY669",
+    "date": "30JUN",
+    "destination": "DOH",
+    "stdEtd": "1805"
+  },
+  {
+    "code": "OV107",
+    "date": "30JUN",
+    "destination": "SLL",
+    "stdEtd": "1830"
+  },
+  {
+    "code": "WY681",
+    "date": "30JUN",
+    "destination": "RUH",
+    "stdEtd": "1850"
+  },
+  {
+    "code": "WY647",
+    "date": "30JUN",
+    "destination": "KWI",
+    "stdEtd": "1855"
+  },
+  {
     "code": "WY648",
     "date": "30JUN",
     "destination": "KWI",
     "stdEtd": "2355"
   },
   {
-    "code": "OV537",
-    "date": "30JUN",
-    "destination": "MUX",
-    "stdEtd": "2355"
-  },
-  {
-    "code": "GF567",
-    "date": "30JUN",
-    "destination": "BAH",
-    "stdEtd": "2355"
-  },
-  {
-    "code": "EY697",
-    "date": "30JUN",
-    "destination": "AUH",
-    "stdEtd": "2350"
-  },
-  {
-    "code": "WY406",
-    "date": "30JUN",
-    "destination": "CAI",
-    "stdEtd": "2345"
-  },
-  {
     "code": "WY922",
     "date": "30JUN",
     "destination": "SLL",
     "stdEtd": "2335"
-  },
-  {
-    "code": "WY612",
-    "date": "30JUN",
-    "destination": "DXB",
-    "stdEtd": "2335"
-  },
-  {
-    "code": "WY654",
-    "date": "30JUN",
-    "destination": "BAH",
-    "stdEtd": "2325"
-  },
-  {
-    "code": "OV705",
-    "date": "30JUN",
-    "destination": "LKO",
-    "stdEtd": "2320"
-  },
-  {
-    "code": "IX235",
-    "date": "30JUN",
-    "destination": "BOM",
-    "stdEtd": "2315"
   },
   {
     "code": "GF566",
@@ -618,18 +672,6 @@
     "stdEtd": "2300"
   },
   {
-    "code": "QR1125",
-    "date": "30JUN",
-    "destination": "DOH",
-    "stdEtd": "2300"
-  },
-  {
-    "code": "WY833",
-    "date": "30JUN",
-    "destination": "HKT",
-    "stdEtd": "2235"
-  },
-  {
     "code": "OV773",
     "date": "30JUN",
     "destination": "CCJ",
@@ -640,12 +682,6 @@
     "date": "30JUN",
     "destination": "HYD",
     "stdEtd": "2230"
-  },
-  {
-    "code": "OV108",
-    "date": "30JUN",
-    "destination": "SLL",
-    "stdEtd": "2215"
   },
   {
     "code": "WY676",
@@ -663,13 +699,7 @@
     "code": "OV497",
     "date": "30JUN",
     "destination": "DAC",
-    "stdEtd": "2215"
-  },
-  {
-    "code": "OV437",
-    "date": "30JUN",
-    "destination": "CMB",
-    "stdEtd": "2215"
+    "stdEtd": "2215/2234"
   },
   {
     "code": "WY670",
@@ -684,27 +714,9 @@
     "stdEtd": "2200"
   },
   {
-    "code": "WY817",
-    "date": "30JUN",
-    "destination": "BKK",
-    "stdEtd": "2150"
-  },
-  {
-    "code": "WY673",
-    "date": "30JUN",
-    "destination": "JED",
-    "stdEtd": "2145"
-  },
-  {
     "code": "WY910",
     "date": "30JUN",
     "destination": "SLL",
-    "stdEtd": "2135"
-  },
-  {
-    "code": "WY407",
-    "date": "30JUN",
-    "destination": "CAI",
     "stdEtd": "2135"
   },
   {
@@ -712,24 +724,6 @@
     "date": "30JUN",
     "destination": "DOH",
     "stdEtd": "2130"
-  },
-  {
-    "code": "MS931",
-    "date": "30JUN",
-    "destination": "CAI",
-    "stdEtd": "2125"
-  },
-  {
-    "code": "WY821",
-    "date": "30JUN",
-    "destination": "KUL",
-    "stdEtd": "2125"
-  },
-  {
-    "code": "IX164",
-    "date": "30JUN",
-    "destination": "DEL",
-    "stdEtd": "2115"
   },
   {
     "code": "OV286",
@@ -754,6 +748,12 @@
     "date": "30JUN",
     "destination": "ALM",
     "stdEtd": "2045/2016"
+  },
+  {
+    "code": "OV106",
+    "date": "30JUN",
+    "destination": "SLL",
+    "stdEtd": "2045/2105"
   },
   {
     "code": "OV246",
