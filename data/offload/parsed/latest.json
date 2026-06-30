@@ -1,3 +1,46 @@
 {
-  "tables": []
+  "tables": [
+    {
+      "rows": [
+        [
+          "",
+          "",
+          "",
+          "CARGO OFFLOADED DETAILS",
+          "",
+          "",
+          ""
+        ],
+        [
+          "FLIGHT #",
+          "GF561",
+          "DATE",
+          "30-Jun",
+          "DESTINATION",
+          "BAH"
+        ],
+        [
+          "AWB",
+          "PCS",
+          "KGS",
+          "DESCRIPTION",
+          "REASON"
+        ],
+        [
+          "072-74344686",
+          "66",
+          "866",
+          "CONCOL",
+          "TRIM"
+        ],
+        [
+          "TOTAL",
+          "66",
+          "866",
+          "",
+          ""
+        ]
+      ]
+    }
+  ]
 }
