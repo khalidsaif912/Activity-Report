@@ -1,9 +1,9 @@
 {
   "shiftMeta": {
-    "key": "night",
-    "title": "Night Shift",
-    "date": "2026-07-08",
-    "time": "21:00 - 06:00"
+    "key": "morning",
+    "title": "Morning Shift",
+    "date": "2026-07-09",
+    "time": "06:00 - 15:00"
   },
   "manpowerSections": [
     {
@@ -56,7 +56,7 @@
       "shiftMeta": {
         "key": "morning",
         "title": "Morning Shift",
-        "date": "2026-07-08",
+        "date": "2026-07-09",
         "time": "06:00 - 15:00"
       },
       "manpowerSections": [
@@ -110,7 +110,7 @@
       "shiftMeta": {
         "key": "afternoon",
         "title": "Afternoon Shift",
-        "date": "2026-07-08",
+        "date": "2026-07-09",
         "time": "13:00 - 22:00"
       },
       "manpowerSections": [
@@ -164,7 +164,7 @@
       "shiftMeta": {
         "key": "night",
         "title": "Night Shift",
-        "date": "2026-07-08",
+        "date": "2026-07-09",
         "time": "21:00 - 06:00"
       },
       "manpowerSections": [
@@ -215,5 +215,5 @@
       ]
     }
   },
-  "defaultShift": "night"
+  "defaultShift": "morning"
 }
