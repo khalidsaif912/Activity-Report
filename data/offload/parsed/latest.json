@@ -1,3 +1,46 @@
 {
-  "tables": []
+  "tables": [
+    {
+      "rows": [
+        [
+          "",
+          "",
+          "",
+          "CARGO OFFLOADED DETAILS",
+          "",
+          "",
+          ""
+        ],
+        [
+          "FLIGHT",
+          "6X7317",
+          "DATE",
+          "11- Jul",
+          "DESTINATION",
+          "IKA"
+        ],
+        [
+          "AWB",
+          "PCS",
+          "KGS",
+          "DESCRIPTION",
+          "REASON"
+        ],
+        [
+          "714-40311935",
+          "39",
+          "410",
+          "TRANSCATHETER",
+          "SPACE"
+        ],
+        [
+          "TOTAL",
+          "39",
+          "410",
+          "",
+          ""
+        ]
+      ]
+    }
+  ]
 }
