@@ -1,3 +1,53 @@
 {
-  "tables": []
+  "tables": [
+    {
+      "rows": [
+        [
+          "",
+          "",
+          "",
+          "CARGO OFFLOADED DETAILS",
+          "",
+          "",
+          ""
+        ],
+        [
+          "FLIGHT #",
+          "QB2113",
+          "DATE",
+          "17-JUL",
+          "DESTINATION",
+          "IKA"
+        ],
+        [
+          "AWB",
+          "PCS",
+          "KGS",
+          "DESCRIPTION",
+          "REASON"
+        ],
+        [
+          "237-10274773",
+          "04",
+          "5",
+          "SPARE PARTS",
+          "SPACE"
+        ],
+        [
+          "237-10279485",
+          "26",
+          "121",
+          "PERSONAL EFFC",
+          "SPACE"
+        ],
+        [
+          "TOTAL",
+          "30",
+          "126",
+          "",
+          ""
+        ]
+      ]
+    }
+  ]
 }
