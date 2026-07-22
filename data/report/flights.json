@@ -1,17 +1,5 @@
 [
   {
-    "code": "FZ043",
-    "date": "22JUL",
-    "destination": "DXB",
-    "stdEtd": "1550"
-  },
-  {
-    "code": "OV284",
-    "date": "22JUL",
-    "destination": "JED",
-    "stdEtd": "1555"
-  },
-  {
     "code": "OV5094",
     "date": "22JUL",
     "destination": "UKH",
@@ -99,7 +87,7 @@
     "code": "MU2051",
     "date": "22JUL",
     "destination": "BEI",
-    "stdEtd": "1855/1931"
+    "stdEtd": "1855/1933"
   },
   {
     "code": "WY3908",
@@ -147,37 +135,37 @@
     "code": "MS930",
     "date": "22JUL",
     "destination": "CAI",
-    "stdEtd": "2025/2053"
+    "stdEtd": "2025/2046"
   },
   {
     "code": "OV246",
     "date": "22JUL",
     "destination": "SHJ",
-    "stdEtd": "2040"
+    "stdEtd": "2040/2013"
   },
   {
     "code": "OV286",
     "date": "22JUL",
     "destination": "JED",
-    "stdEtd": "2055/2112"
+    "stdEtd": "2055"
   },
   {
     "code": "OV338",
     "date": "22JUL",
     "destination": "BAG",
-    "stdEtd": "2100/2157"
+    "stdEtd": "2100"
   },
   {
     "code": "OV366",
     "date": "22JUL",
     "destination": "NAI",
-    "stdEtd": "2110/2150"
+    "stdEtd": "2110/2139"
   },
   {
     "code": "OV218",
     "date": "22JUL",
     "destination": "DMM",
-    "stdEtd": "2110"
+    "stdEtd": "2110/2148"
   },
   {
     "code": "QR1124",
@@ -243,7 +231,7 @@
     "code": "IX549",
     "date": "22JUL",
     "destination": "TRV",
-    "stdEtd": "2225"
+    "stdEtd": "2225/2249"
   },
   {
     "code": "OV106",
@@ -714,34 +702,16 @@
     "stdEtd": "1325/1401"
   },
   {
-    "code": "PF735",
+    "code": "FZ043",
     "date": "22JUL",
-    "destination": "ISB",
-    "stdEtd": "1400/1524"
+    "destination": "DXB",
+    "stdEtd": "1550"
   },
   {
-    "code": "WY679",
+    "code": "OV284",
     "date": "22JUL",
-    "destination": "MED",
-    "stdEtd": "1505"
-  },
-  {
-    "code": "WY143",
-    "date": "22JUL",
-    "destination": "MXP",
-    "stdEtd": "1505"
-  },
-  {
-    "code": "OV391",
-    "date": "22JUL",
-    "destination": "PZU",
-    "stdEtd": "1520/1539"
-  },
-  {
-    "code": "WY907",
-    "date": "22JUL",
-    "destination": "SLL",
-    "stdEtd": "1530"
+    "destination": "JED",
+    "stdEtd": "1555"
   },
   {
     "code": "FZ044",
@@ -798,12 +768,6 @@
     "stdEtd": "1800"
   },
   {
-    "code": "OV163",
-    "date": "22JUL",
-    "destination": "SLL",
-    "stdEtd": "1820"
-  },
-  {
     "code": "OV105",
     "date": "22JUL",
     "destination": "SLL",
@@ -826,6 +790,12 @@
     "date": "22JUL",
     "destination": "KWI",
     "stdEtd": "1855"
+  },
+  {
+    "code": "OV163",
+    "date": "22JUL",
+    "destination": "SLL",
+    "stdEtd": "1820/1919"
   },
   {
     "code": "WY921",
@@ -888,15 +858,15 @@
     "stdEtd": "2115"
   },
   {
-    "code": "MS931",
-    "date": "22JUL",
-    "destination": "CAI",
-    "stdEtd": "2125"
-  },
-  {
     "code": "WY821",
     "date": "22JUL",
     "destination": "KUL",
+    "stdEtd": "2125"
+  },
+  {
+    "code": "MS931",
+    "date": "22JUL",
+    "destination": "CAI",
     "stdEtd": "2125"
   },
   {
@@ -924,16 +894,16 @@
     "stdEtd": "2225"
   },
   {
-    "code": "OV735",
-    "date": "22JUL",
-    "destination": "HYD",
-    "stdEtd": "2230"
-  },
-  {
     "code": "OV773",
     "date": "22JUL",
     "destination": "CCJ",
     "stdEtd": "2230"
+  },
+  {
+    "code": "OV735",
+    "date": "22JUL",
+    "destination": "HYD",
+    "stdEtd": "2230/2300"
   },
   {
     "code": "QR1125",
@@ -1420,6 +1390,36 @@
     "date": "22JUL",
     "destination": "SLL",
     "stdEtd": "1500"
+  },
+  {
+    "code": "PF735",
+    "date": "22JUL",
+    "destination": "ISB",
+    "stdEtd": "1400/1524"
+  },
+  {
+    "code": "WY679",
+    "date": "22JUL",
+    "destination": "MED",
+    "stdEtd": "1505"
+  },
+  {
+    "code": "WY143",
+    "date": "22JUL",
+    "destination": "MXP",
+    "stdEtd": "1505"
+  },
+  {
+    "code": "OV391",
+    "date": "22JUL",
+    "destination": "PZU",
+    "stdEtd": "1520/1539"
+  },
+  {
+    "code": "WY907",
+    "date": "22JUL",
+    "destination": "SLL",
+    "stdEtd": "1530"
   },
   {
     "code": "OV174",
