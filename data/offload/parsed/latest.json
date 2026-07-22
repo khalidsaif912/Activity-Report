@@ -1,3 +1,74 @@
 {
-  "tables": []
+  "tables": [
+    {
+      "rows": [
+        [
+          "",
+          "",
+          "",
+          "CARGO OFFLOADED DETAILS",
+          "",
+          "",
+          ""
+        ],
+        [
+          "FLIGHT #",
+          "GF567",
+          "DATE",
+          "22 -Jul",
+          "DESTINATION",
+          "BAH"
+        ],
+        [
+          "AWB",
+          "PCS",
+          "KGS",
+          "DESCRIPTION",
+          "REASON"
+        ],
+        [
+          "001-15596431",
+          "2",
+          "50",
+          "CONSOLIDATION",
+          "SPACE"
+        ],
+        [
+          "072-74344966",
+          "3",
+          "182",
+          "USED HOUSEHOLD",
+          "SPACE"
+        ],
+        [
+          "072-74345014",
+          "4",
+          "306.5",
+          "ELECTRICAL SPA",
+          "SPACE"
+        ],
+        [
+          "072-74345025",
+          "1",
+          "2.8",
+          "AIRCRAFT PARTS",
+          "SPACE"
+        ],
+        [
+          "072-74345036",
+          "2",
+          "8.5",
+          "AIRCRAFT PARTS",
+          "SPACE"
+        ],
+        [
+          "TOTAL",
+          "12",
+          "549.8",
+          "",
+          ""
+        ]
+      ]
+    }
+  ]
 }
