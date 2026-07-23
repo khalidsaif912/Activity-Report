@@ -1,9 +1,9 @@
 {
   "shiftMeta": {
-    "key": "morning",
-    "title": "Morning Shift",
+    "key": "afternoon",
+    "title": "Afternoon Shift",
     "date": "2026-07-23",
-    "time": "06:00 - 15:00"
+    "time": "13:00 - 22:00"
   },
   "manpowerSections": [
     {
@@ -215,5 +215,5 @@
       ]
     }
   },
-  "defaultShift": "morning"
+  "defaultShift": "afternoon"
 }
