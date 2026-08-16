@@ -4,9 +4,11 @@
  */
 (function () {
   console.info(
-    "[activity-report] client bundle v34 — Employee directory from roster-site; GitHub Pages asset paths."
+    "[activity-report] client bundle v36 — Flight Dispatch from import roster (export+import names)."
   );
   const ROSTER_SITE_SCHEDULES_INDEX =
+    "https://khalidsaif912.github.io/new/docs/schedules/index.json";
+  const ROSTER_SITE_SCHEDULES_INDEX_FALLBACK =
     "https://khalidsaif912.github.io/roster-site/schedules/index.json";
 
   /**
@@ -127,14 +129,19 @@
   }
 
   async function loadEmployeesFromRosterSite() {
-    try {
-      const r = await fetch(ROSTER_SITE_SCHEDULES_INDEX, { cache: "no-store" });
-      if (!r.ok) return [];
-      const idx = await r.json();
-      return namesFromRosterSchedulesIndex(idx);
-    } catch (_) {
-      return [];
+    const urls = [ROSTER_SITE_SCHEDULES_INDEX, ROSTER_SITE_SCHEDULES_INDEX_FALLBACK];
+    for (let i = 0; i < urls.length; i++) {
+      try {
+        const r = await fetch(urls[i], { cache: "no-store" });
+        if (!r.ok) continue;
+        const idx = await r.json();
+        const names = namesFromRosterSchedulesIndex(idx);
+        if (names.length) return names;
+      } catch (_) {
+        /* try next roster mirror */
+      }
     }
+    return [];
   }
 
   /**
@@ -706,6 +713,58 @@
     stripExcludedEmployeesFromManpower();
   }
 
+  function flightDispatchItemsEmpty(sections) {
+    const sec = (Array.isArray(sections) ? sections : []).find(
+      (s) => String((s && s.title) || "").trim().toLowerCase() === "flight dispatch"
+    );
+    return !sec || !(sec.items || []).some((x) => String(x || "").trim());
+  }
+
+  function upsertStateFlightDispatch(items) {
+    const list = (items || []).map((x) => String(x || "").trim()).filter(Boolean);
+    if (!list.length) return false;
+    const apply = (sections) => {
+      const secs = Array.isArray(sections) ? sections.slice() : [];
+      const idx = secs.findIndex((s) => String((s && s.title) || "").trim().toLowerCase() === "flight dispatch");
+      const next = { title: "Flight Dispatch", items: list.slice() };
+      if (idx >= 0) secs[idx] = next;
+      else secs.push(next);
+      return secs;
+    };
+    state.manpowerSections = apply(state.manpowerSections);
+    if (state.shiftsFromServer && state.activeShift && state.shiftsFromServer[state.activeShift]) {
+      state.shiftsFromServer[state.activeShift].manpowerSections = apply(
+        state.shiftsFromServer[state.activeShift].manpowerSections
+      );
+    }
+    return true;
+  }
+
+  async function hydrateFlightDispatchFromImportRoster() {
+    if (!flightDispatchItemsEmpty(state.manpowerSections)) return;
+    const date = String(state.activeDate || (state.shiftMeta && state.shiftMeta.date) || "").trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return;
+    const shiftKey = state.activeShift || "afternoon";
+    const jsonUrls = [
+      new URL(`../flight_dispatch/by-date/${date}/latest.json`, window.location.href).href,
+      `${projectDataReportBase().replace(/data\/report\/?$/, "data/flight_dispatch/")}by-date/${date}/latest.json`
+    ];
+    for (let i = 0; i < jsonUrls.length; i++) {
+      try {
+        const r = await fetch(jsonUrls[i], { cache: "no-store" });
+        if (!r.ok) continue;
+        const data = await r.json();
+        const fromShift = data && data.byShift && data.byShift[shiftKey] && data.byShift[shiftKey].items;
+        const items = (Array.isArray(fromShift) && fromShift.length)
+          ? fromShift
+          : (data && data.flightDispatch && data.flightDispatch.items) || [];
+        if (upsertStateFlightDispatch(items)) return;
+      } catch (_) {
+        /* try next */
+      }
+    }
+  }
+
   function syncManpowerFromServerShifts() {
     if (!state.shiftsFromServer || !state.activeShift) return;
     const pack = state.shiftsFromServer[state.activeShift];
@@ -912,6 +971,7 @@
     applyServerInventorySupportTailSections();
     if (window.offloadLoader) window.offloadLoader.normalizeOffloadRows(state);
     stripExcludedEmployeesFromManpower();
+    await hydrateFlightDispatchFromImportRoster();
   }
 
   async function loadReportPayload() {

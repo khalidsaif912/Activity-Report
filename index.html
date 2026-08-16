@@ -1287,16 +1287,27 @@
         Object.keys(payload.shifts).forEach((key) => {
           const sh = payload.shifts[key];
           if (!sh || typeof sh !== "object") return;
-          const shiftItems = (byShift[key] && byShift[key].items) || singleItems;
-          sh.manpowerSections = upsertFlightDispatchSection(sh.manpowerSections, shiftItems);
+          const shiftItems = (byShift[key] && Array.isArray(byShift[key].items) ? byShift[key].items : [])
+            .map((x) => String(x || "").trim())
+            .filter(Boolean);
+          const fallback = singleItems.map((x) => String(x || "").trim()).filter(Boolean);
+          const items = shiftItems.length ? shiftItems : fallback;
+          if (!items.length) return;
+          sh.manpowerSections = upsertFlightDispatchSection(sh.manpowerSections, items);
         });
       }
 
       if (Array.isArray(payload.manpowerSections)) {
         const activeKey =
           String((payload.shiftMeta && payload.shiftMeta.key) || payload.defaultShift || "").trim().toLowerCase() || "morning";
-        const activeItems = (byShift[activeKey] && byShift[activeKey].items) || singleItems;
-        payload.manpowerSections = upsertFlightDispatchSection(payload.manpowerSections, activeItems);
+        const activeItems = (byShift[activeKey] && Array.isArray(byShift[activeKey].items) ? byShift[activeKey].items : [])
+          .map((x) => String(x || "").trim())
+          .filter(Boolean);
+        const fallback = singleItems.map((x) => String(x || "").trim()).filter(Boolean);
+        const items = activeItems.length ? activeItems : fallback;
+        if (items.length) {
+          payload.manpowerSections = upsertFlightDispatchSection(payload.manpowerSections, items);
+        }
       }
       return payload;
     }
@@ -1305,6 +1316,7 @@
       const d = String(raw || "").trim();
       if (!d) return "Other";
       if (d.toLowerCase() === "supervisors") return "Supervisor";
+      if (d.toLowerCase().startsWith("flight dispatch")) return "Flight Dispatch";
       return d;
     }
 
@@ -1332,7 +1344,10 @@
 
     async function fetchRemoteSchedulesIndex() {
       if (remoteSchedulesIndex) return remoteSchedulesIndex;
-      const idx = await fetchJsonAny(["https://khalidsaif912.github.io/roster-site/schedules/index.json"]);
+      const idx = await fetchJsonAny([
+        "https://khalidsaif912.github.io/new/docs/schedules/index.json",
+        "https://khalidsaif912.github.io/roster-site/schedules/index.json"
+      ]);
       remoteSchedulesIndex = idx && Array.isArray(idx.employees) ? idx : { employees: [] };
       return remoteSchedulesIndex;
     }
@@ -1341,7 +1356,10 @@
       const key = String(empId || "").trim();
       if (!key) return null;
       if (remoteEmployeeScheduleCache.has(key)) return remoteEmployeeScheduleCache.get(key);
-      const data = await fetchJsonAny([`https://khalidsaif912.github.io/roster-site/schedules/${encodeURIComponent(key)}.json`]);
+      const data = await fetchJsonAny([
+        `https://khalidsaif912.github.io/new/docs/schedules/${encodeURIComponent(key)}.json`,
+        `https://khalidsaif912.github.io/roster-site/schedules/${encodeURIComponent(key)}.json`
+      ]);
       const payload = data && typeof data === "object" ? data : null;
       remoteEmployeeScheduleCache.set(key, payload);
       return payload;
@@ -1427,6 +1445,110 @@
       });
     }
 
+    function dispatchPayloadHasNames(data) {
+      if (!data || typeof data !== "object") return false;
+      const packs = [];
+      if (data.byShift && typeof data.byShift === "object") {
+        Object.keys(data.byShift).forEach((k) => packs.push(data.byShift[k]));
+      }
+      if (data.flightDispatch) packs.push(data.flightDispatch);
+      return packs.some((pack) => Array.isArray(pack && pack.items) && pack.items.some((x) => String(x || "").trim()));
+    }
+
+    function lineFromDispatchName(text) {
+      const full = String(text || "").trim();
+      if (!full) return "";
+      if (full.includes("·")) {
+        const parts = full.split("·");
+        const name = String(parts[0] || "").trim();
+        let sn = String(parts[1] || "").trim();
+        if (sn && !/^SN/i.test(sn)) sn = `SN${sn}`;
+        return `${sn} ${name}`.trim();
+      }
+      const dash = full.lastIndexOf(" - ");
+      if (dash >= 0) {
+        const name = full.slice(0, dash).trim();
+        let sn = full.slice(dash + 3).trim();
+        if (sn && !/^SN/i.test(sn)) sn = `SN${sn}`;
+        return `${sn} ${name}`.trim();
+      }
+      return full;
+    }
+
+    function parseImportFlightDispatchHtml(html) {
+      const byShift = { morning: [], afternoon: [], night: [] };
+      const seen = { morning: new Set(), afternoon: new Set(), night: new Set() };
+      const codeToKey = {
+        MN06: "morning", ME06: "morning", ME07: "morning", ME12: "morning",
+        AN13: "afternoon", AE14: "afternoon",
+        NN21: "night", NE22: "night"
+      };
+      const doc = new DOMParser().parseFromString(String(html || ""), "text/html");
+      const cards = Array.from(doc.querySelectorAll(".deptCard, .dept-card"));
+      cards.forEach((card) => {
+        const titleEl = card.querySelector(".deptTitle, .dept-title");
+        const title = String((titleEl && titleEl.textContent) || "").trim().toLowerCase();
+        if (!title.startsWith("flight dispatch")) return;
+        const shiftCards = Array.from(card.querySelectorAll("details.shiftCard"));
+        const groups = shiftCards.length ? shiftCards : [card];
+        groups.forEach((shiftCard) => {
+          const dataShift = String(shiftCard.getAttribute("data-shift") || "").trim().toLowerCase();
+          Array.from(shiftCard.querySelectorAll(".empRow, .emp-row")).forEach((row) => {
+            const nameEl = row.querySelector(".empName, .emp-name");
+            const codeEl = row.querySelector(".empStatus, .emp-code");
+            const line = lineFromDispatchName(nameEl && nameEl.textContent);
+            if (!line) return;
+            let key = ["morning", "afternoon", "night"].includes(dataShift) ? dataShift : "";
+            if (!key) {
+              const status = String((codeEl && codeEl.textContent) || "").toUpperCase();
+              Object.keys(codeToKey).some((code) => {
+                if (status.includes(code)) {
+                  key = codeToKey[code];
+                  return true;
+                }
+                return false;
+              });
+            }
+            if (!key || seen[key].has(line.toUpperCase())) return;
+            seen[key].add(line.toUpperCase());
+            byShift[key].push(line);
+          });
+        });
+      });
+      return {
+        flightDispatch: {
+          title: "Flight Dispatch",
+          items: [...new Set([...byShift.morning, ...byShift.afternoon, ...byShift.night])]
+        },
+        byShift: {
+          morning: { title: "Flight Dispatch", items: byShift.morning },
+          afternoon: { title: "Flight Dispatch", items: byShift.afternoon },
+          night: { title: "Flight Dispatch", items: byShift.night }
+        }
+      };
+    }
+
+    async function fetchLiveImportFlightDispatch(isoDate) {
+      const date = String(isoDate || "").trim();
+      const urls = [
+        `https://khalidsaif912.github.io/new/docs/import/date/${encodeURIComponent(date)}/`,
+        `https://khalidsaif912.github.io/new/docs/import/date/${encodeURIComponent(date)}/index.html`,
+        "https://khalidsaif912.github.io/new/docs/import/now/",
+        "https://khalidsaif912.github.io/new/docs/import/"
+      ];
+      for (let i = 0; i < urls.length; i += 1) {
+        try {
+          const res = await fetch(urls[i], { cache: "no-store" });
+          if (!res.ok) continue;
+          const html = await res.text();
+          if (!/Flight Dispatch/i.test(html)) continue;
+          const parsed = parseImportFlightDispatchHtml(html);
+          if (dispatchPayloadHasNames(parsed)) return parsed;
+        } catch (_) {}
+      }
+      return null;
+    }
+
     async function loadManpowerDataForDate(isoDate) {
       const key = String(isoDate || "").trim();
       if (!key) return {};
@@ -1442,7 +1564,10 @@
         const remote = await buildRemoteRosterForDate(key);
         if (payloadHasManpowerNames(remote)) loaded = remote;
       }
-      const dispatchByDate = await fetchJsonAny([`./data/flight_dispatch/by-date/${dateKey}/latest.json`]);
+      let dispatchByDate = await fetchJsonAny([`./data/flight_dispatch/by-date/${dateKey}/latest.json`]);
+      if (!dispatchPayloadHasNames(dispatchByDate)) {
+        dispatchByDate = await fetchLiveImportFlightDispatch(key);
+      }
 
       const payload = loaded && typeof loaded === "object"
         ? mergeFlightDispatchIntoPayload(JSON.parse(JSON.stringify(loaded)), dispatchByDate)
@@ -1697,7 +1822,7 @@
       );
 
       root.innerHTML = `
-        <a class="kpi-card-link" href="https://khalidsaif912.github.io/roster-site/" target="_blank" rel="noopener noreferrer">
+        <a class="kpi-card-link" href="https://khalidsaif912.github.io/new/docs/" target="_blank" rel="noopener noreferrer">
         <div class="kpi-card">
           <div class="kpi-top">
             <div class="kpi-label">EXPORT ROSTER</div>
@@ -1713,7 +1838,7 @@
         </div>
         </a>
 
-        <a class="kpi-card-link" href="https://khalidsaif912.github.io/roster-site/import" target="_blank" rel="noopener noreferrer">
+        <a class="kpi-card-link" href="https://khalidsaif912.github.io/new/docs/import/" target="_blank" rel="noopener noreferrer">
         <div class="kpi-card k-sky">
           <div class="kpi-top">
             <div class="kpi-label">Import Roster</div>
@@ -1728,7 +1853,7 @@
         </div>
         </a>
 
-        <a class="kpi-card-link" href="https://khalidsaif912.github.io/roster-site/training/" target="_blank" rel="noopener noreferrer">
+        <a class="kpi-card-link" href="https://khalidsaif912.github.io/new/docs/training/" target="_blank" rel="noopener noreferrer">
         <div class="kpi-card k-amber">
           <div class="kpi-top">
             <div class="kpi-label">Training</div>
@@ -1743,7 +1868,7 @@
         </div>
         </a>
 
-        <a class="kpi-card-link" href="https://khalidsaif912.github.io/roster-site/a-cup-of-book/" target="_blank" rel="noopener noreferrer">
+        <a class="kpi-card-link" href="https://khalidsaif912.github.io/new/docs/a-cup-of-book/" target="_blank" rel="noopener noreferrer">
         <div class="kpi-card k-green">
           <div class="kpi-top">
             <div class="kpi-label">A Cup of Book</div>

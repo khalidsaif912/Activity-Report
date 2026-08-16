@@ -1,7 +1,7 @@
-"""Read the live roster-site schedules JSON (source of truth for names).
+"""Read live Duty Roster schedules JSON (source of truth for names).
 
-HTML date pages change markup over time; this JSON is what the homepage
-already uses as a fallback and stays stable.
+Canonical live site: https://khalidsaif912.github.io/new/docs/
+roster-site URLs are fallbacks only — the two projects are linked, not rivals.
 """
 
 from __future__ import annotations
@@ -12,10 +12,14 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from urllib.request import Request, urlopen
 
 SCHEDULES_INDEX_URLS = (
+    "https://khalidsaif912.github.io/new/docs/schedules/index.json",
+    "https://raw.githubusercontent.com/khalidsaif912/new/main/docs/schedules/index.json",
     "https://khalidsaif912.github.io/roster-site/schedules/index.json",
     "https://raw.githubusercontent.com/khalidsaif912/roster-site/main/docs/schedules/index.json",
 )
 SCHEDULE_EMPLOYEE_URLS = (
+    "https://khalidsaif912.github.io/new/docs/schedules/{emp_id}.json",
+    "https://raw.githubusercontent.com/khalidsaif912/new/main/docs/schedules/{emp_id}.json",
     "https://khalidsaif912.github.io/roster-site/schedules/{emp_id}.json",
     "https://raw.githubusercontent.com/khalidsaif912/roster-site/main/docs/schedules/{emp_id}.json",
 )

@@ -32,6 +32,9 @@ EXPORT_DEPTS = {
 
 def html_urls_for_date(date: str) -> list[str]:
     return [
+        f"https://khalidsaif912.github.io/new/docs/date/{date}/",
+        f"https://khalidsaif912.github.io/new/docs/date/{date}/index.html",
+        f"https://raw.githubusercontent.com/khalidsaif912/new/main/docs/date/{date}/index.html",
         f"https://raw.githubusercontent.com/khalidsaif912/roster-site/main/docs/date/{date}/index.html",
         f"https://khalidsaif912.github.io/roster-site/date/{date}/",
         f"https://khalidsaif912.github.io/roster-site/date/{date}/index.html",

@@ -1,0 +1,28 @@
+---
+description: Activity-Report is linked to the live Duty Roster at new/docs — never treat them as conflicting
+alwaysApply: true
+---
+
+# Linked roster ecosystem — extreme care
+
+Activity-Report and the Duty Roster are **one pipeline**, not rivals. Do not "fix" one by breaking the other. Do not rewrite roster markup, URLs, or data contracts unless the user asked.
+
+## Canonical live roster (الصادر / الوارد)
+
+- Live site: https://khalidsaif912.github.io/new/docs/
+- Repo: `khalidsaif912/new` (GitHub Pages from repo root; site files in `docs/`)
+- Export = الصادر, Import = الوارد
+- Employee names and duty lists come from `docs/schedules/*.json` and date HTML under `docs/date/` / `docs/import/`
+- Flight Dispatch in Activity-Report is **consumed from الوارد** (`new/docs/import`): merge `Flight Dispatch (Export)` + `Flight Dispatch (Import)` into one report section titled `Flight Dispatch`.
+
+## Related workspaces
+
+- `roster-site` (`C:\Users\PC\Documents\GitHub\roster-site`) — local generator; live `/roster-site/` often **redirects into** `new/docs`. Same family, not a replacement to fight.
+- `Activity-Report` — **consumer**. It displays manpower and autocomplete from that roster data. It does not own the source roster.
+
+## Hard rules
+
+- Prefer `https://khalidsaif912.github.io/new/docs/` as the live roster source; keep `roster-site` URLs only as fallback.
+- Never delete, overwrite, or "simplify away" roster fields to make this report happier.
+- Do not push `new`, `roster-site`, or Activity-Report unless the user explicitly asks.
+- If a roster HTML/JSON shape changed, adapt the **consumer** here; do not change `new` unless working in that repo with an explicit request.
