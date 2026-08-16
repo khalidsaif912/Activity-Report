@@ -17,7 +17,9 @@ window.employeeAutocomplete = {
         throw new Error(`Expected JSON but got HTML (wrong URL?). ${url}`);
       }
       const raw = JSON.parse(text);
-      this.employees = Array.isArray(raw) ? raw.slice() : [];
+      const list = Array.isArray(raw) ? raw.slice() : [];
+      if (list.length) this.employees = list;
+      else if (!this.employees.length) this.employees = [];
     } catch (err) {
       console.error("Failed to load employees.json", url, err);
       this.employees = [];

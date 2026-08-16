@@ -4,12 +4,34 @@
  */
 (function () {
   console.info(
-    "[activity-report] client bundle v33 — Phrase delete + merged flight/phrase suggestions."
+    "[activity-report] client bundle v34 — Employee directory from roster-site; GitHub Pages asset paths."
   );
+  const ROSTER_SITE_SCHEDULES_INDEX =
+    "https://khalidsaif912.github.io/roster-site/schedules/index.json";
+
+  /**
+   * data/report/ URL that works on localhost (site at /) and GitHub Pages (site at /Activity-Report/).
+   * Origin-absolute /data/report/ is wrong on project Pages because it drops the repo folder.
+   */
+  function projectDataReportBase() {
+    const origin = window.location.origin;
+    const path = String(window.location.pathname || "/");
+    const marker = "/data/report/";
+    const idx = path.toLowerCase().indexOf(marker);
+    if (idx >= 0) {
+      return new URL(path.slice(0, idx + marker.length), origin).href;
+    }
+    const segs = path.split("/").filter(Boolean);
+    if (segs.length && segs[0].toLowerCase() !== "data") {
+      return new URL(`/${segs[0]}/data/report/`, origin).href;
+    }
+    return new URL("/data/report/", origin).href;
+  }
+
   /**
    * Single-folder fallback when meta/window overrides are unset.
    * - file: ../../data/report/
-   * - http(s): same directory as this HTML, then site-root /data/report/ (Flask).
+   * - http(s): same directory as this HTML, then repo-aware /data/report/.
    */
   function reportAssetsRoot() {
     const meta = document.querySelector('meta[name="activity-report-assets-root"]');
@@ -20,7 +42,7 @@
       return window.ACTIVITY_REPORT_ASSETS_ROOT.trim().replace(/\/?$/, "/");
     }
     if (location.protocol === "http:" || location.protocol === "https:") {
-      return new URL("/data/report/", window.location.origin).href;
+      return projectDataReportBase();
     }
     return "../../data/report/";
   }
@@ -80,10 +102,39 @@
     }
 
     const href = window.location.href;
-    const origin = window.location.origin;
     add(new URL(".", href).href);
-    add(new URL("/data/report/", origin).href);
+    add(projectDataReportBase());
+    add(new URL("/data/report/", window.location.origin).href);
     return out;
+  }
+
+  function namesFromRosterSchedulesIndex(idx) {
+    const emps = idx && Array.isArray(idx.employees) ? idx.employees : [];
+    const out = [];
+    const seen = new Set();
+    emps.forEach((emp) => {
+      if (!emp || typeof emp !== "object") return;
+      const id = String(emp.id || "").trim();
+      const name = String(emp.name || "").trim();
+      if (!id && !name) return;
+      const line = `${id ? `SN${id}` : ""} ${name}`.trim();
+      const key = line.toUpperCase();
+      if (!line || seen.has(key)) return;
+      seen.add(key);
+      out.push(line);
+    });
+    return out;
+  }
+
+  async function loadEmployeesFromRosterSite() {
+    try {
+      const r = await fetch(ROSTER_SITE_SCHEDULES_INDEX, { cache: "no-store" });
+      if (!r.ok) return [];
+      const idx = await r.json();
+      return namesFromRosterSchedulesIndex(idx);
+    } catch (_) {
+      return [];
+    }
   }
 
   /**
@@ -100,8 +151,10 @@
         const t = await r.text();
         if (t.trimStart().startsWith("<")) continue;
         const data = JSON.parse(t);
+        const list = filterActivityReportEmployeeList(Array.isArray(data) ? data : []);
+        if (!list.length) continue;
         if (window.employeeAutocomplete) {
-          window.employeeAutocomplete.employees = filterActivityReportEmployeeList(Array.isArray(data) ? data : []);
+          window.employeeAutocomplete.employees = list;
           try {
             const ctuRes = await fetch(b + "ctu_staff_suggestions.json", { cache: "no-store" });
             if (ctuRes.ok) {
@@ -120,6 +173,12 @@
         /* try next */
       }
     }
+    if (window.employeeAutocomplete && !(window.employeeAutocomplete.employees || []).length) {
+      const remoteNames = await loadEmployeesFromRosterSite();
+      if (remoteNames.length) {
+        window.employeeAutocomplete.employees = filterActivityReportEmployeeList(remoteNames);
+      }
+    }
     return null;
   }
 
@@ -134,6 +193,7 @@
 
     const urls = [];
     urls.push(new URL("../offload/report/latest.json", window.location.href).href);
+    urls.push(new URL("../offload/report/latest.json", projectDataReportBase()).href);
     urls.push(new URL("/data/offload/report/latest.json", window.location.origin).href);
 
     for (let i = 0; i < urls.length; i++) {
@@ -787,6 +847,7 @@
     const candidates = [];
     if (location.protocol === "http:" || location.protocol === "https:") {
       candidates.push(new URL("dates_index.json", window.location.href).href);
+      candidates.push(new URL("dates_index.json", projectDataReportBase()).href);
       candidates.push(new URL("/data/report/dates_index.json", window.location.origin).href);
     } else {
       candidates.push("dates_index.json");
@@ -908,8 +969,14 @@
       const launch = parseInitialLaunchContext();
       const foundBase = await resolveReportAssetBase();
       const assetBase = foundBase || reportAssetsRoot();
-      if (foundBase === null && window.employeeAutocomplete) {
+      if (foundBase === null && window.employeeAutocomplete && !(window.employeeAutocomplete.employees || []).length) {
         await window.employeeAutocomplete.load(assetBase + "employees.json");
+        if (!(window.employeeAutocomplete.employees || []).length) {
+          const remoteNames = await loadEmployeesFromRosterSite();
+          if (remoteNames.length) {
+            window.employeeAutocomplete.employees = filterActivityReportEmployeeList(remoteNames);
+          }
+        }
       }
 
       if (window.flightAutocomplete) {

@@ -1414,6 +1414,19 @@
       return payload;
     }
 
+    function payloadHasManpowerNames(payload) {
+      if (!payload || typeof payload !== "object") return false;
+      const packs = [];
+      if (payload.shifts && typeof payload.shifts === "object") {
+        Object.keys(payload.shifts).forEach((k) => packs.push(payload.shifts[k]));
+      }
+      if (Array.isArray(payload.manpowerSections)) packs.push(payload);
+      return packs.some((pack) => {
+        const secs = pack && Array.isArray(pack.manpowerSections) ? pack.manpowerSections : [];
+        return secs.some((sec) => Array.isArray(sec.items) && sec.items.some((x) => String(x || "").trim()));
+      });
+    }
+
     async function loadManpowerDataForDate(isoDate) {
       const key = String(isoDate || "").trim();
       if (!key) return {};
@@ -1423,8 +1436,12 @@
         `./data/report/by-date/${dateKey}/latest.json`,
         `./data/roster/by-date/${dateKey}/latest.json`
       ]);
-      // Fallback to remote schedules only when local by-date files are missing.
-      if (!loaded || typeof loaded !== "object") loaded = await buildRemoteRosterForDate(key);
+      // Local snapshots can exist but be empty (old HTML parser wrote blank sections).
+      // Always fall back to the live roster-site schedules when names are missing.
+      if (!payloadHasManpowerNames(loaded)) {
+        const remote = await buildRemoteRosterForDate(key);
+        if (payloadHasManpowerNames(remote)) loaded = remote;
+      }
       const dispatchByDate = await fetchJsonAny([`./data/flight_dispatch/by-date/${dateKey}/latest.json`]);
 
       const payload = loaded && typeof loaded === "object"

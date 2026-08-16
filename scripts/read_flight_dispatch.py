@@ -8,59 +8,83 @@ from report_date_config import get_report_date
 
 
 SHIFT_CODE = "AN13"   # MN06 / AN13 / NN21
+DISPATCH_TITLES = {"Flight Dispatch (Export)", "Flight Dispatch (Import)"}
 
 
-def page_url_for_date(date: str) -> str:
-    return (
-        "https://raw.githubusercontent.com/khalidsaif912/roster-site/main/docs/import/"
-        f"{date}/index.html"
-    )
+def page_urls_for_date(date: str) -> list[str]:
+    return [
+        f"https://raw.githubusercontent.com/khalidsaif912/roster-site/main/docs/import/date/{date}/index.html",
+        f"https://khalidsaif912.github.io/roster-site/import/date/{date}/",
+        f"https://khalidsaif912.github.io/roster-site/import/date/{date}/index.html",
+        f"https://raw.githubusercontent.com/khalidsaif912/roster-site/main/docs/import/{date}/index.html",
+    ]
 
 
-def fetch_html(url: str) -> str:
-    response = requests.get(url, timeout=30)
-    response.raise_for_status()
-    return response.text
+def fetch_html_candidates(urls: list[str]) -> list[str]:
+    pages: list[str] = []
+    for url in urls:
+        try:
+            response = requests.get(url, timeout=30)
+            response.raise_for_status()
+            text = response.text or ""
+            if "<html" in text.lower() or "Flight Dispatch" in text or "deptCard" in text:
+                print(f"Fetched dispatch HTML: {url} ({len(text)} bytes)")
+                pages.append(text)
+        except Exception as exc:  # noqa: BLE001 — try next mirror
+            print(f"Skip {url} ({exc})")
+    return pages
+
+
+def _line_from_name(text: str) -> str:
+    full = (text or "").strip()
+    if "·" in full:
+        name, sn = full.split("·", 1)
+        name, sn = name.strip(), sn.strip()
+        if sn and not sn.upper().startswith("SN"):
+            sn = f"SN{sn}"
+        return f"{sn} {name}".strip()
+    if " - " in full:
+        name, sn = full.rsplit(" - ", 1)
+        name, sn = name.strip(), sn.strip()
+        if sn and not sn.upper().startswith("SN"):
+            sn = f"SN{sn}"
+        return f"{sn} {name}".strip()
+    return full
 
 
 def parse_dispatch(html: str, shift_code: str) -> list[str]:
     soup = BeautifulSoup(html, "html.parser")
     items = []
 
-    for card in soup.find_all("div", class_="dept-card"):
-        title_tag = card.find("div", class_="dept-title")
+    dept_cards = soup.find_all("div", class_="deptCard")
+    if not dept_cards:
+        dept_cards = soup.find_all("div", class_="dept-card")
+
+    for card in dept_cards:
+        title_tag = card.find(class_="deptTitle") or card.find(class_="dept-title")
         if not title_tag:
             continue
 
         title = title_tag.get_text(" ", strip=True)
-        if title not in ["Flight Dispatch (Export)", "Flight Dispatch (Import)"]:
+        if title not in DISPATCH_TITLES:
             continue
 
-        for row in card.find_all("div", class_="emp-row"):
-            name_tag = row.find("span", class_="emp-name")
-            code_tag = row.find("span", class_="emp-code")
-
-            if not name_tag or not code_tag:
+        for row in card.find_all("div", class_=["empRow", "emp-row"]):
+            name_tag = row.find("span", class_="empName") or row.find("span", class_="emp-name")
+            code_tag = row.find("span", class_="empStatus") or row.find("span", class_="emp-code")
+            if not name_tag:
                 continue
 
-            emp_shift = code_tag.get_text(" ", strip=True)
-            if emp_shift != shift_code:
+            emp_shift = code_tag.get_text(" ", strip=True) if code_tag else ""
+            if shift_code and shift_code not in emp_shift:
                 continue
 
-            text = name_tag.get_text(" ", strip=True)
-
-            if "·" in text:
-                name, sn = text.split("·", 1)
-                name = name.strip()
-                sn = sn.strip()
-                items.append(f"SN{sn} {name}")
-            else:
-                items.append(text.strip())
+            items.append(_line_from_name(name_tag.get_text(" ", strip=True)))
 
     seen = set()
     result = []
     for item in items:
-        if item not in seen:
+        if item and item not in seen:
             seen.add(item)
             result.append(item)
 
@@ -71,7 +95,16 @@ def main() -> None:
     date = get_report_date()
     print(f"Report date: {date}")
     print("Fetching flight dispatch...")
-    html = fetch_html(page_url_for_date(date))
+    pages = fetch_html_candidates(page_urls_for_date(date))
+    html = ""
+    best_count = -1
+    for page in pages:
+        n = sum(len(parse_dispatch(page, code)) for code in ("MN06", "AN13", "NN21"))
+        if n > best_count:
+            best_count = n
+            html = page
+    if not html:
+        print("No dispatch HTML; writing empty payload")
 
     print("Parsing...")
     dispatch_items = parse_dispatch(html, SHIFT_CODE)
@@ -118,6 +151,12 @@ def main() -> None:
 
     print(f"Done [ok] {output_file} created")
     print(f"Done [ok] {dated_file} created")
+    print(
+        "Dispatch counts: "
+        f"morning={len(by_shift['morning']['items'])} "
+        f"afternoon={len(by_shift['afternoon']['items'])} "
+        f"night={len(by_shift['night']['items'])}"
+    )
 
 
 if __name__ == "__main__":
