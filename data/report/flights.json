@@ -1,47 +1,5 @@
 [
   {
-    "code": "WY674",
-    "date": "17AUG",
-    "destination": "JED",
-    "stdEtd": "0510"
-  },
-  {
-    "code": "WY172",
-    "date": "17AUG",
-    "destination": "AMS",
-    "stdEtd": "0515"
-  },
-  {
-    "code": "WY154",
-    "date": "17AUG",
-    "destination": "ZRH",
-    "stdEtd": "0525"
-  },
-  {
-    "code": "WY2918",
-    "date": "17AUG",
-    "destination": "SLL",
-    "stdEtd": "0530"
-  },
-  {
-    "code": "OV564",
-    "date": "17AUG",
-    "destination": "RAW",
-    "stdEtd": "0545"
-  },
-  {
-    "code": "WY148",
-    "date": "17AUG",
-    "destination": "ROM",
-    "stdEtd": "0545"
-  },
-  {
-    "code": "OV736",
-    "date": "17AUG",
-    "destination": "HYD",
-    "stdEtd": "0600/0539"
-  },
-  {
     "code": "OV598",
     "date": "17AUG",
     "destination": "PES",
@@ -201,7 +159,7 @@
     "code": "OV134",
     "date": "17AUG",
     "destination": "DQM",
-    "stdEtd": "1130"
+    "stdEtd": "1130/1114"
   },
   {
     "code": "WY298",
@@ -726,10 +684,46 @@
     "stdEtd": "0355"
   },
   {
-    "code": "QR1149",
+    "code": "WY674",
     "date": "17AUG",
-    "destination": "DOH",
+    "destination": "JED",
+    "stdEtd": "0510"
+  },
+  {
+    "code": "WY172",
+    "date": "17AUG",
+    "destination": "AMS",
+    "stdEtd": "0515"
+  },
+  {
+    "code": "WY154",
+    "date": "17AUG",
+    "destination": "ZRH",
+    "stdEtd": "0525"
+  },
+  {
+    "code": "WY2918",
+    "date": "17AUG",
+    "destination": "SLL",
     "stdEtd": "0530"
+  },
+  {
+    "code": "OV564",
+    "date": "17AUG",
+    "destination": "RAW",
+    "stdEtd": "0545"
+  },
+  {
+    "code": "WY148",
+    "date": "17AUG",
+    "destination": "ROM",
+    "stdEtd": "0545"
+  },
+  {
+    "code": "OV736",
+    "date": "17AUG",
+    "destination": "HYD",
+    "stdEtd": "0600/0539"
   },
   {
     "code": "WY201",
@@ -837,7 +831,7 @@
     "code": "FZ046",
     "date": "17AUG",
     "destination": "DXB",
-    "stdEtd": "0910/0940"
+    "stdEtd": "0910/0950"
   },
   {
     "code": "WY203",
@@ -1432,6 +1426,12 @@
     "date": "17AUG",
     "destination": "PEN",
     "stdEtd": "0445"
+  },
+  {
+    "code": "QR1149",
+    "date": "17AUG",
+    "destination": "DOH",
+    "stdEtd": "0530"
   },
   {
     "code": "WY648",
