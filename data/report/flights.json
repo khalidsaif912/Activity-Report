@@ -1,35 +1,5 @@
 [
   {
-    "code": "OV174",
-    "date": "17AUG",
-    "destination": "SLL",
-    "stdEtd": "1500"
-  },
-  {
-    "code": "WY3914",
-    "date": "17AUG",
-    "destination": "SLL",
-    "stdEtd": "1525"
-  },
-  {
-    "code": "WY906",
-    "date": "17AUG",
-    "destination": "SLL",
-    "stdEtd": "1540"
-  },
-  {
-    "code": "WY204",
-    "date": "17AUG",
-    "destination": "BOM",
-    "stdEtd": "1545"
-  },
-  {
-    "code": "OV284",
-    "date": "17AUG",
-    "destination": "JED",
-    "stdEtd": "1555"
-  },
-  {
     "code": "OV104",
     "date": "17AUG",
     "destination": "SLL",
@@ -129,7 +99,7 @@
     "code": "FZ047",
     "date": "17AUG",
     "destination": "DXB",
-    "stdEtd": "1945/2001"
+    "stdEtd": "1945"
   },
   {
     "code": "OV228",
@@ -153,7 +123,7 @@
     "code": "OV246",
     "date": "17AUG",
     "destination": "SHJ",
-    "stdEtd": "2040/2012"
+    "stdEtd": "2040/2013"
   },
   {
     "code": "WY414",
@@ -171,7 +141,7 @@
     "code": "OV214",
     "date": "17AUG",
     "destination": "AD",
-    "stdEtd": "2055"
+    "stdEtd": "2055/2035"
   },
   {
     "code": "OV286",
@@ -189,7 +159,7 @@
     "code": "OV366",
     "date": "17AUG",
     "destination": "NAI",
-    "stdEtd": "2110"
+    "stdEtd": "2110/2142"
   },
   {
     "code": "QR1124",
@@ -726,16 +696,34 @@
     "stdEtd": "1425/1410"
   },
   {
-    "code": "WY291",
+    "code": "OV174",
     "date": "17AUG",
-    "destination": "CCJ",
-    "stdEtd": "1510"
+    "destination": "SLL",
+    "stdEtd": "1500"
   },
   {
-    "code": "PF737",
+    "code": "WY3914",
     "date": "17AUG",
-    "destination": "SKT",
-    "stdEtd": "1515"
+    "destination": "SLL",
+    "stdEtd": "1525"
+  },
+  {
+    "code": "WY906",
+    "date": "17AUG",
+    "destination": "SLL",
+    "stdEtd": "1540"
+  },
+  {
+    "code": "WY204",
+    "date": "17AUG",
+    "destination": "BOM",
+    "stdEtd": "1545"
+  },
+  {
+    "code": "OV284",
+    "date": "17AUG",
+    "destination": "JED",
+    "stdEtd": "1555"
   },
   {
     "code": "WY675",
@@ -1432,6 +1420,18 @@
     "date": "17AUG",
     "destination": "CAI",
     "stdEtd": "1440"
+  },
+  {
+    "code": "WY291",
+    "date": "17AUG",
+    "destination": "CCJ",
+    "stdEtd": "1510"
+  },
+  {
+    "code": "PF737",
+    "date": "17AUG",
+    "destination": "SKT",
+    "stdEtd": "1515"
   },
   {
     "code": "WY648",
