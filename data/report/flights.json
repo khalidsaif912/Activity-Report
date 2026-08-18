@@ -1008,21 +1008,15 @@
     "stdEtd": "2250"
   },
   {
-    "code": "OV563",
-    "date": "18AUG",
-    "destination": "RAW",
-    "stdEtd": "2300"
-  },
-  {
-    "code": "OV521",
-    "date": "18AUG",
-    "destination": "LHE",
-    "stdEtd": "2300"
-  },
-  {
     "code": "QR1125",
     "date": "18AUG",
     "destination": "DOH",
+    "stdEtd": "2300"
+  },
+  {
+    "code": "OV563",
+    "date": "18AUG",
+    "destination": "RAW",
     "stdEtd": "2300"
   },
   {
@@ -1030,6 +1024,12 @@
     "date": "18AUG",
     "destination": "BKK",
     "stdEtd": "2300"
+  },
+  {
+    "code": "OV521",
+    "date": "18AUG",
+    "destination": "LHE",
+    "stdEtd": "2300/2315"
   },
   {
     "code": "OV705",
