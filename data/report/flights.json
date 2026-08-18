@@ -102,6 +102,12 @@
     "stdEtd": "1855"
   },
   {
+    "code": "OV206",
+    "date": "18AUG",
+    "destination": "RUH",
+    "stdEtd": "1800/1953"
+  },
+  {
     "code": "WY850",
     "date": "18AUG",
     "destination": "JAK",
@@ -120,22 +126,16 @@
     "stdEtd": "1920"
   },
   {
-    "code": "FZ047",
-    "date": "18AUG",
-    "destination": "DXB",
-    "stdEtd": "1945"
-  },
-  {
-    "code": "OV206",
-    "date": "18AUG",
-    "destination": "RUH",
-    "stdEtd": "1800/2010"
-  },
-  {
     "code": "OV104",
     "date": "18AUG",
     "destination": "SLL",
-    "stdEtd": "1930/2016"
+    "stdEtd": "1930/2017"
+  },
+  {
+    "code": "FZ047",
+    "date": "18AUG",
+    "destination": "DXB",
+    "stdEtd": "1945/2018"
   },
   {
     "code": "OV228",
@@ -147,7 +147,7 @@
     "code": "IX163",
     "date": "18AUG",
     "destination": "NEW",
-    "stdEtd": "2020"
+    "stdEtd": "2020/2039"
   },
   {
     "code": "WY908",
@@ -165,13 +165,13 @@
     "code": "OV246",
     "date": "18AUG",
     "destination": "SHJ",
-    "stdEtd": "2040"
+    "stdEtd": "2040/2017"
   },
   {
     "code": "OV928",
     "date": "18AUG",
     "destination": "ALM",
-    "stdEtd": "2045/2013"
+    "stdEtd": "2045/2010"
   },
   {
     "code": "OV294",
@@ -837,7 +837,7 @@
     "code": "OV175",
     "date": "18AUG",
     "destination": "SLL",
-    "stdEtd": "1900/2020"
+    "stdEtd": "1900/2040"
   },
   {
     "code": "WY3903",
@@ -873,7 +873,7 @@
     "code": "FZ048",
     "date": "18AUG",
     "destination": "DXB",
-    "stdEtd": "2045"
+    "stdEtd": "2045/2124"
   },
   {
     "code": "WY821",
