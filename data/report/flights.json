@@ -1,11 +1,5 @@
 [
   {
-    "code": "OV498",
-    "date": "19AUG",
-    "destination": "DAC",
-    "stdEtd": "0835/0811"
-  },
-  {
     "code": "FZ045",
     "date": "19AUG",
     "destination": "DXB",
@@ -195,7 +189,7 @@
     "code": "OV5094",
     "date": "19AUG",
     "destination": "MUK",
-    "stdEtd": "1445"
+    "stdEtd": "1445/1417"
   },
   {
     "code": "OV166",
@@ -732,70 +726,10 @@
     "stdEtd": "0745"
   },
   {
-    "code": "OV151",
-    "date": "19AUG",
-    "destination": "SLL",
-    "stdEtd": "0800"
-  },
-  {
-    "code": "WY903",
-    "date": "19AUG",
-    "destination": "SLL",
-    "stdEtd": "0820"
-  },
-  {
-    "code": "WY223",
-    "date": "19AUG",
-    "destination": "KOC",
-    "stdEtd": "0825"
-  },
-  {
-    "code": "WY317",
+    "code": "OV498",
     "date": "19AUG",
     "destination": "DAC",
-    "stdEtd": "0825"
-  },
-  {
-    "code": "OV133",
-    "date": "19AUG",
-    "destination": "DQM",
-    "stdEtd": "0830"
-  },
-  {
-    "code": "OV283",
-    "date": "19AUG",
-    "destination": "JED",
-    "stdEtd": "0830/0845"
-  },
-  {
-    "code": "OV811",
-    "date": "19AUG",
-    "destination": "VIE",
-    "stdEtd": "0835"
-  },
-  {
-    "code": "WY815",
-    "date": "19AUG",
-    "destination": "BKK",
-    "stdEtd": "0840"
-  },
-  {
-    "code": "WY603",
-    "date": "19AUG",
-    "destination": "DXB",
-    "stdEtd": "0840"
-  },
-  {
-    "code": "OV101",
-    "date": "19AUG",
-    "destination": "SLL",
-    "stdEtd": "0850"
-  },
-  {
-    "code": "WY823",
-    "date": "19AUG",
-    "destination": "SEP",
-    "stdEtd": "0915"
+    "stdEtd": "0835/0811"
   },
   {
     "code": "OV241",
@@ -924,15 +858,15 @@
     "stdEtd": "1330"
   },
   {
-    "code": "OV167",
-    "date": "19AUG",
-    "destination": "SLL",
-    "stdEtd": "1330"
-  },
-  {
     "code": "OV285",
     "date": "19AUG",
     "destination": "JED",
+    "stdEtd": "1330"
+  },
+  {
+    "code": "OV167",
+    "date": "19AUG",
+    "destination": "SLL",
     "stdEtd": "1330"
   },
   {
@@ -1038,6 +972,12 @@
     "stdEtd": "1520"
   },
   {
+    "code": "OV837",
+    "date": "19AUG",
+    "destination": "TRA",
+    "stdEtd": "1710/1650"
+  },
+  {
     "code": "OV771",
     "date": "19AUG",
     "destination": "CCJ",
@@ -1048,12 +988,6 @@
     "date": "19AUG",
     "destination": "SLL",
     "stdEtd": "1700"
-  },
-  {
-    "code": "OV837",
-    "date": "19AUG",
-    "destination": "TRA",
-    "stdEtd": "1710"
   },
   {
     "code": "WY907",
@@ -1146,15 +1080,15 @@
     "stdEtd": "2115"
   },
   {
-    "code": "IX164",
-    "date": "19AUG",
-    "destination": "NEW",
-    "stdEtd": "2120"
-  },
-  {
     "code": "WY821",
     "date": "19AUG",
     "destination": "SEP",
+    "stdEtd": "2120"
+  },
+  {
+    "code": "IX164",
+    "date": "19AUG",
+    "destination": "NEW",
     "stdEtd": "2120"
   },
   {
@@ -1450,6 +1384,72 @@
     "date": "19AUG",
     "destination": "MAR",
     "stdEtd": "0745"
+  },
+  {
+    "code": "OV151",
+    "date": "19AUG",
+    "destination": "SLL",
+    "stdEtd": "0800"
+  },
+  {
+    "code": "WY903",
+    "date": "19AUG",
+    "destination": "SLL",
+    "stdEtd": "0820"
+  },
+  {
+    "code": "WY223",
+    "date": "19AUG",
+    "destination": "KOC",
+    "stdEtd": "0825"
+  },
+  {
+    "code": "WY317",
+    "date": "19AUG",
+    "destination": "DAC",
+    "stdEtd": "0825"
+  },
+  {
+    "code": "OV133",
+    "date": "19AUG",
+    "destination": "DQM",
+    "stdEtd": "0830"
+  },
+  {
+    "code": "OV283",
+    "date": "19AUG",
+    "destination": "JED",
+    "stdEtd": "0830/0845"
+  },
+  {
+    "code": "OV811",
+    "date": "19AUG",
+    "destination": "VIE",
+    "stdEtd": "0835"
+  },
+  {
+    "code": "WY815",
+    "date": "19AUG",
+    "destination": "BKK",
+    "stdEtd": "0840"
+  },
+  {
+    "code": "WY603",
+    "date": "19AUG",
+    "destination": "DXB",
+    "stdEtd": "0840"
+  },
+  {
+    "code": "OV101",
+    "date": "19AUG",
+    "destination": "SLL",
+    "stdEtd": "0850"
+  },
+  {
+    "code": "WY823",
+    "date": "19AUG",
+    "destination": "SEP",
+    "stdEtd": "0915"
   },
   {
     "code": "OV796",
