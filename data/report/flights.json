@@ -60,12 +60,6 @@
     "stdEtd": "1905/1842"
   },
   {
-    "code": "WY850",
-    "date": "19AUG",
-    "destination": "JAK",
-    "stdEtd": "1905"
-  },
-  {
     "code": "WY684",
     "date": "19AUG",
     "destination": "RUH",
@@ -120,10 +114,16 @@
     "stdEtd": "2055"
   },
   {
+    "code": "WY850",
+    "date": "19AUG",
+    "destination": "JAK",
+    "stdEtd": "1905"
+  },
+  {
     "code": "OV286",
     "date": "19AUG",
     "destination": "JED",
-    "stdEtd": "2055/2133"
+    "stdEtd": "2055"
   },
   {
     "code": "OV366",
@@ -819,7 +819,7 @@
     "code": "FZ048",
     "date": "19AUG",
     "destination": "DXB",
-    "stdEtd": "2045/2115"
+    "stdEtd": "2045/2125"
   },
   {
     "code": "MU2052",
