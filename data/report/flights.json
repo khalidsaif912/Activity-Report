@@ -882,12 +882,6 @@
     "stdEtd": "1415"
   },
   {
-    "code": "OV337",
-    "date": "19AUG",
-    "destination": "BAG",
-    "stdEtd": "1430"
-  },
-  {
     "code": "OV227",
     "date": "19AUG",
     "destination": "KUW",
@@ -897,6 +891,12 @@
     "code": "WY609",
     "date": "19AUG",
     "destination": "DXB",
+    "stdEtd": "1430"
+  },
+  {
+    "code": "OV337",
+    "date": "19AUG",
+    "destination": "BAG",
     "stdEtd": "1430"
   },
   {
@@ -975,7 +975,7 @@
     "code": "OV245",
     "date": "19AUG",
     "destination": "SHJ",
-    "stdEtd": "1735"
+    "stdEtd": "1735/1750"
   },
   {
     "code": "WY909",
