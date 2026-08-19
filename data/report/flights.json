@@ -114,16 +114,16 @@
     "stdEtd": "0745"
   },
   {
-    "code": "FZ045",
-    "date": "19AUG",
-    "destination": "DXB",
-    "stdEtd": "0810"
-  },
-  {
     "code": "OV498",
     "date": "19AUG",
     "destination": "DAC",
     "stdEtd": "0835/0811"
+  },
+  {
+    "code": "FZ045",
+    "date": "19AUG",
+    "destination": "DXB",
+    "stdEtd": "0810/0910"
   },
   {
     "code": "WY3914",
@@ -141,7 +141,7 @@
     "code": "OV174",
     "date": "19AUG",
     "destination": "SLL",
-    "stdEtd": "1000"
+    "stdEtd": "1000/0943"
   },
   {
     "code": "WY236",
