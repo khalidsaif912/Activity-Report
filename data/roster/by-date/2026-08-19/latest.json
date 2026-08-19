@@ -1,42 +1,40 @@
 {
   "shiftMeta": {
-    "key": "afternoon",
-    "title": "Afternoon Shift",
+    "key": "night",
+    "title": "Night Shift",
     "date": "2026-08-19",
-    "time": "13:00 - 22:00"
+    "time": "21:00 - 06:00"
   },
   "manpowerSections": [
     {
       "title": "Supervisor",
       "items": [
-        "SN80250 Jay Macalino",
-        "SN82546 Saleh Al Rashdi"
+        "SN81404 Mohamed Al Amri"
       ]
     },
     {
       "title": "Load Control",
       "items": [
-        "SN82441 Mudathir Al Hajri",
-        "SN82550 Saleh Al Aufi"
+        "SN82600 Habib Al Balushi",
+        "SN81409 Qasim Al Maqbali"
       ]
     },
     {
       "title": "Export Checker",
       "items": [
-        "SN82616 Ahmed Al Hashmi",
-        "SN82283 Ahmed Al Mawali",
-        "SN82574 Ali Al Mamari",
-        "SN990465 Abdulfatah Al Shukeili",
-        "SN81832 Ahmed Al Bakari",
-        "SN82439 Ghaith al Habsi",
-        "SN82587 Yousuf Al Balushi"
+        "SN81393 Ali Al Farsi",
+        "SN990752 Ali Yousuf Al Balushi",
+        "SN82671 Khalil Al Hinai",
+        "SN82673 Khalifa Al Maqbali",
+        "SN82661 Mohamed Al Maskari",
+        "SN82658 Mohamed Al Mazroie"
       ]
     },
     {
       "title": "Export Operators",
       "items": [
-        "SN81307 Badar Al Hamadani",
-        "SN82429 Zakariya Al Balushi"
+        "SN82588 Ghassan Al Tarsi",
+        "SN81224 Mohamed Al Amri"
       ]
     },
     {
@@ -44,17 +42,15 @@
       "items": []
     },
     {
-      "title": "Support Team",
-      "items": [
-        "SN82565 Jamal Al Hadi"
-      ]
-    },
-    {
       "title": "CTU Staff On Duty",
       "items": []
     },
     {
       "title": "Inventory",
+      "items": []
+    },
+    {
+      "title": "Support Team",
       "items": []
     },
     {
@@ -88,16 +84,16 @@
         {
           "title": "Load Control",
           "items": [
-            "SN81348 Assad Al Omairi",
-            "SN82657 Bushra Al Wahiebi"
+            "SN82657 Bushra Al Wahiebi",
+            "SN81348 Assad Al Omairi"
           ]
         },
         {
           "title": "Export Checker",
           "items": [
             "SN8584 Adil Al Zadjali",
-            "SN8715 Khalid Al Raqadi",
             "SN80270 Marlon Esmilla",
+            "SN8715 Khalid Al Raqadi",
             "SN82666 Mohamed Al Maskari",
             "SN82424 Riyadh Al Sulti",
             "SN82674 Mohamed Al Mamari"
@@ -170,9 +166,9 @@
           "items": [
             "SN82616 Ahmed Al Hashmi",
             "SN82283 Ahmed Al Mawali",
-            "SN82574 Ali Al Mamari",
-            "SN990465 Abdulfatah Al Shukeili",
             "SN81832 Ahmed Al Bakari",
+            "SN990465 Abdulfatah Al Shukeili",
+            "SN82574 Ali Al Mamari",
             "SN82439 Ghaith al Habsi",
             "SN82587 Yousuf Al Balushi"
           ]
@@ -240,10 +236,10 @@
         {
           "title": "Export Checker",
           "items": [
-            "SN990752 Ali Yousuf Al Balushi",
             "SN81393 Ali Al Farsi",
-            "SN82673 Khalifa Al Maqbali",
+            "SN990752 Ali Yousuf Al Balushi",
             "SN82671 Khalil Al Hinai",
+            "SN82673 Khalifa Al Maqbali",
             "SN82661 Mohamed Al Maskari",
             "SN82658 Mohamed Al Mazroie"
           ]
@@ -286,5 +282,5 @@
       ]
     }
   },
-  "defaultShift": "afternoon"
+  "defaultShift": "night"
 }
