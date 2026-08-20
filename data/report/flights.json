@@ -117,19 +117,19 @@
     "code": "FZ047",
     "date": "20AUG",
     "destination": "DXB",
-    "stdEtd": "1945/2034"
+    "stdEtd": "1945/2033"
   },
   {
     "code": "IX163",
     "date": "20AUG",
     "destination": "NEW",
-    "stdEtd": "2020/2045"
+    "stdEtd": "2020/2047"
   },
   {
     "code": "MS930",
     "date": "20AUG",
     "destination": "CAI",
-    "stdEtd": "2025/2057"
+    "stdEtd": "2025/2049"
   },
   {
     "code": "OV294",
@@ -147,7 +147,7 @@
     "code": "OV274",
     "date": "20AUG",
     "destination": "MED",
-    "stdEtd": "2050/2025"
+    "stdEtd": "2050"
   },
   {
     "code": "WY3922",
@@ -159,13 +159,13 @@
     "code": "OV246",
     "date": "20AUG",
     "destination": "SHJ",
-    "stdEtd": "2055/2028"
+    "stdEtd": "2055/2027"
   },
   {
     "code": "OV106",
     "date": "20AUG",
     "destination": "SLL",
-    "stdEtd": "2105"
+    "stdEtd": "2105/2136"
   },
   {
     "code": "OV286",
@@ -195,7 +195,7 @@
     "code": "OV104",
     "date": "20AUG",
     "destination": "SLL",
-    "stdEtd": "2145"
+    "stdEtd": "2145/2207"
   },
   {
     "code": "WY816",
@@ -324,12 +324,6 @@
     "stdEtd": "0100"
   },
   {
-    "code": "GF566",
-    "date": "20AUG",
-    "destination": "MAN",
-    "stdEtd": "2310/0049"
-  },
-  {
     "code": "TK774",
     "date": "20AUG",
     "destination": "IST",
@@ -352,6 +346,12 @@
     "date": "20AUG",
     "destination": "TRV",
     "stdEtd": "2225/0104"
+  },
+  {
+    "code": "GF566",
+    "date": "20AUG",
+    "destination": "MAN",
+    "stdEtd": "2310/0159"
   },
   {
     "code": "OV838",
@@ -990,12 +990,6 @@
     "stdEtd": "0150"
   },
   {
-    "code": "GF567",
-    "date": "20AUG",
-    "destination": "MAN",
-    "stdEtd": "2355/0125"
-  },
-  {
     "code": "TK775",
     "date": "20AUG",
     "destination": "IST",
@@ -1042,6 +1036,12 @@
     "date": "20AUG",
     "destination": "TRV",
     "stdEtd": "2325/0235"
+  },
+  {
+    "code": "GF567",
+    "date": "20AUG",
+    "destination": "MAN",
+    "stdEtd": "2355/0235"
   },
   {
     "code": "WY297",
