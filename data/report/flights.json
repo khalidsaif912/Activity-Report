@@ -1,11 +1,5 @@
 [
   {
-    "code": "OV838",
-    "date": "22AUG",
-    "destination": "TRA",
-    "stdEtd": "0140/0219"
-  },
-  {
     "code": "ET624",
     "date": "22AUG",
     "destination": "ADD",
@@ -117,13 +111,13 @@
     "code": "OV438",
     "date": "22AUG",
     "destination": "CMB",
-    "stdEtd": "0735/0709"
+    "stdEtd": "0735/0710"
   },
   {
     "code": "OV498",
     "date": "22AUG",
     "destination": "DAC",
-    "stdEtd": "0835/0742"
+    "stdEtd": "0835/0743"
   },
   {
     "code": "WY188",
@@ -684,22 +678,10 @@
     "stdEtd": "0150/0131"
   },
   {
-    "code": "WY251",
+    "code": "OV838",
     "date": "22AUG",
-    "destination": "MAA",
-    "stdEtd": "0205"
-  },
-  {
-    "code": "WY225",
-    "date": "22AUG",
-    "destination": "KOC",
-    "stdEtd": "0225"
-  },
-  {
-    "code": "WY211",
-    "date": "22AUG",
-    "destination": "TRV",
-    "stdEtd": "0225"
+    "destination": "TRA",
+    "stdEtd": "0140/0219"
   },
   {
     "code": "IX442",
@@ -1384,6 +1366,24 @@
     "date": "22AUG",
     "destination": "DAC",
     "stdEtd": "0200"
+  },
+  {
+    "code": "WY251",
+    "date": "22AUG",
+    "destination": "MAA",
+    "stdEtd": "0205"
+  },
+  {
+    "code": "WY225",
+    "date": "22AUG",
+    "destination": "KOC",
+    "stdEtd": "0225"
+  },
+  {
+    "code": "WY211",
+    "date": "22AUG",
+    "destination": "TRV",
+    "stdEtd": "0225"
   },
   {
     "code": "WY648",
