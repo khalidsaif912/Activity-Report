@@ -1,11 +1,5 @@
 [
   {
-    "code": "WY118",
-    "date": "22AUG",
-    "destination": "FRA",
-    "stdEtd": "0405"
-  },
-  {
     "code": "WY148",
     "date": "22AUG",
     "destination": "ROM",
@@ -690,22 +684,10 @@
     "stdEtd": "0355"
   },
   {
-    "code": "IX236",
+    "code": "WY118",
     "date": "22AUG",
-    "destination": "BOM",
-    "stdEtd": "0015/0410"
-  },
-  {
-    "code": "ET625",
-    "date": "22AUG",
-    "destination": "ADD",
-    "stdEtd": "0425"
-  },
-  {
-    "code": "WY201",
-    "date": "22AUG",
-    "destination": "BOM",
-    "stdEtd": "0505"
+    "destination": "FRA",
+    "stdEtd": "0405"
   },
   {
     "code": "WY849",
@@ -1390,6 +1372,24 @@
     "date": "22AUG",
     "destination": "NEW",
     "stdEtd": "0320"
+  },
+  {
+    "code": "IX236",
+    "date": "22AUG",
+    "destination": "BOM",
+    "stdEtd": "0015/0410"
+  },
+  {
+    "code": "ET625",
+    "date": "22AUG",
+    "destination": "ADD",
+    "stdEtd": "0425"
+  },
+  {
+    "code": "WY201",
+    "date": "22AUG",
+    "destination": "BOM",
+    "stdEtd": "0505"
   },
   {
     "code": "WY648",
