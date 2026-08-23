@@ -1,29 +1,5 @@
 [
   {
-    "code": "WY202",
-    "date": "23AUG",
-    "destination": "BOM",
-    "stdEtd": "1130"
-  },
-  {
-    "code": "OV162",
-    "date": "23AUG",
-    "destination": "SLL",
-    "stdEtd": "1130/1153"
-  },
-  {
-    "code": "WY818",
-    "date": "23AUG",
-    "destination": "BKK",
-    "stdEtd": "1150"
-  },
-  {
-    "code": "OV402",
-    "date": "23AUG",
-    "destination": "CHA",
-    "stdEtd": "1215/1151"
-  },
-  {
     "code": "WY844",
     "date": "23AUG",
     "destination": "MAN",
@@ -144,18 +120,6 @@
     "stdEtd": "1645"
   },
   {
-    "code": "OV154",
-    "date": "23AUG",
-    "destination": "SLL",
-    "stdEtd": "1700"
-  },
-  {
-    "code": "OV104",
-    "date": "23AUG",
-    "destination": "SLL",
-    "stdEtd": "1700/1639"
-  },
-  {
     "code": "OV272",
     "date": "23AUG",
     "destination": "MED",
@@ -165,7 +129,19 @@
     "code": "OV336",
     "date": "23AUG",
     "destination": "BAG",
-    "stdEtd": "1715"
+    "stdEtd": "1715/1645"
+  },
+  {
+    "code": "OV154",
+    "date": "23AUG",
+    "destination": "SLL",
+    "stdEtd": "1700"
+  },
+  {
+    "code": "OV104",
+    "date": "23AUG",
+    "destination": "SLL",
+    "stdEtd": "1700/1722"
   },
   {
     "code": "WY908",
@@ -486,12 +462,6 @@
     "stdEtd": "0200"
   },
   {
-    "code": "IX619",
-    "date": "23AUG",
-    "destination": "TIR",
-    "stdEtd": "2215/0246"
-  },
-  {
     "code": "EK866",
     "date": "23AUG",
     "destination": "DXB",
@@ -532,6 +502,12 @@
     "date": "23AUG",
     "destination": "MUC",
     "stdEtd": "0445"
+  },
+  {
+    "code": "IX619",
+    "date": "23AUG",
+    "destination": "TIR",
+    "stdEtd": "2215/0446"
   },
   {
     "code": "WY172",
@@ -702,46 +678,28 @@
     "stdEtd": "1055"
   },
   {
-    "code": "OV111",
+    "code": "WY202",
     "date": "23AUG",
-    "destination": "FOR",
+    "destination": "BOM",
     "stdEtd": "1130"
   },
   {
-    "code": "OV5093",
-    "date": "23AUG",
-    "destination": "MUK",
-    "stdEtd": "1130"
-  },
-  {
-    "code": "WY831",
-    "date": "23AUG",
-    "destination": "HKT",
-    "stdEtd": "1130"
-  },
-  {
-    "code": "WY167",
-    "date": "23AUG",
-    "destination": "TRA",
-    "stdEtd": "1130"
-  },
-  {
-    "code": "WY917",
+    "code": "OV162",
     "date": "23AUG",
     "destination": "SLL",
-    "stdEtd": "1135"
+    "stdEtd": "1130/1153"
   },
   {
-    "code": "EY693",
+    "code": "WY818",
     "date": "23AUG",
-    "destination": "AUH",
-    "stdEtd": "1155"
+    "destination": "BKK",
+    "stdEtd": "1150"
   },
   {
-    "code": "WY3905",
+    "code": "OV402",
     "date": "23AUG",
-    "destination": "SLL",
-    "stdEtd": "1200"
+    "destination": "CHA",
+    "stdEtd": "1215/1151"
   },
   {
     "code": "OV205",
@@ -1212,12 +1170,6 @@
     "stdEtd": "0400"
   },
   {
-    "code": "IX620",
-    "date": "23AUG",
-    "destination": "TIR",
-    "stdEtd": "2315/0335"
-  },
-  {
     "code": "ET625",
     "date": "23AUG",
     "destination": "ADD",
@@ -1246,6 +1198,12 @@
     "date": "23AUG",
     "destination": "DOH",
     "stdEtd": "0530"
+  },
+  {
+    "code": "IX620",
+    "date": "23AUG",
+    "destination": "TIR",
+    "stdEtd": "2315/0535"
   },
   {
     "code": "OV391",
@@ -1384,6 +1342,48 @@
     "date": "23AUG",
     "destination": "ALM",
     "stdEtd": "1040"
+  },
+  {
+    "code": "OV111",
+    "date": "23AUG",
+    "destination": "FOR",
+    "stdEtd": "1130"
+  },
+  {
+    "code": "OV5093",
+    "date": "23AUG",
+    "destination": "MUK",
+    "stdEtd": "1130"
+  },
+  {
+    "code": "WY831",
+    "date": "23AUG",
+    "destination": "HKT",
+    "stdEtd": "1130"
+  },
+  {
+    "code": "WY167",
+    "date": "23AUG",
+    "destination": "TRA",
+    "stdEtd": "1130"
+  },
+  {
+    "code": "WY917",
+    "date": "23AUG",
+    "destination": "SLL",
+    "stdEtd": "1135"
+  },
+  {
+    "code": "EY693",
+    "date": "23AUG",
+    "destination": "AUH",
+    "stdEtd": "1155"
+  },
+  {
+    "code": "WY3905",
+    "date": "23AUG",
+    "destination": "SLL",
+    "stdEtd": "1200"
   },
   {
     "code": "WY3912",
