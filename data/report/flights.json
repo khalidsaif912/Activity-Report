@@ -1,17 +1,5 @@
 [
   {
-    "code": "WY604",
-    "date": "24AUG",
-    "destination": "DXB",
-    "stdEtd": "1415"
-  },
-  {
-    "code": "OV174",
-    "date": "24AUG",
-    "destination": "SLL",
-    "stdEtd": "1500"
-  },
-  {
     "code": "PF736",
     "date": "24AUG",
     "destination": "SKT",
@@ -117,7 +105,7 @@
     "code": "OV164",
     "date": "24AUG",
     "destination": "SLL",
-    "stdEtd": "1925/1907"
+    "stdEtd": "1925"
   },
   {
     "code": "FZ047",
@@ -690,52 +678,16 @@
     "stdEtd": "1400"
   },
   {
-    "code": "WY131",
+    "code": "WY604",
     "date": "24AUG",
-    "destination": "PAR",
-    "stdEtd": "1410"
-  },
-  {
-    "code": "WY101",
-    "date": "24AUG",
-    "destination": "LHR",
+    "destination": "DXB",
     "stdEtd": "1415"
   },
   {
-    "code": "OV227",
+    "code": "OV174",
     "date": "24AUG",
-    "destination": "KUW",
-    "stdEtd": "1430"
-  },
-  {
-    "code": "WY609",
-    "date": "24AUG",
-    "destination": "DXB",
-    "stdEtd": "1430"
-  },
-  {
-    "code": "OV391",
-    "date": "24AUG",
-    "destination": "PZU",
-    "stdEtd": "1430"
-  },
-  {
-    "code": "WY663",
-    "date": "24AUG",
-    "destination": "DOH",
-    "stdEtd": "1435"
-  },
-  {
-    "code": "WY405",
-    "date": "24AUG",
-    "destination": "CAI",
-    "stdEtd": "1440"
-  },
-  {
-    "code": "WY675",
-    "date": "24AUG",
-    "destination": "JED",
-    "stdEtd": "1450"
+    "destination": "SLL",
+    "stdEtd": "1500"
   },
   {
     "code": "WY143",
@@ -1372,6 +1324,54 @@
     "date": "24AUG",
     "destination": "MUC",
     "stdEtd": "1355"
+  },
+  {
+    "code": "WY131",
+    "date": "24AUG",
+    "destination": "PAR",
+    "stdEtd": "1410"
+  },
+  {
+    "code": "WY101",
+    "date": "24AUG",
+    "destination": "LHR",
+    "stdEtd": "1415"
+  },
+  {
+    "code": "OV227",
+    "date": "24AUG",
+    "destination": "KUW",
+    "stdEtd": "1430"
+  },
+  {
+    "code": "WY609",
+    "date": "24AUG",
+    "destination": "DXB",
+    "stdEtd": "1430"
+  },
+  {
+    "code": "OV391",
+    "date": "24AUG",
+    "destination": "PZU",
+    "stdEtd": "1430"
+  },
+  {
+    "code": "WY663",
+    "date": "24AUG",
+    "destination": "DOH",
+    "stdEtd": "1435"
+  },
+  {
+    "code": "WY405",
+    "date": "24AUG",
+    "destination": "CAI",
+    "stdEtd": "1440"
+  },
+  {
+    "code": "WY675",
+    "date": "24AUG",
+    "destination": "JED",
+    "stdEtd": "1450"
   },
   {
     "code": "WY910",
