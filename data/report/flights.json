@@ -1,29 +1,5 @@
 [
   {
-    "code": "OV104",
-    "date": "24AUG",
-    "destination": "SLL",
-    "stdEtd": "1600/1631"
-  },
-  {
-    "code": "WY906",
-    "date": "24AUG",
-    "destination": "SLL",
-    "stdEtd": "1625"
-  },
-  {
-    "code": "WY224",
-    "date": "24AUG",
-    "destination": "KOC",
-    "stdEtd": "1640"
-  },
-  {
-    "code": "OV272",
-    "date": "24AUG",
-    "destination": "MED",
-    "stdEtd": "1700/1644"
-  },
-  {
     "code": "OV154",
     "date": "24AUG",
     "destination": "SLL",
@@ -105,13 +81,13 @@
     "code": "OV228",
     "date": "24AUG",
     "destination": "KUW",
-    "stdEtd": "2000/2040"
+    "stdEtd": "2000/2036"
   },
   {
     "code": "IX163",
     "date": "24AUG",
     "destination": "NEW",
-    "stdEtd": "2020/2046"
+    "stdEtd": "2020/2044"
   },
   {
     "code": "OV246",
@@ -135,7 +111,7 @@
     "code": "OV214",
     "date": "24AUG",
     "destination": "AD",
-    "stdEtd": "2055/2038"
+    "stdEtd": "2055/2029"
   },
   {
     "code": "OV366",
@@ -219,7 +195,7 @@
     "code": "OV108",
     "date": "24AUG",
     "destination": "SLL",
-    "stdEtd": "2245"
+    "stdEtd": "2245/2224"
   },
   {
     "code": "WY705",
@@ -690,16 +666,28 @@
     "stdEtd": "1620/1539"
   },
   {
-    "code": "PF735",
+    "code": "OV104",
     "date": "24AUG",
-    "destination": "RAW",
-    "stdEtd": "1525/1641"
+    "destination": "SLL",
+    "stdEtd": "1600/1631"
   },
   {
-    "code": "OV213",
+    "code": "WY906",
     "date": "24AUG",
-    "destination": "AD",
-    "stdEtd": "1630"
+    "destination": "SLL",
+    "stdEtd": "1625"
+  },
+  {
+    "code": "WY224",
+    "date": "24AUG",
+    "destination": "KOC",
+    "stdEtd": "1640"
+  },
+  {
+    "code": "OV272",
+    "date": "24AUG",
+    "destination": "MED",
+    "stdEtd": "1700/1644"
   },
   {
     "code": "PF737",
@@ -1372,6 +1360,18 @@
     "date": "24AUG",
     "destination": "SLL",
     "stdEtd": "1530"
+  },
+  {
+    "code": "PF735",
+    "date": "24AUG",
+    "destination": "RAW",
+    "stdEtd": "1525/1641"
+  },
+  {
+    "code": "OV213",
+    "date": "24AUG",
+    "destination": "AD",
+    "stdEtd": "1630"
   },
   {
     "code": "WY910",
