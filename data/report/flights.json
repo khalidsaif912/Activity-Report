@@ -123,13 +123,13 @@
     "code": "OV228",
     "date": "24AUG",
     "destination": "KUW",
-    "stdEtd": "2000"
+    "stdEtd": "2000/2039"
   },
   {
     "code": "IX163",
     "date": "24AUG",
     "destination": "NEW",
-    "stdEtd": "2020"
+    "stdEtd": "2020/2040"
   },
   {
     "code": "OV246",
@@ -153,7 +153,7 @@
     "code": "OV214",
     "date": "24AUG",
     "destination": "AD",
-    "stdEtd": "2055"
+    "stdEtd": "2055/2037"
   },
   {
     "code": "OV366",
@@ -762,6 +762,12 @@
     "stdEtd": "1805"
   },
   {
+    "code": "WY843",
+    "date": "24AUG",
+    "destination": "MAN",
+    "stdEtd": "0915"
+  },
+  {
     "code": "WY681",
     "date": "24AUG",
     "destination": "RUH",
@@ -1204,12 +1210,6 @@
     "date": "24AUG",
     "destination": "DXB",
     "stdEtd": "0910/0934"
-  },
-  {
-    "code": "WY843",
-    "date": "24AUG",
-    "destination": "MAN",
-    "stdEtd": "0915"
   },
   {
     "code": "WY203",
