@@ -1,23 +1,5 @@
 [
   {
-    "code": "EK866",
-    "date": "25AUG",
-    "destination": "DXB",
-    "stdEtd": "0330/0310"
-  },
-  {
-    "code": "ET624",
-    "date": "25AUG",
-    "destination": "ADD",
-    "stdEtd": "0335"
-  },
-  {
-    "code": "QR1148",
-    "date": "25AUG",
-    "destination": "DOH",
-    "stdEtd": "0355"
-  },
-  {
     "code": "WY118",
     "date": "25AUG",
     "destination": "FRA",
@@ -141,13 +123,13 @@
     "code": "OV498",
     "date": "25AUG",
     "destination": "DAC",
-    "stdEtd": "0835/0811"
+    "stdEtd": "0835/0816"
   },
   {
     "code": "WY408",
     "date": "25AUG",
     "destination": "CAI",
-    "stdEtd": "0805/1059"
+    "stdEtd": "0805/1034"
   },
   {
     "code": "WY252",
@@ -273,7 +255,7 @@
     "code": "OV464",
     "date": "25AUG",
     "destination": "BKK",
-    "stdEtd": "1300/1242"
+    "stdEtd": "1300/1240"
   },
   {
     "code": "WY844",
@@ -720,16 +702,22 @@
     "stdEtd": "0305/0245"
   },
   {
-    "code": "OV513",
+    "code": "EK866",
     "date": "25AUG",
-    "destination": "KHI",
-    "stdEtd": "0315"
+    "destination": "DXB",
+    "stdEtd": "0330/0310"
   },
   {
-    "code": "WY241",
+    "code": "ET624",
     "date": "25AUG",
-    "destination": "NEW",
-    "stdEtd": "0320"
+    "destination": "ADD",
+    "stdEtd": "0335"
+  },
+  {
+    "code": "QR1148",
+    "date": "25AUG",
+    "destination": "DOH",
+    "stdEtd": "0355"
   },
   {
     "code": "ET625",
@@ -774,15 +762,15 @@
     "stdEtd": "0725"
   },
   {
-    "code": "OV171",
-    "date": "25AUG",
-    "destination": "SLL",
-    "stdEtd": "0735"
-  },
-  {
     "code": "WY253",
     "date": "25AUG",
     "destination": "MAA",
+    "stdEtd": "0735"
+  },
+  {
+    "code": "OV171",
+    "date": "25AUG",
+    "destination": "SLL",
     "stdEtd": "0735"
   },
   {
@@ -1408,6 +1396,18 @@
     "date": "25AUG",
     "destination": "LKO",
     "stdEtd": "0300"
+  },
+  {
+    "code": "OV513",
+    "date": "25AUG",
+    "destination": "KHI",
+    "stdEtd": "0315"
+  },
+  {
+    "code": "WY241",
+    "date": "25AUG",
+    "destination": "NEW",
+    "stdEtd": "0320"
   },
   {
     "code": "WY648",
