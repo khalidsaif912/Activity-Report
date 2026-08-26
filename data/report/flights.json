@@ -1,41 +1,5 @@
 [
   {
-    "code": "WY674",
-    "date": "26AUG",
-    "destination": "JED",
-    "stdEtd": "0510"
-  },
-  {
-    "code": "WY172",
-    "date": "26AUG",
-    "destination": "AMS",
-    "stdEtd": "0515"
-  },
-  {
-    "code": "WY2922",
-    "date": "26AUG",
-    "destination": "SLL",
-    "stdEtd": "0525"
-  },
-  {
-    "code": "OV538",
-    "date": "26AUG",
-    "destination": "MUX",
-    "stdEtd": "0545"
-  },
-  {
-    "code": "OV564",
-    "date": "26AUG",
-    "destination": "RAW",
-    "stdEtd": "0555/0538"
-  },
-  {
-    "code": "OV736",
-    "date": "26AUG",
-    "destination": "HYD",
-    "stdEtd": "0605/0541"
-  },
-  {
     "code": "OV522",
     "date": "26AUG",
     "destination": "LHE",
@@ -129,7 +93,7 @@
     "code": "OV174",
     "date": "26AUG",
     "destination": "SLL",
-    "stdEtd": "1000"
+    "stdEtd": "1000/1015"
   },
   {
     "code": "WY236",
@@ -183,19 +147,19 @@
     "code": "OV5042",
     "date": "26AUG",
     "destination": "MAR",
-    "stdEtd": "1100"
+    "stdEtd": "1100/1119"
   },
   {
     "code": "OV134",
     "date": "26AUG",
     "destination": "DQM",
-    "stdEtd": "1130"
+    "stdEtd": "1130/1108"
   },
   {
     "code": "WY202",
     "date": "26AUG",
     "destination": "BOM",
-    "stdEtd": "1130"
+    "stdEtd": "1130/1110"
   },
   {
     "code": "WY818",
@@ -690,16 +654,40 @@
     "stdEtd": "0445"
   },
   {
-    "code": "WY201",
+    "code": "WY674",
     "date": "26AUG",
-    "destination": "BOM",
-    "stdEtd": "0505"
+    "destination": "JED",
+    "stdEtd": "0510"
   },
   {
-    "code": "QR1149",
+    "code": "WY172",
     "date": "26AUG",
-    "destination": "DOH",
-    "stdEtd": "0530"
+    "destination": "AMS",
+    "stdEtd": "0515"
+  },
+  {
+    "code": "WY2922",
+    "date": "26AUG",
+    "destination": "SLL",
+    "stdEtd": "0525"
+  },
+  {
+    "code": "OV538",
+    "date": "26AUG",
+    "destination": "MUX",
+    "stdEtd": "0545"
+  },
+  {
+    "code": "OV564",
+    "date": "26AUG",
+    "destination": "RAW",
+    "stdEtd": "0555/0538"
+  },
+  {
+    "code": "OV736",
+    "date": "26AUG",
+    "destination": "HYD",
+    "stdEtd": "0605/0541"
   },
   {
     "code": "OV173",
@@ -744,12 +732,6 @@
     "stdEtd": "0830"
   },
   {
-    "code": "OV811",
-    "date": "26AUG",
-    "destination": "VIE",
-    "stdEtd": "0835/0856"
-  },
-  {
     "code": "WY815",
     "date": "26AUG",
     "destination": "BKK",
@@ -760,12 +742,6 @@
     "date": "26AUG",
     "destination": "DXB",
     "stdEtd": "0840"
-  },
-  {
-    "code": "OV283",
-    "date": "26AUG",
-    "destination": "JED",
-    "stdEtd": "0840/0855"
   },
   {
     "code": "WY823",
@@ -780,16 +756,28 @@
     "stdEtd": "0850"
   },
   {
+    "code": "OV811",
+    "date": "26AUG",
+    "destination": "VIE",
+    "stdEtd": "0835/0912"
+  },
+  {
+    "code": "OV283",
+    "date": "26AUG",
+    "destination": "JED",
+    "stdEtd": "0840/0905"
+  },
+  {
     "code": "OV101",
     "date": "26AUG",
     "destination": "SLL",
-    "stdEtd": "0850"
+    "stdEtd": "0850/0905"
   },
   {
     "code": "OV171",
     "date": "26AUG",
     "destination": "SLL",
-    "stdEtd": "0905/0940"
+    "stdEtd": "0905/0925"
   },
   {
     "code": "FZ046",
@@ -807,7 +795,7 @@
     "code": "OV271",
     "date": "26AUG",
     "destination": "MED",
-    "stdEtd": "0955"
+    "stdEtd": "0955/1010"
   },
   {
     "code": "OV365",
@@ -948,15 +936,15 @@
     "stdEtd": "1425"
   },
   {
-    "code": "OV227",
-    "date": "26AUG",
-    "destination": "KUW",
-    "stdEtd": "1430"
-  },
-  {
     "code": "WY609",
     "date": "26AUG",
     "destination": "DXB",
+    "stdEtd": "1430"
+  },
+  {
+    "code": "OV227",
+    "date": "26AUG",
+    "destination": "KUW",
     "stdEtd": "1430"
   },
   {
@@ -1384,6 +1372,18 @@
     "date": "26AUG",
     "destination": "DXB",
     "stdEtd": "0440"
+  },
+  {
+    "code": "WY201",
+    "date": "26AUG",
+    "destination": "BOM",
+    "stdEtd": "0505"
+  },
+  {
+    "code": "QR1149",
+    "date": "26AUG",
+    "destination": "DOH",
+    "stdEtd": "0530"
   },
   {
     "code": "WY648",
