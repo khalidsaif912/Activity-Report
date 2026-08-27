@@ -1,3 +1,46 @@
 {
-  "tables": []
+  "tables": [
+    {
+      "rows": [
+        [
+          "",
+          "",
+          "",
+          "CARGO OFFLOADED DETAILS",
+          "",
+          "",
+          ""
+        ],
+        [
+          "FLIGHT #",
+          "OV211",
+          "DATE",
+          "27 -Aug",
+          "DESTINATION",
+          "DMM"
+        ],
+        [
+          "AWB",
+          "PCS",
+          "KGS",
+          "DESCRIPTION",
+          "REASON"
+        ],
+        [
+          "960 10039190",
+          "22",
+          "624",
+          "LEATHER APPAREL",
+          "TRIM"
+        ],
+        [
+          "TOTAL",
+          "22",
+          "624",
+          "",
+          ""
+        ]
+      ]
+    }
+  ]
 }
