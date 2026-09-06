@@ -1,3 +1,46 @@
 {
-  "tables": []
+  "tables": [
+    {
+      "rows": [
+        [
+          "",
+          "",
+          "",
+          "CARGO OFFLOADED DETAILS",
+          "",
+          "",
+          ""
+        ],
+        [
+          "FLIGHT #",
+          "OV283",
+          "DATE",
+          "6-Sep",
+          "DESTINATION",
+          "JED"
+        ],
+        [
+          "AWB",
+          "PCS",
+          "KGS",
+          "DESCRIPTION",
+          "REASON"
+        ],
+        [
+          "703 13667205",
+          "17",
+          "155",
+          "CONSOLIDATION",
+          "SPACE"
+        ],
+        [
+          "TOTAL",
+          "17",
+          "155",
+          "",
+          ""
+        ]
+      ]
+    }
+  ]
 }
