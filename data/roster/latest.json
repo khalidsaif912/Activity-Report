@@ -1,39 +1,38 @@
 {
   "shiftMeta": {
-    "key": "afternoon",
-    "title": "Afternoon Shift",
+    "key": "night",
+    "title": "Night Shift",
     "date": "2026-09-11",
-    "time": "13:00 - 22:00"
+    "time": "21:00 - 06:00"
   },
   "manpowerSections": [
     {
       "title": "Supervisor",
       "items": [
-        "SN80250 Jay Macalino"
+        "SN81300 Talal Al Balushi"
       ]
     },
     {
       "title": "Load Control",
       "items": [
-        "SN82657 Bushra Al Wahiebi",
-        "SN82551 Omar Al Obaidi"
+        "SN82445 Al Muthana Al Shamfari",
+        "SN81409 Qasim Al Maqbali"
       ]
     },
     {
       "title": "Export Checker",
       "items": [
-        "SN82659 Ammar Al Hashmi",
-        "SN82439 Ghaith Al Habsi",
-        "SN80695 Hosni Al Sulti",
-        "SN80270 Marlon Esmilla",
-        "SN82555 Riyadh Al Jabri"
+        "SN990752 Ali Yousuf Al Balushi",
+        "SN82658 Mohamed Al Mazroie",
+        "SN82674 Mohamed Al Mamari",
+        "SN82578 Raad Al Farsi"
       ]
     },
     {
       "title": "Export Operators",
       "items": [
-        "SN81307 Badar Al Hamadani",
-        "SN82468 Badar Al Fulaiti"
+        "SN82588 Ghassan Al Tarsi",
+        "SN82534 Muadh Al Qasimi"
       ]
     },
     {
@@ -82,18 +81,18 @@
           "title": "Load Control",
           "items": [
             "SN81348 Assad Al Omairi",
-            "SN82441 Mudathir Al Hajri",
-            "SN82550 Saleh Al Aufi"
+            "SN82550 Saleh Al Aufi",
+            "SN82441 Mudathir Al Hajri"
           ]
         },
         {
           "title": "Export Checker",
           "items": [
-            "SN990465 Abdulfatah Al Shukeili",
             "SN82616 Ahmed Al Hashmi",
+            "SN990465 Abdulfatah Al Shukeili",
             "SN82283 Ahmed Al Mawali",
-            "SN81832 Ahmed Al Bakari",
             "SN82574 Ali Al Mamari",
+            "SN81832 Ahmed Al Bakari",
             "SN82587 Yousuf Al Balushi"
           ]
         },
@@ -169,8 +168,8 @@
         {
           "title": "Export Operators",
           "items": [
-            "SN81307 Badar Al Hamadani",
-            "SN82468 Badar Al Fulaiti"
+            "SN82468 Badar Al Fulaiti",
+            "SN81307 Badar Al Hamadani"
           ]
         },
         {
@@ -228,9 +227,9 @@
           "title": "Export Checker",
           "items": [
             "SN990752 Ali Yousuf Al Balushi",
+            "SN82658 Mohamed Al Mazroie",
             "SN82674 Mohamed Al Mamari",
-            "SN82578 Raad Al Farsi",
-            "SN82658 Mohamed Al Mazroie"
+            "SN82578 Raad Al Farsi"
           ]
         },
         {
@@ -271,5 +270,5 @@
       ]
     }
   },
-  "defaultShift": "afternoon"
+  "defaultShift": "night"
 }
