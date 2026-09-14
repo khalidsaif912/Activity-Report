@@ -1,3 +1,46 @@
 {
-  "tables": []
+  "tables": [
+    {
+      "rows": [
+        [
+          "",
+          "",
+          "",
+          "CARGO OFFLOADED DETAILS",
+          "",
+          "",
+          ""
+        ],
+        [
+          "FLIGHT #",
+          "OV241",
+          "DATE",
+          "14-Sep",
+          "DESTINATION",
+          "SHJ"
+        ],
+        [
+          "AWB",
+          "PCS",
+          "KGS",
+          "DESCRIPTION",
+          "REASON"
+        ],
+        [
+          "96010088923",
+          "36",
+          "1007",
+          "PERFUMERY",
+          "TRIM"
+        ],
+        [
+          "TOTAL",
+          "36",
+          "1007",
+          "",
+          ""
+        ]
+      ]
+    }
+  ]
 }
