@@ -1,39 +1,40 @@
 {
   "shiftMeta": {
-    "key": "night",
-    "title": "Night Shift",
-    "date": "2026-09-15",
-    "time": "21:00 - 06:00"
+    "key": "morning",
+    "title": "Morning Shift",
+    "date": "2026-09-16",
+    "time": "06:00 - 15:00"
   },
   "manpowerSections": [
     {
       "title": "Supervisor",
-      "items": []
+      "items": [
+        "SN81300 Talal Al Balushi"
+      ]
     },
     {
       "title": "Load Control",
       "items": [
-        "SN82550 Saleh Al Aufi",
-        "SN82441 Mudathir Al Hajri",
-        "SN81402 Mohamed Al Siyabi"
+        "SN82445 Al Muthana Al Shamfari",
+        "SN81409 Qasim Al Maqbali"
       ]
     },
     {
       "title": "Export Checker",
       "items": [
-        "SN990465 Abdulfatah Al Shukeili",
-        "SN82283 Ahmed Al Mawali",
-        "SN81832 Ahmed Al Bakari",
-        "SN8930 Fahim Al Hashni",
-        "SN8715 Khalid Al Raqadi",
-        "SN82649 Saif Al Mahrizi"
+        "SN990752 Ali Yousuf Al Balushi",
+        "SN80270 Marlon Esmilla",
+        "SN82578 Raad Al Farsi",
+        "SN82555 Riyadh Al Jabri",
+        "SN82424 Riyadh Al Sulti"
       ]
     },
     {
       "title": "Export Operators",
       "items": [
-        "SN82656 Faisal Al Balushi",
-        "SN81223 Mazin Al Siyabi"
+        "SN81307 Badar Al Hamadani",
+        "SN8744 Said Al Fahkri",
+        "SN82534 Muadh Al Qasimi"
       ]
     },
     {
@@ -70,38 +71,37 @@
       "shiftMeta": {
         "key": "morning",
         "title": "Morning Shift",
-        "date": "2026-09-15",
+        "date": "2026-09-16",
         "time": "06:00 - 15:00"
       },
       "manpowerSections": [
         {
           "title": "Supervisor",
           "items": [
-            "SN81404 Mohamed Al Amri"
+            "SN81300 Talal Al Balushi"
           ]
         },
         {
           "title": "Load Control",
           "items": [
-            "SN82548 Ahmed Al Muqaini",
-            "SN82596 Hamed Al Fulaiti"
+            "SN82445 Al Muthana Al Shamfari",
+            "SN81409 Qasim Al Maqbali"
           ]
         },
         {
           "title": "Export Checker",
           "items": [
             "SN990752 Ali Yousuf Al Balushi",
-            "SN82671 Khalil Al Hinai",
+            "SN80270 Marlon Esmilla",
             "SN82578 Raad Al Farsi",
-            "SN82658 Mohamed Al Mazroie",
-            "SN8584 Adil Al Zadjali",
+            "SN82555 Riyadh Al Jabri",
             "SN82424 Riyadh Al Sulti"
           ]
         },
         {
           "title": "Export Operators",
           "items": [
-            "SN81224 Mohamed Al Amri",
+            "SN81307 Badar Al Hamadani",
             "SN8744 Said Al Fahkri",
             "SN82534 Muadh Al Qasimi"
           ]
@@ -140,40 +140,40 @@
       "shiftMeta": {
         "key": "afternoon",
         "title": "Afternoon Shift",
-        "date": "2026-09-15",
+        "date": "2026-09-16",
         "time": "13:00 - 22:00"
       },
       "manpowerSections": [
         {
           "title": "Supervisor",
           "items": [
-            "SN82593 Mohamed Al Kalbani"
+            "SN81404 Mohamed Al Amri"
           ]
         },
         {
           "title": "Load Control",
           "items": [
-            "SN82575 Ahmed Al Kharusi",
-            "SN81258 Jaafar Al Balushi",
-            "SN82437 Marwan Al Difai"
+            "SN82548 Ahmed Al Muqaini",
+            "SN82596 Hamed Al Fulaiti",
+            "SN82575 Ahmed Al Kharusi"
           ]
         },
         {
           "title": "Export Checker",
           "items": [
-            "SN82672 Dawood Al Siyabi",
+            "SN8584 Adil Al Zadjali",
+            "SN82671 Khalil Al Hinai",
             "SN82673 Khalifa Al Maqbali",
+            "SN82658 Mohamed Al Mazroie",
             "SN82661 Mohamed Al Maskari",
-            "SN82547 Mazin Al Hajri",
-            "SN80482 Waleed Al Hadabi",
             "SN82464 Wissam Al Kharusi"
           ]
         },
         {
           "title": "Export Operators",
           "items": [
-            "SN82467 Khamis Al Hinai",
-            "SN8762 Mohamed Al Falahi"
+            "SN8762 Mohamed Al Falahi",
+            "SN81224 Mohamed Al Amri"
           ]
         },
         {
@@ -212,30 +212,32 @@
       "shiftMeta": {
         "key": "night",
         "title": "Night Shift",
-        "date": "2026-09-15",
+        "date": "2026-09-16",
         "time": "21:00 - 06:00"
       },
       "manpowerSections": [
         {
           "title": "Supervisor",
-          "items": []
+          "items": [
+            "SN82593 Mohamed Al Kalbani"
+          ]
         },
         {
           "title": "Load Control",
           "items": [
-            "SN82550 Saleh Al Aufi",
-            "SN82441 Mudathir Al Hajri",
+            "SN82437 Marwan Al Difai",
+            "SN81258 Jaafar Al Balushi",
             "SN81402 Mohamed Al Siyabi"
           ]
         },
         {
           "title": "Export Checker",
           "items": [
-            "SN990465 Abdulfatah Al Shukeili",
-            "SN82283 Ahmed Al Mawali",
-            "SN81832 Ahmed Al Bakari",
+            "SN82672 Dawood Al Siyabi",
             "SN8930 Fahim Al Hashni",
             "SN8715 Khalid Al Raqadi",
+            "SN82547 Mazin Al Hajri",
+            "SN80482 Waleed Al Hadabi",
             "SN82649 Saif Al Mahrizi"
           ]
         },
@@ -243,7 +245,7 @@
           "title": "Export Operators",
           "items": [
             "SN82656 Faisal Al Balushi",
-            "SN81223 Mazin Al Siyabi"
+            "SN82467 Khamis Al Hinai"
           ]
         },
         {
@@ -277,5 +279,5 @@
       ]
     }
   },
-  "defaultShift": "night"
+  "defaultShift": "morning"
 }
