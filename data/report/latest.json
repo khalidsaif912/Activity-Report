@@ -1,40 +1,40 @@
 {
   "shiftMeta": {
-    "key": "afternoon",
-    "title": "Afternoon Shift",
+    "key": "night",
+    "title": "Night Shift",
     "date": "2026-09-17",
-    "time": "13:00 - 22:00"
+    "time": "21:00 - 06:00"
   },
   "manpowerSections": [
     {
       "title": "Supervisor",
       "items": [
-        "SN81404 Mohamed Al Amri"
+        "SN82593 Mohamed Al Kalbani"
       ]
     },
     {
       "title": "Load Control",
       "items": [
-        "SN82548 Ahmed Al Muqaini",
-        "SN82445 Al Muthana Al Shamfari",
-        "SN82596 Hamed Al Fulaiti"
+        "SN82575 Ahmed Al Kharusi",
+        "SN82437 Marwan Al Difai",
+        "SN81258 Jaafar Al Balushi"
       ]
     },
     {
       "title": "Export Checker",
       "items": [
-        "SN8584 Adil Al Zadjali",
-        "SN990752 Ali Yousuf Al Balushi",
-        "SN82671 Khalil Al Hinai",
-        "SN82658 Mohamed Al Mazroie",
-        "SN82578 Raad Al Farsi"
+        "SN82672 Dawood Al Siyabi",
+        "SN82547 Mazin Al Hajri",
+        "SN82661 Mohamed Al Maskari",
+        "SN82673 Khalifa Al Maqbali",
+        "SN82464 Wissam Al Kharusi",
+        "SN80482 Waleed Al Hadabi"
       ]
     },
     {
       "title": "Export Operators",
       "items": [
-        "SN82534 Muadh Al Qasimi",
-        "SN81224 Mohamed Al Amri"
+        "SN8762 Mohamed Al Falahi"
       ]
     },
     {
@@ -42,17 +42,15 @@
       "items": []
     },
     {
-      "title": "Support Team",
-      "items": [
-        "SN82565 Jamal Al Hadi"
-      ]
-    },
-    {
       "title": "CTU Staff On Duty",
       "items": []
     },
     {
       "title": "Inventory",
+      "items": []
+    },
+    {
+      "title": "Support Team",
       "items": []
     },
     {
@@ -95,8 +93,8 @@
           "title": "Export Checker",
           "items": [
             "SN82439 Ghaith Al Habsi",
-            "SN80695 Hosni Al Sulti",
             "SN80270 Marlon Esmilla",
+            "SN80695 Hosni Al Sulti",
             "SN82555 Riyadh Al Jabri",
             "SN82424 Riyadh Al Sulti"
           ]
@@ -104,8 +102,8 @@
         {
           "title": "Export Operators",
           "items": [
-            "SN81307 Badar Al Hamadani",
-            "SN8744 Said Al Fahkri"
+            "SN8744 Said Al Fahkri",
+            "SN81307 Badar Al Hamadani"
           ]
         },
         {
@@ -156,25 +154,25 @@
           "title": "Load Control",
           "items": [
             "SN82548 Ahmed Al Muqaini",
-            "SN82445 Al Muthana Al Shamfari",
-            "SN82596 Hamed Al Fulaiti"
+            "SN82596 Hamed Al Fulaiti",
+            "SN82445 Al Muthana Al Shamfari"
           ]
         },
         {
           "title": "Export Checker",
           "items": [
-            "SN8584 Adil Al Zadjali",
             "SN990752 Ali Yousuf Al Balushi",
+            "SN8584 Adil Al Zadjali",
             "SN82671 Khalil Al Hinai",
-            "SN82658 Mohamed Al Mazroie",
-            "SN82578 Raad Al Farsi"
+            "SN82578 Raad Al Farsi",
+            "SN82658 Mohamed Al Mazroie"
           ]
         },
         {
           "title": "Export Operators",
           "items": [
-            "SN82534 Muadh Al Qasimi",
-            "SN81224 Mohamed Al Amri"
+            "SN81224 Mohamed Al Amri",
+            "SN82534 Muadh Al Qasimi"
           ]
         },
         {
@@ -227,8 +225,8 @@
           "title": "Load Control",
           "items": [
             "SN82575 Ahmed Al Kharusi",
-            "SN81258 Jaafar Al Balushi",
-            "SN82437 Marwan Al Difai"
+            "SN82437 Marwan Al Difai",
+            "SN81258 Jaafar Al Balushi"
           ]
         },
         {
@@ -236,10 +234,10 @@
           "items": [
             "SN82672 Dawood Al Siyabi",
             "SN82547 Mazin Al Hajri",
-            "SN82673 Khalifa Al Maqbali",
             "SN82661 Mohamed Al Maskari",
-            "SN80482 Waleed Al Hadabi",
-            "SN82464 Wissam Al Kharusi"
+            "SN82673 Khalifa Al Maqbali",
+            "SN82464 Wissam Al Kharusi",
+            "SN80482 Waleed Al Hadabi"
           ]
         },
         {
@@ -279,5 +277,5 @@
       ]
     }
   },
-  "defaultShift": "afternoon"
+  "defaultShift": "night"
 }
