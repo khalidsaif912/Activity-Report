@@ -1,37 +1,40 @@
 {
   "shiftMeta": {
-    "key": "afternoon",
-    "title": "Afternoon Shift",
+    "key": "night",
+    "title": "Night Shift",
     "date": "2026-09-18",
-    "time": "13:00 - 22:00"
+    "time": "21:00 - 06:00"
   },
   "manpowerSections": [
     {
       "title": "Supervisor",
       "items": [
-        "SN81300 Talal Al Balushi"
+        "SN81404 Mohamed Al Amri"
       ]
     },
     {
       "title": "Load Control",
       "items": [
-        "SN82445 Al Muthana Al Shamfari",
-        "SN81409 Qasim Al Maqbali"
+        "SN82548 Ahmed Al Muqaini",
+        "SN82575 Ahmed Al Kharusi",
+        "SN82596 Hamed Al Fulaiti"
       ]
     },
     {
       "title": "Export Checker",
       "items": [
-        "SN990752 Ali Yousuf Al Balushi",
-        "SN80270 Marlon Esmilla",
-        "SN82424 Riyadh Al Sulti",
-        "SN82555 Riyadh Al Jabri"
+        "SN82671 Khalil Al Hinai",
+        "SN82661 Mohamed Al Maskari",
+        "SN82578 Raad Al Farsi",
+        "SN82673 Khalifa Al Maqbali",
+        "SN82658 Mohamed Al Mazroie"
       ]
     },
     {
       "title": "Export Operators",
       "items": [
-        "SN81307 Badar Al Hamadani"
+        "SN82534 Muadh Al Qasimi",
+        "SN81224 Mohamed Al Amri"
       ]
     },
     {
@@ -87,10 +90,10 @@
         {
           "title": "Export Checker",
           "items": [
-            "SN82574 Ali Al Mamari",
             "SN82659 Ammar Al Hashmi",
             "SN82439 Ghaith Al Habsi",
             "SN80695 Hosni Al Sulti",
+            "SN82574 Ali Al Mamari",
             "SN82587 Yousuf Al Balushi"
           ]
         },
@@ -157,8 +160,8 @@
           "items": [
             "SN990752 Ali Yousuf Al Balushi",
             "SN80270 Marlon Esmilla",
-            "SN82424 Riyadh Al Sulti",
-            "SN82555 Riyadh Al Jabri"
+            "SN82555 Riyadh Al Jabri",
+            "SN82424 Riyadh Al Sulti"
           ]
         },
         {
@@ -222,18 +225,18 @@
         {
           "title": "Export Checker",
           "items": [
-            "SN82673 Khalifa Al Maqbali",
             "SN82671 Khalil Al Hinai",
-            "SN82658 Mohamed Al Mazroie",
+            "SN82661 Mohamed Al Maskari",
             "SN82578 Raad Al Farsi",
-            "SN82661 Mohamed Al Maskari"
+            "SN82673 Khalifa Al Maqbali",
+            "SN82658 Mohamed Al Mazroie"
           ]
         },
         {
           "title": "Export Operators",
           "items": [
-            "SN81224 Mohamed Al Amri",
-            "SN82534 Muadh Al Qasimi"
+            "SN82534 Muadh Al Qasimi",
+            "SN81224 Mohamed Al Amri"
           ]
         },
         {
@@ -267,5 +270,5 @@
       ]
     }
   },
-  "defaultShift": "afternoon"
+  "defaultShift": "night"
 }
