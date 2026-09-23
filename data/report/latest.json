@@ -1,41 +1,41 @@
 {
   "shiftMeta": {
-    "key": "morning",
-    "title": "Morning Shift",
+    "key": "afternoon",
+    "title": "Afternoon Shift",
     "date": "2026-09-23",
-    "time": "06:00 - 15:00"
+    "time": "13:00 - 22:00"
   },
   "manpowerSections": [
     {
       "title": "Supervisor",
       "items": [
-        "SN81404 Mohamed Al Amri"
+        "SN82593 Mohamed Al Kalbani"
       ]
     },
     {
       "title": "Load Control",
       "items": [
-        "SN82548 Ahmed Al Muqaini",
-        "SN82600 Habib Al Balushi",
-        "SN82596 Hamed Al Fulaiti"
+        "SN82575 Ahmed Al Kharusi",
+        "SN81258 Jaafar Al Balushi",
+        "SN82437 Marwan Al Difai"
       ]
     },
     {
       "title": "Export Checker",
       "items": [
-        "SN990752 Ali Yousuf Al Balushi",
-        "SN82673 Khalifa Al Maqbali",
-        "SN82671 Khalil Al Hinai",
-        "SN82658 Mohamed Al Mazroie",
-        "SN82424 Riyadh Al Sulti"
+        "SN8584 Adil Al Zadjali",
+        "SN82672 Dawood Al Siyabi",
+        "SN82547 Mazin Al Hajri",
+        "SN82661 Mohamed Al Maskari",
+        "SN82464 Wissam Al Kharusi",
+        "SN80482 Waleed Al Hadabi"
       ]
     },
     {
       "title": "Export Operators",
       "items": [
-        "SN82588 Ghassan Al Tarsi",
-        "SN8744 Said Al Fahkri",
-        "SN82534 Muadh Al Qasimi"
+        "SN81224 Mohamed Al Amri",
+        "SN8762 Mohamed Al Falahi"
       ]
     },
     {
@@ -86,8 +86,8 @@
           "title": "Load Control",
           "items": [
             "SN82548 Ahmed Al Muqaini",
-            "SN82600 Habib Al Balushi",
-            "SN82596 Hamed Al Fulaiti"
+            "SN82596 Hamed Al Fulaiti",
+            "SN82600 Habib Al Balushi"
           ]
         },
         {
@@ -156,19 +156,19 @@
           "title": "Load Control",
           "items": [
             "SN82575 Ahmed Al Kharusi",
-            "SN82437 Marwan Al Difai",
-            "SN81258 Jaafar Al Balushi"
+            "SN81258 Jaafar Al Balushi",
+            "SN82437 Marwan Al Difai"
           ]
         },
         {
           "title": "Export Checker",
           "items": [
-            "SN82672 Dawood Al Siyabi",
             "SN8584 Adil Al Zadjali",
+            "SN82672 Dawood Al Siyabi",
             "SN82547 Mazin Al Hajri",
             "SN82661 Mohamed Al Maskari",
-            "SN80482 Waleed Al Hadabi",
-            "SN82464 Wissam Al Kharusi"
+            "SN82464 Wissam Al Kharusi",
+            "SN80482 Waleed Al Hadabi"
           ]
         },
         {
@@ -231,12 +231,12 @@
         {
           "title": "Export Checker",
           "items": [
-            "SN82616 Ahmed Al Hashmi",
-            "SN81832 Ahmed Al Bakari",
             "SN82645 Abdullah Al Shukeili",
             "SN990465 Abdulfatah Al Shukeili",
-            "SN8715 Khalid Al Raqadi",
-            "SN8930 Fahim Al Hashni"
+            "SN82616 Ahmed Al Hashmi",
+            "SN81832 Ahmed Al Bakari",
+            "SN8930 Fahim Al Hashni",
+            "SN8715 Khalid Al Raqadi"
           ]
         },
         {
@@ -277,5 +277,5 @@
       ]
     }
   },
-  "defaultShift": "morning"
+  "defaultShift": "afternoon"
 }
