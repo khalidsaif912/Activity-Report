@@ -1,3 +1,53 @@
 {
-  "tables": []
+  "tables": [
+    {
+      "rows": [
+        [
+          "",
+          "",
+          "",
+          "CARGO OFFLOADED DETAILS",
+          "",
+          "",
+          ""
+        ],
+        [
+          "FLIGHT #",
+          "OV521",
+          "DATE",
+          "26-Sep",
+          "DESTINATION",
+          "LHE"
+        ],
+        [
+          "AWB",
+          "PCS",
+          "KGS",
+          "DESCRIPTION",
+          "REASON"
+        ],
+        [
+          "960 10064891",
+          "20",
+          "582",
+          "LINEZOLID USP",
+          "SPACE"
+        ],
+        [
+          "960 10074595",
+          "20",
+          "616.4",
+          "ESOMEPRAZOLE",
+          "SPACE"
+        ],
+        [
+          "TOTAL",
+          "40",
+          "1198.4",
+          "",
+          ""
+        ]
+      ]
+    }
+  ]
 }
