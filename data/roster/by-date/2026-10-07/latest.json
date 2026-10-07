@@ -1,41 +1,38 @@
 {
   "shiftMeta": {
-    "key": "afternoon",
-    "title": "Afternoon Shift",
+    "key": "night",
+    "title": "Night Shift",
     "date": "2026-10-07",
-    "time": "13:00 - 22:00"
+    "time": "21:00 - 06:00"
   },
   "manpowerSections": [
     {
       "title": "Supervisor",
       "items": [
-        "SN82546 Saleh Al Rashdi"
+        "SN80250 Jay Macalino"
       ]
     },
     {
       "title": "Load Control",
       "items": [
-        "SN82114 Mubarak Al Nofli",
-        "SN82550 Saleh Al Aufi"
+        "SN82657 Bushra Al Wahiebi",
+        "SN82551 Omar Al Obaidi"
       ]
     },
     {
       "title": "Export Checker",
       "items": [
-        "SN82616 Ahmed Al Hashmi",
-        "SN81832 Ahmed Al Bakari",
-        "SN82577 Ali Al Marjubi",
-        "SN8584 Adil Al Zadjali",
-        "SN82283 Ahmed Al Mawali",
-        "SN990465 Abdulfatah Al Shukeili",
-        "SN82645 Abdullah Al Shukeili"
+        "SN82574 Ali Al Mamari",
+        "SN82659 Ammar Al Hashmi",
+        "SN82439 Ghaith Al Habsi",
+        "SN82677 Rashid Shayai"
       ]
     },
     {
       "title": "Export Operators",
       "items": [
-        "SN82467 Khamis Al Hinai",
-        "SN81223 Mazin Al Siyabi"
+        "SN8941 Adil Al Oraimi",
+        "SN82429 Zakariya Al Balushi"
       ]
     },
     {
@@ -43,17 +40,15 @@
       "items": []
     },
     {
-      "title": "Support Team",
-      "items": [
-        "SN82565 Jamal Al Hadi"
-      ]
-    },
-    {
       "title": "CTU Staff On Duty",
       "items": []
     },
     {
       "title": "Inventory",
+      "items": []
+    },
+    {
+      "title": "Support Team",
       "items": []
     },
     {
@@ -163,13 +158,13 @@
         {
           "title": "Export Checker",
           "items": [
-            "SN82616 Ahmed Al Hashmi",
-            "SN81832 Ahmed Al Bakari",
-            "SN82577 Ali Al Marjubi",
             "SN8584 Adil Al Zadjali",
-            "SN82283 Ahmed Al Mawali",
+            "SN82616 Ahmed Al Hashmi",
+            "SN82645 Abdullah Al Shukeili",
+            "SN82577 Ali Al Marjubi",
             "SN990465 Abdulfatah Al Shukeili",
-            "SN82645 Abdullah Al Shukeili"
+            "SN81832 Ahmed Al Bakari",
+            "SN82283 Ahmed Al Mawali"
           ]
         },
         {
@@ -279,5 +274,5 @@
       ]
     }
   },
-  "defaultShift": "afternoon"
+  "defaultShift": "night"
 }
