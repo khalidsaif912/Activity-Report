@@ -1,13 +1,20 @@
 {
-  "flight": "OV521",
-  "date": "10-OCT",
-  "destination": "LHE",
+  "flight": "OV241",
+  "date": "11-Oct",
+  "destination": "SHJ",
   "items": [
     {
-      "awb": "960-10064891",
-      "pcs": "",
-      "kgs": "",
-      "desc": "20",
+      "awb": "70313678346",
+      "pcs": "10",
+      "kgs": "149",
+      "desc": "MENS HOODY",
+      "reason": "SPACE"
+    },
+    {
+      "awb": "TOTAL",
+      "pcs": "10",
+      "kgs": "149",
+      "desc": "",
       "reason": ""
     }
   ]
