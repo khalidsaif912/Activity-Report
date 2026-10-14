@@ -1,3 +1,46 @@
 {
-  "tables": []
+  "tables": [
+    {
+      "rows": [
+        [
+          "",
+          "",
+          "",
+          "CARGO OFFLOADED DETAILS",
+          "",
+          "",
+          ""
+        ],
+        [
+          "FLIGHT #",
+          "OV283",
+          "DATE",
+          "14-Oct",
+          "DESTINATION",
+          "JED"
+        ],
+        [
+          "AWB",
+          "PCS",
+          "KGS",
+          "DESCRIPTION",
+          "REASON"
+        ],
+        [
+          "703-13669224",
+          "18",
+          "341",
+          "CONSOLIDATION",
+          "PAYLOAD (RZFW )"
+        ],
+        [
+          "TOTAL",
+          "",
+          "",
+          "",
+          ""
+        ]
+      ]
+    }
+  ]
 }
