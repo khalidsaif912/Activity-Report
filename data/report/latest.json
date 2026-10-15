@@ -1,44 +1,50 @@
 {
   "shiftMeta": {
-    "key": "night",
-    "title": "Night Shift",
-    "date": "2026-10-14",
-    "time": "21:00 - 06:00"
+    "key": "morning",
+    "title": "Morning Shift",
+    "date": "2026-10-15",
+    "time": "06:00 - 15:00"
   },
   "manpowerSections": [
     {
       "title": "Supervisor",
-      "items": []
+      "items": [
+        "SN82593 Mohamed Al Kalbani"
+      ]
     },
     {
       "title": "Load Control",
       "items": [
-        "SN82551 Omar Al Obaidi",
-        "SN81409 Qasim Al Maqbali"
+        "SN81258 Jaafar Al Balushi",
+        "SN82114 Mubarak Al Nofli",
+        "SN82437 Marwan Al Difai"
       ]
     },
     {
       "title": "Export Checker",
       "items": [
-        "SN80695 Hosni Al Sulti",
-        "SN82674 Mohamed Al Mamari",
-        "SN82677 Rashid Shayai",
-        "SN82439 Ghaith Al Habsi",
-        "SN82555 Riyadh Al Jabri"
+        "SN82672 Dawood Al Siyabi",
+        "SN82547 Mazin Al Hajri",
+        "SN82649 Saif Al Mahrizi",
+        "SN82464 Wissam Al Kharusi",
+        "SN80482 Waleed Al Hadabi"
       ]
     },
     {
       "title": "Export Operators",
       "items": [
-        "SN81307 Badar Al Hamadani"
+        "SN82415 Ahmed Al Balushi",
+        "SN82656 Faisal Al Balushi",
+        "SN8762 Mohamed Al Falahi",
+        "SN8744 Said Al Fahkri"
       ]
     },
     {
       "title": "Flight Dispatch",
       "items": [
-        "SN82654 AHMED AL HADI",
-        "SN82420 MOHAMMED AL SAADI",
-        "SN82417 TALAL AL HUSEINI"
+        "SN82419 HAITHAM AL BALUSHI",
+        "SN80479 SAMI AL HADABI",
+        "SN82571 YAARAB AL RAQADI"
       ]
     },
     {
@@ -71,47 +77,49 @@
       "shiftMeta": {
         "key": "morning",
         "title": "Morning Shift",
-        "date": "2026-10-14",
+        "date": "2026-10-15",
         "time": "06:00 - 15:00"
       },
       "manpowerSections": [
         {
           "title": "Supervisor",
           "items": [
-            "SN82546 Saleh Al Rashdi"
+            "SN82593 Mohamed Al Kalbani"
           ]
         },
         {
           "title": "Load Control",
           "items": [
+            "SN81258 Jaafar Al Balushi",
             "SN82114 Mubarak Al Nofli",
-            "SN81402 Mohamed Al Siyabi"
+            "SN82437 Marwan Al Difai"
           ]
         },
         {
           "title": "Export Checker",
           "items": [
-            "SN82645 Abdullah Al Shukeili",
-            "SN990465 Abdulfatah Al Shukeili",
-            "SN82577 Ali Al Marjubi",
-            "SN8930 Fahim Al Hashni",
+            "SN82672 Dawood Al Siyabi",
+            "SN82547 Mazin Al Hajri",
             "SN82649 Saif Al Mahrizi",
-            "SN8715 Khalid Al Raqadi"
+            "SN82464 Wissam Al Kharusi",
+            "SN80482 Waleed Al Hadabi"
           ]
         },
         {
           "title": "Export Operators",
           "items": [
-            "SN81223 Mazin Al Siyabi",
+            "SN82415 Ahmed Al Balushi",
             "SN82656 Faisal Al Balushi",
+            "SN8762 Mohamed Al Falahi",
             "SN8744 Said Al Fahkri"
           ]
         },
         {
           "title": "Flight Dispatch",
           "items": [
-            "SN82566 ANWAR ALAMRI",
-            "SN82468 BADAR AL FULAITI"
+            "SN82419 HAITHAM AL BALUSHI",
+            "SN80479 SAMI AL HADABI",
+            "SN82571 YAARAB AL RAQADI"
           ]
         },
         {
@@ -144,48 +152,47 @@
       "shiftMeta": {
         "key": "afternoon",
         "title": "Afternoon Shift",
-        "date": "2026-10-14",
+        "date": "2026-10-15",
         "time": "13:00 - 22:00"
       },
       "manpowerSections": [
         {
           "title": "Supervisor",
           "items": [
-            "SN80250 Jay Macalino"
+            "SN82546 Saleh Al Rashdi"
           ]
         },
         {
           "title": "Load Control",
           "items": [
-            "SN81348 Assad Al Omairi",
-            "SN82657 Bushra Al Wahiebi",
-            "SN82550 Saleh Al Aufi"
+            "SN81402 Mohamed Al Siyabi",
+            "SN81348 Assad Al Omairi"
           ]
         },
         {
           "title": "Export Checker",
           "items": [
             "SN82283 Ahmed Al Mawali",
-            "SN82616 Ahmed Al Hashmi",
-            "SN82574 Ali Al Mamari",
-            "SN82659 Ammar Al Hashmi",
             "SN81832 Ahmed Al Bakari",
-            "SN8584 Adil Al Zadjali"
+            "SN8584 Adil Al Zadjali",
+            "SN990465 Abdulfatah Al Shukeili",
+            "SN82577 Ali Al Marjubi",
+            "SN8930 Fahim Al Hashni",
+            "SN8715 Khalid Al Raqadi"
           ]
         },
         {
           "title": "Export Operators",
           "items": [
-            "SN8941 Adil Al Oraimi",
-            "SN82429 Zakariya Al Balushi"
+            "SN81223 Mazin Al Siyabi",
+            "SN82467 Khamis Al Hinai"
           ]
         },
         {
           "title": "Flight Dispatch",
           "items": [
-            "SN82414 BADAR AL BUSAIDI",
-            "SN990895 MOHD AL HADDABI",
-            "SN82416 NASSER AL OMAIRI"
+            "SN82566 ANWAR ALAMRI",
+            "SN82468 BADAR AL FULAITI"
           ]
         },
         {
@@ -220,43 +227,46 @@
       "shiftMeta": {
         "key": "night",
         "title": "Night Shift",
-        "date": "2026-10-14",
+        "date": "2026-10-15",
         "time": "21:00 - 06:00"
       },
       "manpowerSections": [
         {
           "title": "Supervisor",
-          "items": []
+          "items": [
+            "SN80250 Jay Macalino"
+          ]
         },
         {
           "title": "Load Control",
           "items": [
-            "SN82551 Omar Al Obaidi",
-            "SN81409 Qasim Al Maqbali"
+            "SN82657 Bushra Al Wahiebi",
+            "SN82551 Omar Al Obaidi"
           ]
         },
         {
           "title": "Export Checker",
           "items": [
-            "SN80695 Hosni Al Sulti",
-            "SN82674 Mohamed Al Mamari",
-            "SN82677 Rashid Shayai",
+            "SN82574 Ali Al Mamari",
+            "SN82659 Ammar Al Hashmi",
             "SN82439 Ghaith Al Habsi",
-            "SN82555 Riyadh Al Jabri"
+            "SN80695 Hosni Al Sulti",
+            "SN82677 Rashid Shayai"
           ]
         },
         {
           "title": "Export Operators",
           "items": [
-            "SN81307 Badar Al Hamadani"
+            "SN8941 Adil Al Oraimi",
+            "SN82429 Zakariya Al Balushi"
           ]
         },
         {
           "title": "Flight Dispatch",
           "items": [
-            "SN82654 AHMED AL HADI",
-            "SN82420 MOHAMMED AL SAADI",
-            "SN82417 TALAL AL HUSEINI"
+            "SN82414 BADAR AL BUSAIDI",
+            "SN990895 MOHD AL HADDABI",
+            "SN82416 NASSER AL OMAIRI"
           ]
         },
         {
@@ -286,5 +296,5 @@
       ]
     }
   },
-  "defaultShift": "night"
+  "defaultShift": "morning"
 }
