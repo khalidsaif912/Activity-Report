@@ -1,0 +1,50 @@
+{
+  "shiftMeta": {
+    "date": "2026-10-16",
+    "shiftCode": "AN13",
+    "source": "import-roster"
+  },
+  "flightDispatch": {
+    "title": "Flight Dispatch",
+    "items": [
+      "SN82423 BADAR AL BURTAMANI",
+      "SN82410 SAID AL SADI",
+      "SN82419 HAITHAM AL BALUSHI",
+      "SN80479 SAMI AL HADABI",
+      "SN82571 YAARAB AL RAQADI",
+      "SN82566 ANWAR ALAMRI",
+      "SN82468 BADAR AL FULAITI",
+      "SN82414 BADAR AL BUSAIDI",
+      "SN990895 MOHD AL HADDABI",
+      "SN82416 NASSER AL OMAIRI"
+    ]
+  },
+  "byShift": {
+    "morning": {
+      "title": "Flight Dispatch",
+      "items": [
+        "SN82423 BADAR AL BURTAMANI",
+        "SN82410 SAID AL SADI",
+        "SN82419 HAITHAM AL BALUSHI",
+        "SN80479 SAMI AL HADABI",
+        "SN82571 YAARAB AL RAQADI"
+      ]
+    },
+    "afternoon": {
+      "title": "Flight Dispatch",
+      "items": [
+        "SN82566 ANWAR ALAMRI",
+        "SN82468 BADAR AL FULAITI"
+      ]
+    },
+    "night": {
+      "title": "Flight Dispatch",
+      "items": [
+        "SN82414 BADAR AL BUSAIDI",
+        "SN990895 MOHD AL HADDABI",
+        "SN82416 NASSER AL OMAIRI"
+      ]
+    }
+  },
+  "defaultShift": "afternoon"
+}
